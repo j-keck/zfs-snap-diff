@@ -51,21 +51,12 @@ func checkIllegalReqHandler(paramName string, next http.HandlerFunc) http.Handle
 }
 
 func listSnapshotsHandler(w http.ResponseWriter, r *http.Request) {
-	type Snapshot struct {
-		Name     string
-		Creation string
-	}
-	newSnapshotFromLine := func(line string) Snapshot {
-		fields := strings.SplitN(line, "\t", 2)
-		return Snapshot{lastElement(fields[0], "@"), fields[1]}
-	}
-
 	out, err := zfs("list -t snapshot -r -o name,creation -H " + zfsName)
 	panicOnError(err, "list snaphshots", out)
 
-	var snapshots []Snapshot
+	var snapshots Snapshots
 	for _, line := range strings.Split(string(out), "\n") {
-		snapshots = append(snapshots, newSnapshotFromLine(line))
+		snapshots.addFromZfsOutput(line)
 	}
 
 	js, err := json.Marshal(snapshots)
