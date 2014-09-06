@@ -58,6 +58,7 @@ func listSnapshotsHandler(w http.ResponseWriter, r *http.Request) {
 	for _, line := range strings.Split(string(out), "\n") {
 		snapshots.addFromZfsOutput(line)
 	}
+	snapshots = snapshots.reverse()
 
 	js, err := json.Marshal(snapshots)
 	panicOnError(err, "Marshal snapshots")
