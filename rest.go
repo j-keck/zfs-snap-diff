@@ -23,8 +23,12 @@ func listenAndServe(addr string) {
 	http.HandleFunc("/snapshot-diff", snapshotDiffHandler)
 	http.HandleFunc("/list-dir", checkIllegalReqHandler("dir-name", listDirHandler))
 	http.HandleFunc("/read-file", checkIllegalReqHandler("file-name", readFileHandler))
-	//http.HandleFunc("/", defaultHandler)
-	http.Handle("/", http.FileServer(http.Dir("webapp")))
+	if envHasSet("ZSD_SERVE_FROM_WEBAPPS") {
+		log.Println("serve from webapps")
+		http.Handle("/", http.FileServer(http.Dir("webapp")))
+	} else {
+		http.HandleFunc("/", defaultHandler)
+	}
 	http.ListenAndServe(addr, nil)
 }
 

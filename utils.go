@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
 	"strings"
 )
@@ -39,4 +40,9 @@ func zfs(args string) (string, error) {
 	}
 
 	return strings.TrimRight(stdoutBuf.String(), "\n"), nil
+}
+
+// envHasSet returns true, if 'key' is in the environment
+func envHasSet(key string) bool {
+	return len(os.Getenv(key)) > 0
 }
