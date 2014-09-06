@@ -109,18 +109,17 @@ func listDirHandler(w http.ResponseWriter, r *http.Request) {
 	dirName, _ := getQueryParameter(r, "dir-name")
 
 	type DirEntry struct {
-		FileType string
-		FileName string
-		ModTime  time.Time
+		Type    string
+		Name    string
+		Size    int64
+		ModTime time.Time
 	}
 	newDirEntryFromFileInfo := func(fi os.FileInfo) DirEntry {
-		var fileType string
+		_type := "F"
 		if fi.IsDir() {
-			fileType = "D"
-		} else {
-			fileType = "F"
+			_type = "D"
 		}
-		return DirEntry{fileType, fi.Name(), fi.ModTime()}
+		return DirEntry{_type, fi.Name(), fi.Size(), fi.ModTime()}
 	}
 
 	files, err := ioutil.ReadDir(dirName)
