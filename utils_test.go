@@ -14,13 +14,3 @@ func TestLastElement(t *testing.T) {
 		t.Error("d expected")
 	}
 }
-
-func TestPanicOnError(t *testing.T) {
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("panic expected")
-		}
-	}()
-
-	panicOnError(errors.New("dummy error"))
-}

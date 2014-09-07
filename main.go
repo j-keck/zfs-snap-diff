@@ -7,6 +7,7 @@ import (
 	"os"
 )
 
+// VERSION  a set at buid time (go build -ldflags "-X main.VERSION $(git describe)")
 var VERSION string
 
 var (

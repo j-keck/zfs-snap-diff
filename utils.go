@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -13,13 +12,6 @@ import (
 func lastElement(str, sep string) string {
 	fields := strings.Split(str, sep)
 	return fields[len(fields)-1]
-}
-
-// panicOnError throws a panic if err != nil
-func panicOnError(err error, msg ...string) {
-	if err != nil {
-		panic(fmt.Sprintf("%s: %s", msg, err))
-	}
 }
 
 // zfs executes the 'zfs' command with the provided arguments.
