@@ -88,4 +88,10 @@ If you download a file from a snapshot, the generated name are: `<ORG_FILE_NAME>
 # Changelog
 
 ###0.0.X###
-  * 0.0.1 prototype  
+0.0.2 :
+  * config frontent from server
+  * fix firefox ui
+
+
+0.0.1:
+  * prototype  
