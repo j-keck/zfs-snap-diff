@@ -1,0 +1,68 @@
+<div class="container">
+  <dir-browser start="{'Path': '/home', 'Type': 'D'}"
+               on-file-selected="ctrl.fileSelected(pathElements)"
+               on-dir-selected="ctrl.isFileSelected = false">
+  </dir-browser>
+
+  <div ng-show="ctrl.isFileSelected">
+    <div ng-hide="ctrl.snapshots">
+      loading snapshots .....
+    </div>
+
+    <div ng-show="ctrl.snapshots">
+      <snapshots snapshots="ctrl.snapshots" on-snapshot-selected="ctrl.snapshotSelected(snap, true)">
+      </snapshots>
+
+
+      <div id="content" ng-show="ctrl.fileDiff || ctrl.binaryContent">
+        <div class="btn-group btn-group-justified">
+          <div class="btn-group">
+            <button class="btn btn-primary" ng-click="ctrl.nextSnapshot()"
+                    ng-disabled="ctrl.currentSnapshotIsLast()">&larr; Older</button>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-primary" ng-click="ctrl.previousSnapshot()"
+                    ng-disabled="ctrl.currentSnapshotIsFirst()">Newer &rarr;</button>
+          </div>    
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+</div>
+
+
+<div ng-show="ctrl.isFileSelected">
+  <!-- file diff -->
+  <div class="panel panel-default"
+       ng-bind-html="ctrl.fileDiff"
+       ng-show="ctrl.fileDiff"></div>
+
+  <!-- embedded binary content -->
+  <div class="center-block"
+       ng-show="ctrl.binaryContent"
+       style="width: 90%">
+    <div class="panel-heading">{{ctrl.currentSnapshot.Name}}</div>
+    <embed embed-src="{{ctrl.binaryContent}}"
+           ng-src="{{ctrl.binaryContent}}"
+           class="panel-body"
+           style="width:100%;height:100%"></embed>
+  </div>
+
+
+</div>
+
+<div class="container" ng-show="ctrl.isFileSelected">
+  <div class="btn-group btn-group-justified">
+    <div class="btn-group">  
+      <button class="btn btn-primary"
+              ng-show="ctrl.currentSnapshot"
+              ng-click="ctrl.downloadSnapFile()">Download @{{ctrl.currentSnapshot.Name}}</button>
+    </div>
+  </div>
+</div>
+
+
+
+

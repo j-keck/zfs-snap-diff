@@ -1,0 +1,12 @@
+<div class="panel pandel-default">
+  <div class="panel-heading">Snapshots</div>
+  <div class="panel-body">
+    <table id="snapshots" class="table">
+      <tr ng-repeat="snap in snapshots" ng-click="snapshotSelected(snap)">
+        <td>{{snap.Name}}</td>
+        <td>{{snap.Creation}}</td>
+      </tr>
+    </table>
+  </div>
+</div>
+

@@ -1,0 +1,24 @@
+<div class="container">
+  <snapshots snapshots="ctrl.snapshots"
+             on-snapshot-selected="ctrl.showSnapshotDiff(snap)">
+  </snapshots>
+
+  <table id="snapshotDiff" class="table" ng-show="ctrl.snapshotDiff">
+    <thead>
+      <tr>
+        <th>Change</th>
+        <th>Type</th>
+        <th>Path</th>
+      </tr>
+    </thead>
+
+    <tr ng-repeat="change in ctrl.snapshotDiff">
+      <td>{{change.Change}}</td>
+      <td>{{change.Type}}</td>
+      <td>{{change.Path}}</td>
+    </tr>
+  </table>
+
+
+
+</div>
