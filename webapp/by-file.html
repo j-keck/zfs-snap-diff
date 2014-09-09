@@ -1,5 +1,6 @@
 <div class="container">
-  <dir-browser start="{'Path': '/home', 'Type': 'D'}"
+
+  <dir-browser start-path="{{mainCtrl.config.ZFSMountPoint}}"
                on-file-selected="ctrl.fileSelected(pathElements)"
                on-dir-selected="ctrl.isFileSelected = false">
   </dir-browser>

@@ -19,7 +19,8 @@ var mimeTypes = map[string]string{
 }
 
 // registers response handlers and starts the web server
-func listenAndServe(addr string) {
+func listenAndServe(addr string, frontendConfig FrontendConfig) {
+	http.HandleFunc("/config", configHndl(frontendConfig))
 	http.HandleFunc("/list-snapshots", listSnapshotsHndl)
 	http.HandleFunc("/snapshot-diff", verifyParamExistsHndl("snapshot-name", snapshotDiffHndl))
 	http.HandleFunc("/list-dir", verifyParamExistsHndl("path", verifyParamUnderZMPHndl("path", listDirHndl)))
@@ -65,6 +66,23 @@ func verifyParamUnderZMPHndl(paramName string, next http.HandlerFunc) http.Handl
 			// trigger shutdown in a goroutine, to give the server time serve the 403 error
 			go os.Exit(1)
 		}
+	}
+}
+
+// frontend-config
+func configHndl(config FrontendConfig) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		// marshal
+		js, err := json.Marshal(config)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+
+		// respond
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(js)
 	}
 }
 

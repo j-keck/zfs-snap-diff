@@ -15,8 +15,24 @@ zsd.config(['$routeProvider', function($routeProvider){
 }]);
 
 
+zsd.factory('Config', ["$http", function($http){
+  var config;
+  var promise = $http.get('config').then(function(res){
+    config = res.data;
+  });
 
-zsd.factory('Backend', ["$http", function($http){
+  return {
+    promise: promise,
+    config: config,
+    config: function(){
+      return config;
+    },
+    get: function(key){
+      return config[key]
+    }
+  };
+}]);
+zsd.factory('Backend', ["$http", "Config", function($http, Config){
   return {
     listSnapshots: function(whereFileModified){
       var params = {};
@@ -37,7 +53,7 @@ zsd.factory('Backend', ["$http", function($http){
       })
     },
     readFile: function(path, snapName){
-      var params = {"path": path, "max-file-size": 100 * 1024 * 1024} // FIXME: per config
+      var params = {"path": path, "max-file-size": Config.get("MaxFileSize")};
       if(snapName !== undefined) params['snapshot-name'] = snapName;
       
       return $http.get("read-file", {"params": params, "responseType": "arraybuffer"}).then(function(res){
@@ -50,7 +66,7 @@ zsd.factory('Backend', ["$http", function($http){
   }
 }]);
 
-zsd.factory("Difflib", [function(){
+zsd.factory("Difflib", ["Config", function(Config){
   return {
     htmlDiff: function(currentFileContent, snapName, snapFileContent){
       var currentLines = difflib.stringAsLines(currentFileContent);
@@ -64,7 +80,7 @@ zsd.factory("Difflib", [function(){
         newTextName: "Current Version",
         newTextLines: currentLines,
         opcodes: sm.get_opcodes(),
-        contextSize: 5, // FIXME: per config
+        contextSize: Config.get("DiffContextSize"),
         viewType: 0 }).outerHTML;
     }
   }
@@ -111,7 +127,7 @@ zsd.directive('dirBrowser', ['Backend', function(Backend){
     restrict: 'E',
     templateUrl: 'template-dir-browser.html',
     scope: {
-      start: '=',
+      startPath: '@',
       onFileSelected: '&',
       onDirSelected: '&'
     },
@@ -160,14 +176,20 @@ zsd.directive('dirBrowser', ['Backend', function(Backend){
       };
 
       // open at start element
-      $scope.open($scope.start);      
+      $scope.open({'Path': $scope.startPath, 'Type': 'D'});      
     }
   };
 }]);
 
-zsd.controller('MainCtrl', ["$location", function($location){
+zsd.controller('MainCtrl', ["$location", "Config", function($location, Config){
   var self = this;
 
+
+  Config.promise.then(function(){
+    self.config = Config.config();
+  });
+
+  
   
   self.activeClassIfAt = function(path){
     return {active: $location.path() === path};

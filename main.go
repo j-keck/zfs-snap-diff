@@ -27,6 +27,10 @@ func main() {
 	portFlag := flag.Int("p", 12345, "web server port")
 	listenOnAllInterfacesFlag := flag.Bool("a", false, "listen on all interfaces")
 	printVersionFlag := flag.Bool("V", false, "print version and exit")
+	// frontend
+	maxFileSizeFlag := flag.Int("max-file-size", 100*1024*1024, "max file size for inline view")
+	diffContextSizeFlag := flag.Int("diff-context-size", 5, "context size in diff")
+
 	flag.Parse()
 
 	if *printVersionFlag {
@@ -66,7 +70,14 @@ func main() {
 		addr = fmt.Sprintf("127.0.0.1:%d", *portFlag)
 	}
 
+	// frontend-config
+	frontendConfig := FrontendConfig{
+		zfsMountPoint,
+		*maxFileSizeFlag,
+		*diffContextSizeFlag,
+	}
+
 	// startup web server
 	log.Printf("start server and listen on: '%s'\n", addr)
-	listenAndServe(addr)
+	listenAndServe(addr, frontendConfig)
 }
