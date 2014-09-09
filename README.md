@@ -44,6 +44,22 @@ If you download a file from a snapshot, the generated name are: `<ORG_FILE_NAME>
   
 # Build:
 
+  * clone the repository
+
+      git clone github.com/j-keck/zfs-snap-diff
+
+  * change into the project directory
+
+      cd zfs-snap-diff
+
+  * init submodule
+
+      git submodule init
+
+  * update submodule
+
+      git submodule update
+
   * generate golang src from static web content (this generates bindata.go)
   
       go-bindata webapp/...
@@ -52,8 +68,9 @@ If you download a file from a snapshot, the generated name are: `<ORG_FILE_NAME>
   
       go build -ldflags "-X main.VERSION $(git describe)"
 
-# Run:
 
+  
+# Run:
   
 `./zfs-snap-diff <ZFS_NAME>` 
 
