@@ -1,2 +1,3 @@
 zfs-snap-diff
 bindata.go
+build-output/
