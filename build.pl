@@ -14,7 +14,7 @@ chomp($version);
 
 # bindata.go
 say "generate bindata.go ...";
-say `go-bindata -ignore=.git webapp/...`;
+say `go-bindata -ignore=.git -ignore=config.json -ignore=README webapp/...`;
 
 
 # create build-output
