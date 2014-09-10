@@ -212,7 +212,7 @@ zsd.controller('BySnapshotCtrl', ["Backend", "Difflib", "$timeout", "$window", f
 
       // delayed - to give the browser time
       $timeout(function(){
-        $('#snapshotDiff')[0].scrollIntoView(true);
+        $window.document.getElementById('snapshotDiff').scrollIntoView(true);        
         $window.scrollBy(0, -80); // scroll up (FIXME: get from css: padding-top)
       }, 200);      
     })
@@ -271,7 +271,7 @@ zsd.controller('ByFileCtrl', ["Backend", "Difflib", "$timeout", "$window", "$sce
       if(scrollToContent === true){
       // scroll to content
       $timeout(function(){
-        $('#content')[0].scrollIntoView(true);
+        $window.document.getElementById('content').scrollIntoView(true);
         $window.scrollBy(0, -80); // scroll up (FIXME: get from css: padding-top)
       }, 200);
       }
