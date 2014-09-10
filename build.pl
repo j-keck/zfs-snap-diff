@@ -17,9 +17,7 @@ say "generate bindata.go ...";
 say `go-bindata -ignore=.git webapp/...`;
 
 
-# recreate build-output
-unlink glob "build-output/*";
-rmdir("build-output");
+# create build-output
 mkdir("build-output");
 
 # build
@@ -36,7 +34,7 @@ for my $os(<freebsd linux>){
         system($cmd) && die "build error";
 
         # pack it
-        zip "zfs-snap-diff" => "build-output/zfs-snap-diff-${os}-${arch}.zip" || die "zip falied: $ZipError\n";
+        zip "zfs-snap-diff" => "build-output/zfs-snap-diff-${version}-${os}-${arch}.zip" || die "zip failed: $ZipError\n";
 
         # delete org binary
         unlink "zfs-snap-diff" || die $!;
