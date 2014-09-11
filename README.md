@@ -1,18 +1,43 @@
-I make every 5 minutes a snapshot from my ZFS filesystem (keep it for 1 day).
+# Background
+  
+I make every 5 minutes a snapshot (keep it for 1 day) and once a day for long term (keep it for one month) from my home partition on a ZFS filesystem.
 If i messed up a file, i need to search a clean state from the file in the snapshots - not always easy if don't realize it directly.
 
-`zfs-snap-diff` is a little standalone tool (one executable with all inside) to help me for such cases.
+`zfs-snap-diff` is a little tool to help me for such cases.
 
-!! it's in a very early dev state - only tested on FreeBSD !!
+
+# Description
+
+With `zfs-snap-diff` you can explore file differences from different zfs snapshots.
+
+  
+`zfs-snap-diff` has a web frontend, so it can run on your local work machine or on your remote file / backup server (no Xserver necesarry).
+
+To keep it protable and independent, it's made as a single executable with all html / js stuff included.
+The backend is implemented in golang, the frontend with [angularjs](https://angularjs.org), [bootstrap](http://getbootstrap.com) and [jsdifflib](https://github.com/cemerick/jsdifflib).
+
+
+  
+*!! it's in a very early dev state - only tested on FreeBSD !!*
+
 
 
 #Usage
+
+
+### Startup a server instance
+
+      ./zfs_snap_diff <ZFS_NAME>
+
+### Connect with your web browser
+
+      http://localhost:12345
 
 ### Search a file
   
 Search a file in the file browser.
     
-![File Browser](doc/zsd-file-browser.png)
+![File browser](doc/zsd-file-browser.png)
 
 ### Select a file
 
@@ -33,9 +58,17 @@ When you select a snapshot, and
 
 ![File Diff](doc/zsd-snap-selected.png)  
 
-----
 
-If you download a file from a snapshot, the generated name are: `<ORG_FILE_NAME>-<SNAPSHOT_NAME>.<FILE_SUFFIX>`.
+
+#Notes
+
+  * if you download a file from a snapshot, the generated file name has the snapshot name included:
+
+        <ORG_FILE_NAME>-<SNAPSHOT_NAME>.<FILE_SUFFIX>
+  
+  * for snapshot differences, you need to set the diff permission:
+
+        zfs allow -u <USER_NAME> diff <ZFS_NAME>
 
 
   
@@ -46,50 +79,51 @@ If you download a file from a snapshot, the generated name are: `<ORG_FILE_NAME>
 
   * clone the repository
 
-      git clone github.com/j-keck/zfs-snap-diff
+        git clone github.com/j-keck/zfs-snap-diff
 
   * change into the project directory
 
-      cd zfs-snap-diff
+        cd zfs-snap-diff
 
   * init submodule
 
-      git submodule init
+        git submodule init
 
   * update submodule
 
-      git submodule update
+        git submodule update
 
   * generate golang src from static web content (this generates bindata.go)
   
-      go-bindata webapp/...
+        go-bindata webapp/...
 
   * build it
   
-      go build -ldflags "-X main.VERSION $(git describe)"
+        go build -ldflags "-X main.VERSION $(git describe)"
 
 
   
 # Run:
   
-`./zfs-snap-diff <ZFS_NAME>` 
+        ./zfs-snap-diff <ZFS_NAME> 
 
-  * starts a web server on port 127.0.0.1:12345 
-  * all html / javascript files included (including bootstrap, jquery, angularjs, jsdifflib)
-
+  * starts a web server on port http://127.0.0.1:12345
+  * check `-h` for currently supported parameters
 
 
 ### for dev:
   
-`ZSD_SERVE_FROM_WEBAPPS=YES ./zfs-snap-diff <ZFS_NAME>` 
+        ZSD_SERVE_FROM_WEBAPPS=YES ./zfs-snap-diff <ZFS_NAME> 
 
-  * serve static content from webapps dir (for dev)
+  * serve static content from webapps dir
 
+
+  
 # Changelog
 
 ###0.0.X###
 0.0.2 :
-  * config frontent from server
+  * partial frontend configuration from server
   * fix firefox ui
 
 
