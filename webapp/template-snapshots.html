@@ -1,6 +1,9 @@
 <div class="panel pandel-default">
-  <div class="panel-heading">Snapshots</div>
-  <div class="panel-body">
+  <div class="panel-heading" ng-click="toggleHideSnapshots()">Snapshots
+    <span ng-show="hideSnapshots" class="glyphicon glyphicon-chevron-down"></span>
+    <span ng-hide="hideSnapshots" class="glyphicon glyphicon-chevron-up"></span>
+  </div>
+  <div class="panel-body animate-show" ng-hide="hideSnapshots">
     <table id="snapshots" class="table">
       <tr ng-repeat="snap in snapshots" ng-click="snapshotSelected(snap)">
         <td>{{snap.Name}}</td>

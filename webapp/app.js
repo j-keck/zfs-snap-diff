@@ -1,4 +1,4 @@
-var zsd = angular.module('ZFSSnapDiff', ['ngRoute', 'ngSanitize']);
+var zsd = angular.module('ZFSSnapDiff', ['ngRoute', 'ngSanitize', 'ngAnimate']);
 
 zsd.config(['$routeProvider', function($routeProvider){
   $routeProvider.
@@ -96,9 +96,19 @@ zsd.directive('snapshots', [function(){
       onSnapshotSelected: '&'
     },
     link: function($scope, $element, $attrs){
+      $scope.hideSnapshots = false;
       $scope.snapshotSelected = function(snap){
+        $scope.hideSnapshots = true;
         $scope.onSnapshotSelected({snap: snap});
-      }
+      };
+      $scope.toggleHideSnapshots = function(){
+        $scope.hideSnapshots = ! $scope.hideSnapshots;
+      };
+
+      $scope.$watch('snapshots', function(){
+        // on new file selected
+        $scope.hideSnapshots = false;
+      });
     }
   };
 }]);
@@ -198,7 +208,7 @@ zsd.controller('MainCtrl', ["$location", "Config", function($location, Config){
 }]);
 
 
-zsd.controller('BySnapshotCtrl', ["Backend", "Difflib", "$timeout", "$window", function(Backend, Difflib, $timeout, $window){
+zsd.controller('BySnapshotCtrl', ["Backend", "Difflib", function(Backend, Difflib){
   var self = this;
 
   Backend.listSnapshots().then(function(snapshots){
@@ -209,19 +219,13 @@ zsd.controller('BySnapshotCtrl', ["Backend", "Difflib", "$timeout", "$window", f
     self.currentSnapshot = snap;
     Backend.snapshotDiff(snap.Name).then(function(diff){
       self.snapshotDiff = diff;
-
-      // delayed - to give the browser time
-      $timeout(function(){
-        $window.document.getElementById('snapshotDiff').scrollIntoView(true);        
-        $window.scrollBy(0, -80); // scroll up (FIXME: get from css: padding-top)
-      }, 200);      
-    })
+    });
   };
 
 }]);
 
 
-zsd.controller('ByFileCtrl', ["Backend", "Difflib", "$timeout", "$window", "$sce", "$q", function(Backend, Difflib, $timeout, $window, $sce, $q){
+zsd.controller('ByFileCtrl', ["Backend", "Difflib", "$window", "$sce", "$q", function(Backend, Difflib, $window, $sce, $q){
   var self = this;
 
   self.fileSelected = function(pathElements){
@@ -267,14 +271,6 @@ zsd.controller('ByFileCtrl', ["Backend", "Difflib", "$timeout", "$window", "$sce
         var url = URL.createObjectURL(blob);
         self.binaryContent = $sce.trustAsResourceUrl(url);
       }      
-    }).then(function(ignore){
-      if(scrollToContent === true){
-      // scroll to content
-      $timeout(function(){
-        $window.document.getElementById('content').scrollIntoView(true);
-        $window.scrollBy(0, -80); // scroll up (FIXME: get from css: padding-top)
-      }, 200);
-      }
     });
   };
 
@@ -289,12 +285,12 @@ zsd.controller('ByFileCtrl', ["Backend", "Difflib", "$timeout", "$window", "$sce
   
   self.previousSnapshot = function(){
     var idx = self.snapshots.indexOf(self.currentSnapshot);
-    self.snapshotSelected(self.snapshots[idx - 1], false);
+    self.snapshotSelected(self.snapshots[idx - 1]);
   };
 
   self.nextSnapshot = function(){
     var idx = self.snapshots.indexOf(self.currentSnapshot);
-    self.snapshotSelected(self.snapshots[idx + 1], false);
+    self.snapshotSelected(self.snapshots[idx + 1]);
   };
 
   self.downloadSnapFile = function(){

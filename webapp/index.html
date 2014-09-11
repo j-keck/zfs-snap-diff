@@ -9,19 +9,41 @@
     
     <style>
       body{
-        padding-top: 80px;
+      padding-top: 80px;
       }
 
       [ng-click]{
-        cursor: pointer;
+      cursor: pointer;
       }
 
       /* center diff table */
       table.diff {
-        margin-right: auto;
-        margin-left: auto;
+      margin-right: auto;
+      margin-left: auto;
       }
 
+
+
+
+      .animate-show {
+      line-height:20px;
+      opacity:1;
+      padding:10px;
+      background:white;
+      }
+
+      .animate-show.ng-hide-add.ng-hide-add,
+      .animate-show.ng-hide-remove.ng-hide-remove {
+      -webkit-transition:all linear 0.5s;
+      transition:all linear 0.5s;
+      }
+
+      .animate-show.ng-hide {
+      line-height:0;
+      opacity:0;
+      padding:0 10px;
+      }
+      
     </style>
   </head>
   
@@ -55,7 +77,8 @@
 
   <script src="lib/angular-1.2.23/angular.min.js"></script>
   <script src="lib/angular-1.2.23/angular-route.min.js"></script>
-  <script src="lib/angular-1.2.23/angular-sanitize.min.js"></script>    
+  <script src="lib/angular-1.2.23/angular-sanitize.min.js"></script>
+  <script src="lib/angular-1.2.23/angular-animate.min.js"></script>      
   <script src="app.js"></script>
   <script src="lib/jsdifflib/difflib.js"></script>
   <script src="lib/jsdifflib/diffview.js"></script>
