@@ -14,6 +14,26 @@ zsd.config(['$routeProvider', function($routeProvider){
     otherwise({redirectTo: '/by-file'});
 }]);
 
+zsd.config(['$httpProvider', function($httpProvider){
+  $httpProvider.interceptors.push('HTTPErrorInterceptor');
+}]);
+
+zsd.factory('HTTPErrorInterceptor', ['$q', '$rootScope', function($q, $rootScope){
+  return {
+    'requestError': function(rejection){
+      console.log("requestError");
+      console.log(rejection);
+      return $q.reject(rejection);
+    },
+    'responseError': function(rejection){
+      // 406 are handled in the controller (file size limit)
+      if(rejection.status !== 406){
+        $rootScope.$broadcast('response-error', rejection);
+      }
+      return $q.reject(rejection);      
+    }
+  };
+}]);
 
 zsd.factory('Config', ["$http", function($http){
   var config;
@@ -191,19 +211,25 @@ zsd.directive('dirBrowser', ['Backend', function(Backend){
   };
 }]);
 
-zsd.controller('MainCtrl', ["$location", "Config", function($location, Config){
+zsd.controller('MainCtrl', ['$location', '$rootScope', 'Config', function($location, $rootScope, Config){
   var self = this;
 
 
+  
   Config.promise.then(function(){
     self.config = Config.config();
   });
 
+  $rootScope.$on('response-error', function(event, args){
+    self.error = args.data;
+  });
   
   
   self.activeClassIfAt = function(path){
     return {active: $location.path() === path};
   };
+
+  
 
 }]);
 
