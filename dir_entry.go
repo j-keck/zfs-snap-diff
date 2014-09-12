@@ -15,7 +15,7 @@ func ScanDirEntries(path string) (DirEntries, error) {
 		return nil, err
 	}
 
-	var dirEntries DirEntries
+	dirEntries := DirEntries{}
 	for _, fi := range files {
 		_type := "F"
 		if fi.IsDir() {

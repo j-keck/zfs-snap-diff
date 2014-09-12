@@ -15,7 +15,7 @@ func ScanZFSSnapshots(zfsName string) (ZFSSnapshots, error) {
 		return nil, errors.New(out)
 	}
 
-	var snapshots ZFSSnapshots
+	snapshots := ZFSSnapshots{}
 	for _, line := range strings.Split(string(out), "\n") {
 		fields := strings.SplitN(line, "\t", 2)
 		snap := ZFSSnapshot{lastElement(fields[0], "@"), fields[1]}
@@ -27,7 +27,7 @@ func ScanZFSSnapshots(zfsName string) (ZFSSnapshots, error) {
 
 // Reverse reverse the snapshot list
 func (s ZFSSnapshots) Reverse() ZFSSnapshots {
-	var reversed ZFSSnapshots
+	reversed := ZFSSnapshots{}
 	for i := len(s) - 1; i >= 0; i-- {
 		reversed = append(reversed, s[i])
 	}
@@ -36,7 +36,7 @@ func (s ZFSSnapshots) Reverse() ZFSSnapshots {
 
 // Filter filters snapshots per given filter function
 func (s *ZFSSnapshots) Filter(f func(ZFSSnapshot) bool) ZFSSnapshots {
-	var newS ZFSSnapshots
+	newS := ZFSSnapshots{}
 	for _, snap := range *s {
 		if f(snap) {
 			newS = append(newS, snap)

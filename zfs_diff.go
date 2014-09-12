@@ -21,7 +21,7 @@ func ScanZFSDiffs(zfsName, snapName string) (ZFSDiffs, error) {
 	//   see: https://www.illumos.org/issues/1912
 	replacer := strings.NewReplacer("\\040", " ")
 
-	var diffs ZFSDiffs
+	diffs := ZFSDiffs{}
 	for _, line := range strings.Split(out, "\n") {
 		//FIXME: filter only files, directories?
 		//FIXME: type rename: '/' -> 'D' ...
