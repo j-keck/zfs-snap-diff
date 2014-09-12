@@ -16,15 +16,36 @@ zsd.config(['$routeProvider', function($routeProvider){
 
 zsd.config(['$httpProvider', function($httpProvider){
   $httpProvider.interceptors.push('HTTPErrorInterceptor');
+  $httpProvider.interceptors.push('HTTPActivityInterceptor');
+}]);
+
+zsd.factory('HTTPActivityInterceptor', ['$q', '$rootScope', '$timeout', function($q, $rootScope, $timeout){
+  var activityCounter = 0;
+  var timeoutHandlers = [];
+  return {
+    'request': function(config){
+      activityCounter++;
+      $rootScope.$broadcast('http-activity', activityCounter);
+
+      return config
+    },
+    'response': function(response){
+      activityCounter--;
+      $rootScope.$broadcast('http-activity', activityCounter);
+
+      return response;
+    },
+    'responseError': function(rejection){
+      activityCounter--;
+      $rootScope.$broadcast('http-activity', activityCounter);
+      
+      return $q.reject(rejection);      
+    }
+  };
 }]);
 
 zsd.factory('HTTPErrorInterceptor', ['$q', '$rootScope', function($q, $rootScope){
   return {
-    'requestError': function(rejection){
-      console.log("requestError");
-      console.log(rejection);
-      return $q.reject(rejection);
-    },
     'responseError': function(rejection){
       // 406 are handled in the controller (file size limit)
       if(rejection.status !== 406){
@@ -135,7 +156,7 @@ zsd.directive('snapshots', [function(){
 
 // https://github.com/angular/angular.js/issues/339
 zsd.directive('embedSrc', function () {
-    return {
+  return {
     restrict: 'A',
     link: function (scope, element, attrs) {
       var current = element;
@@ -211,10 +232,8 @@ zsd.directive('dirBrowser', ['Backend', function(Backend){
   };
 }]);
 
-zsd.controller('MainCtrl', ['$location', '$rootScope', 'Config', function($location, $rootScope, Config){
+zsd.controller('MainCtrl', ['$location', '$rootScope', '$timeout', 'Config', function($location, $rootScope, $timeout, Config){
   var self = this;
-
-
   
   Config.promise.then(function(){
     self.config = Config.config();
@@ -222,6 +241,25 @@ zsd.controller('MainCtrl', ['$location', '$rootScope', 'Config', function($locat
 
   $rootScope.$on('response-error', function(event, args){
     self.error = args.data;
+  });
+
+
+  $rootScope.$on('http-activity', function(event, args){
+    // first http request pending
+    if(typeof self.timeoutHndl === 'undefined'){
+      // delayed - only show spinner when duration > 'delay'
+      var delay = 1000;
+      self.timeoutHndl = $timeout(function(){
+        self.loading = true;
+      }, delay);      
+    }
+
+    // no more http request pending
+    if(args === 0){
+      $timeout.cancel(self.timeoutHndl);
+      delete self.timeoutHndl;
+      self.loading = false;
+    }
   });
   
   
