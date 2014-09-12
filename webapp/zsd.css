@@ -1,6 +1,43 @@
+body{
+    padding-top: 80px;
+}
+
+[ng-click]{
+    cursor: pointer;
+}
+
+/* center diff table */
+table.diff {
+    margin-right: auto;
+    margin-left: auto;
+}
+
+
+
+.animate-show {
+    line-height:20px;
+    opacity:1;
+    padding:10px;
+    background:white;
+}
+
+.animate-show.ng-hide-add.ng-hide-add,
+.animate-show.ng-hide-remove.ng-hide-remove {
+    -webkit-transition:all linear 0.5s;
+    transition:all linear 0.5s;
+}
+
+.animate-show.ng-hide {
+    line-height:0;
+    opacity:0;
+    padding:0 10px;
+}
+
+
+
 /* loading spinner
    from: http://stackoverflow.com/a/20013732
-*/
+   */
 .spinner {
     height:60px;
     width:60px;
