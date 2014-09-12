@@ -243,6 +243,7 @@ zsd.controller('BySnapshotCtrl', ["Backend", "Difflib", function(Backend, Diffli
   
   self.showSnapshotDiff = function(snap){
     self.currentSnapshot = snap;
+    delete self.snapshotDiff;
     Backend.snapshotDiff(snap.Name).then(function(diff){
       self.snapshotDiff = diff;
     });
@@ -267,6 +268,11 @@ zsd.controller('ByFileCtrl', ["Backend", "Difflib", "$window", "$sce", "$q", fun
     });   
   }
 
+
+  self.snapshotsFetched = function(){
+    return angular.isArray($scope.snapshots);
+  };
+  
   self.snapshotSelected = function(snap, scrollToContent){
     self.currentSnapshot = snap;
 

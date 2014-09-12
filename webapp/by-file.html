@@ -6,11 +6,8 @@
   </dir-browser>
 
   <div ng-show="ctrl.isFileSelected">
-    <div ng-hide="ctrl.snapshots">
-      loading snapshots .....
-    </div>
 
-    <div ng-show="ctrl.snapshots">
+    <div ng-show="ctrl.snapshotsFetched">
       <snapshots snapshots="ctrl.snapshots" on-snapshot-selected="ctrl.snapshotSelected(snap)">
       </snapshots>
 
