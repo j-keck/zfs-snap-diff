@@ -26,8 +26,8 @@ func listenAndServe(addr string, frontendConfig FrontendConfig) {
 	http.HandleFunc("/list-dir", verifyParamExistsHndl("path", verifyParamUnderZMPHndl("path", listDirHndl)))
 	http.HandleFunc("/read-file", verifyParamExistsHndl("path", verifyParamUnderZMPHndl("path", readFileHndl)))
 	// serve static content from 'webapps' directory if environment has 'ZSD_SERVE_FROM_WEBAPPS' set (for dev)
-	if envHasSet("ZSD_SERVE_FROM_WEBAPPS") {
-		log.Println("serve from webapps")
+	if envHasSet("ZSD_SERVE_FROM_WEBAPP") {
+		log.Println("serve from webapp")
 		http.Handle("/", http.FileServer(http.Dir("webapp")))
 	} else {
 		http.HandleFunc("/", serveStaticContentFromBinaryHndl)

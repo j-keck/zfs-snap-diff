@@ -113,9 +113,9 @@ When you select a snapshot, and
 
 ### for dev:
   
-        ZSD_SERVE_FROM_WEBAPPS=YES ./zfs-snap-diff <ZFS_NAME> 
+        ZSD_SERVE_FROM_WEBAPP=YES ./zfs-snap-diff <ZFS_NAME> 
 
-  * serve static content from webapps dir
+  * serve static content from webapp dir
 
 
   
