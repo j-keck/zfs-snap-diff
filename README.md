@@ -122,6 +122,10 @@ When you select a snapshot, and
 # Changelog
 
 ###0.0.X###
+0.0.3:
+  * show server errors on frontend
+  * show waiting spinner when loading
+  
 0.0.2 :
   * partial frontend configuration from server
   * fix firefox ui
