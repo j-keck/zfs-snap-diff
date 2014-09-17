@@ -1,15 +1,36 @@
-<div class="panel pandel-default">
-  <div class="panel-heading" ng-click="toggleHideSnapshots()">Snapshots
-    <span ng-show="hideSnapshots" class="glyphicon glyphicon-chevron-down"></span>
-    <span ng-hide="hideSnapshots" class="glyphicon glyphicon-chevron-up"></span>
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" ng-click="toggleHideSnapshots()">Snapshots
+        <span ng-show="hideSnapshots" class="glyphicon glyphicon-chevron-down"></span>
+        <span ng-hide="hideSnapshots" class="glyphicon glyphicon-chevron-up"></span>
+      </a>     
+    </div>
+
+    <ul class="nav navbar-nav navbar-right">
+      <li>
+        <a href="" ng-click="showOlderSnap()" class="btn btn-large" ng-disabled="showOlderSnapDisabled()">
+          <span class="glyphicon glyphicon-backward"></span> Older
+        </a>
+      </li>
+      <li>
+        <a href="" ng-click="showNewerSnap()" class="btn btn-large" ng-disabled="showNewerSnapDisabled()">
+          <span class="glyphicon glyphicon-forward"></span> Newer
+        </a>
+      </li>      
+    </ul>   
   </div>
-  <div class="panel-body animate-show" ng-hide="hideSnapshots">
-    <table id="snapshots" class="table">
-      <tr ng-repeat="snap in snapshots" ng-click="snapshotSelected(snap)">
-        <td>{{snap.Name}}</td>
-        <td>{{snap.Creation}}</td>
-      </tr>
-    </table>
-  </div>
+</nav>
+
+
+
+
+<div class="animate-show" ng-hide="hideSnapshots">
+  <table id="snapshots" class="table">
+    <tr ng-repeat="snap in snapshots" ng-click="snapshotSelected(snap)">
+      <td>{{snap.Name}}</td>
+      <td>{{snap.Creation}}</td>
+    </tr>
+  </table>
 </div>
 

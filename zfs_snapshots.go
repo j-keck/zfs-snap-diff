@@ -17,9 +17,16 @@ func ScanZFSSnapshots(zfsName string) (ZFSSnapshots, error) {
 
 	snapshots := ZFSSnapshots{}
 	for _, line := range strings.Split(string(out), "\n") {
+		// extract fields
 		fields := strings.SplitN(line, "\t", 2)
-		snap := ZFSSnapshot{lastElement(fields[0], "@"), fields[1]}
+		snapName := lastElement(fields[0], "@")
+		creation := fields[1]
 
+		// path
+		path := zfsMountPoint + "/.zfs/snapshot/" + snapName
+
+		// append new snap to snapshots
+		snap := ZFSSnapshot{snapName, creation, path}
 		snapshots = append(snapshots, snap)
 	}
 	return snapshots.Reverse(), nil
@@ -64,4 +71,5 @@ func (s *ZFSSnapshots) FilterWhereFileWasModified(path string) ZFSSnapshots {
 type ZFSSnapshot struct {
 	Name     string
 	Creation string
+	Path     string
 }

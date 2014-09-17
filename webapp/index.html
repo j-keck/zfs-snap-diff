@@ -7,7 +7,7 @@
     <link rel="stylesheet" type="text/css" href="lib/jsdifflib/diffview.css"></link>
   </head>
   
-  <body ng-controller="MainCtrl as mainCtrl">
+  <body ng-controller="MainCtrl as mainCtrl" id="top">
 
     <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="container">
@@ -22,8 +22,9 @@
         </div>
         <div class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
-            <li ng-class="mainCtrl.activeClassIfAt('/by-file')"><a href="#/by-file">By File</a></li>
-            <li ng-class="mainCtrl.activeClassIfAt('/by-snapshots')"><a href="#/by-snapshots">By Snapshots</a></li>
+            <li ng-class="mainCtrl.activeClassIfAt('/browse-actual')"><a href="#/browse-actual">Browse actual</a></li>
+            <li ng-class="mainCtrl.activeClassIfAt('/browse-snapshots')"><a href="#/browse-snapshots">Browse snapshots</a></li>
+            <li ng-class="mainCtrl.activeClassIfAt('/browse-snapshot-diff')"><a href="#/browse-snapshot-diff">Browse snapshot diff</a></li>            
           </ul>
         </div><!--/.nav-collapse -->
       </div>
@@ -50,6 +51,10 @@
   <script src="lib/angular/angular-sanitize.min.js"></script>
   <script src="lib/angular/angular-animate.min.js"></script>      
   <script src="app.js"></script>
+  <script src="utils.js"></script>
+  <script src="controller.js"></script>
+  <script src="directives.js"></script>
+  <script src="services.js"></script>
   <script src="lib/jsdifflib/difflib.js"></script>
   <script src="lib/jsdifflib/diffview.js"></script>
 

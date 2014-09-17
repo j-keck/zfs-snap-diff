@@ -25,6 +25,7 @@ func listenAndServe(addr string, frontendConfig FrontendConfig) {
 	http.HandleFunc("/snapshot-diff", verifyParamExistsHndl("snapshot-name", snapshotDiffHndl))
 	http.HandleFunc("/list-dir", verifyParamExistsHndl("path", verifyParamUnderZMPHndl("path", listDirHndl)))
 	http.HandleFunc("/read-file", verifyParamExistsHndl("path", verifyParamUnderZMPHndl("path", readFileHndl)))
+	http.HandleFunc("/file-info", verifyParamExistsHndl("path", verifyParamUnderZMPHndl("path", fileInfoHndl)))
 	// serve static content from 'webapps' directory if environment has 'ZSD_SERVE_FROM_WEBAPPS' set (for dev)
 	if envHasSet("ZSD_SERVE_FROM_WEBAPP") {
 		log.Println("serve from webapp")
@@ -158,31 +159,15 @@ func listDirHndl(w http.ResponseWriter, r *http.Request) {
 }
 
 // read the file given in the query param 'path'
-//  * if the query param 'snapshot-name' a given, the file is
-//    a read from the given snapshot
 func readFileHndl(w http.ResponseWriter, r *http.Request) {
 	path, _ := getQueryParameter(r, "path")
 
-	var fh *FileHandle
-	var err error
-	if snapName, ok := getQueryParameter(r, "snapshot-name"); ok {
-		fh, err = NewFileHandleInSnapshot(path, snapName)
-	} else {
-		fh, err = NewFileHandle(path)
-	}
+	fh, err := NewFileHandle(path)
 
 	if err != nil {
 		log.Println(err)
 		http.Error(w, err.Error(), 500)
 		return
-	}
-
-	if maxFileSize, ok := getQueryParameter(r, "max-file-size"); ok {
-		mfs, err := strconv.ParseInt(maxFileSize, 10, 64)
-		if fh.Size > mfs || err != nil {
-			http.Error(w, "file size limit", 406)
-			return
-		}
 	}
 
 	contentType, err := fh.MimeType()
@@ -194,12 +179,40 @@ func readFileHndl(w http.ResponseWriter, r *http.Request) {
 
 	// size to string
 	contentLength := strconv.FormatInt(fh.Size, 10)
-	contentDisposition := "attachment; filename=" + fh.UniqueName
+	contentDisposition := "attachment; filename=" + fh.UniqueName()
 
 	w.Header().Set("Content-Disposition", contentDisposition)
 	w.Header().Set("Content-Type", contentType)
 	w.Header().Set("Content-Length", contentLength)
 	fh.CopyTo(w)
+}
+
+func fileInfoHndl(w http.ResponseWriter, r *http.Request) {
+	path, _ := getQueryParameter(r, "path")
+
+	fh, err := NewFileHandle(path)
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
+
+	type FileInfo struct {
+		FileHandle
+		MimeType string
+	}
+	mimeType, _ := fh.MimeType()
+	fi := FileInfo{*fh, mimeType}
+
+	// marshal
+	js, err := json.Marshal(fi)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	// respond
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
 }
 
 // serve content from binary

@@ -1,3 +1,5 @@
 zfs-snap-diff
 bindata.go
 build-output/
+emacs-24.3.core
+webapp/tests/node_modules

@@ -1,0 +1,17 @@
+<div class="container">
+
+  <dir-browser start="mainCtrl.config.ZFSMountPoint"
+               on-file-selected="ctrl.fileSelected(entries)"
+               on-dir-selected="ctrl.dirSelected(entries)"></dir-browser>
+
+
+  <snapshots snapshots="ctrl.snapshots"
+             on-snapshot-selected="ctrl.snapshotSelected(snap)"
+             ng-show="ctrl.snapshots"></snapshots>
+  
+
+  <file-actions path="ctrl.curPath"
+                path-from="actual"
+                cur-snap="ctrl.curSnap"
+                ng-show="ctrl.curSnap"></file-action>
+</div>

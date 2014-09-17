@@ -12,17 +12,15 @@ import (
 
 // FileHandle to access files / meta infos
 type FileHandle struct {
-	Name       string
-	UniqueName string
-	Path       string
-	Size       int64
-	ModTime    time.Time
+	Name    string
+	Path    string
+	Size    int64
+	ModTime time.Time
 }
 
 // NewFileHandle creates a new FileHandle
 func NewFileHandle(path string) (*FileHandle, error) {
-	name := filepath.Base(path)
-	return newFileHandle(name, name, path)
+	return newFileHandle(path)
 }
 
 // NewFileHandleInSnapshot creates a new FileHandle from a file in the given snapshot
@@ -30,26 +28,36 @@ func NewFileHandleInSnapshot(path, snapName string) (*FileHandle, error) {
 	relativePath := strings.TrimPrefix(path, zfsMountPoint)
 	pathInSnap := fmt.Sprintf("%s/.zfs/snapshot/%s%s", zfsMountPoint, snapName, relativePath)
 
-	name := filepath.Base(path)
-
-	// uniqueName is: <FILE_PREFIX>-<SNAPSHOT_NAME>.<FILE_SUFFIX>
-	var uniqueName string
-	if strings.Contains(name, ".") {
-		f := strings.Split(name, ".")
-		uniqueName = fmt.Sprintf("%s-%s.%s", f[0], snapName, f[1])
-	} else {
-		uniqueName = fmt.Sprintf("%s-%s", name, snapName)
-	}
-
-	return newFileHandle(name, uniqueName, pathInSnap)
+	return newFileHandle(pathInSnap)
 }
 
-func newFileHandle(name, uniqueName, path string) (*FileHandle, error) {
+func newFileHandle(path string) (*FileHandle, error) {
 	fi, err := os.Stat(path)
 	if err != nil {
 		return nil, err
 	}
-	return &FileHandle{name, uniqueName, path, fi.Size(), fi.ModTime()}, nil
+
+	name := filepath.Base(path)
+	return &FileHandle{name, path, fi.Size(), fi.ModTime()}, nil
+}
+
+func (fh *FileHandle) UniqueName() string {
+	// file under a snapshot?
+	if strings.HasPrefix(fh.Path, zfsMountPoint+"/.zfs/snapshot") {
+		// extract snapshot-name
+		s := strings.TrimPrefix(fh.Path, zfsMountPoint)
+		s = strings.TrimPrefix(s, "/.zfs/snapshot/")
+		snapName := strings.Split(s, "/")[0]
+
+		// build unique-name
+		if strings.Contains(fh.Name, ".") {
+			f := strings.Split(fh.Name, ".")
+			return fmt.Sprintf("%s-%s.%s", f[0], snapName, f[1])
+		}
+		return fmt.Sprintf("%s-%s", fh.Name, snapName)
+	}
+
+	return fh.Name
 }
 
 // MimeType of the file

@@ -1,17 +1,17 @@
 <ol class="breadcrumb">
-  <li ng-repeat="element in pathElements">
-    <!-- link if element is directory -->
-    <a href="" ng-show="isDirectory(element)" ng-click="open(element)">{{element.Path}}</a>
+  <li ng-repeat="entry in entries">
+    <!-- link if entry is directory -->
+    <a href="" ng-show="isDirectory(entry)" ng-click="open(entry)">{{entry.Path}}</a>
 
-    <!-- text only, if element is file (the last element, if a file is selected)-->
-    <span ng-show="isFile(element)">{{element.Path}}</span>
+    <!-- text only, if entry is file (the last entry, if a file is selected)-->
+    <span ng-show="isFile(entry)">{{entry.Path}}</span>
   </li>
 </ol>
 
 
 <div class="list-group" ng-hide="fileSelected">
   <input type="checkbox" ng-model="showHiddenEntries">show hidden entries</input>  
-  <a href="" class="list-group-item" ng-repeat="entry in dirEntries | filter:filterHiddenEntries" ng-click="open(entry)">
+  <a href="" class="list-group-item" ng-repeat="entry in dirListing | filter:filterHiddenEntries" ng-click="open(entry)">
     <span class="glyphicon" ng-class="{'glyphicon-file': isFile(entry), 'glyphicon-folder-open': isDirectory(entry)}">
       {{entry.Path}}
     </span>

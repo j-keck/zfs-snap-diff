@@ -1,0 +1,19 @@
+<div class="container">
+  <snapshots snapshots="ctrl.snapshots"
+             on-snapshot-selected="ctrl.snapshotSelected(snap)"></snapshots>
+
+
+  <dir-browser ng-if="ctrl.curSnap"
+               start-entries="ctrl.startEntries"
+               on-file-selected="ctrl.fileSelected(entries)"
+               on-dir-selected="ctrl.dirSelected(entries)"></dir-browser>
+
+
+
+
+  <file-actions path="ctrl.curPath"
+                path-from="snapshot"
+                cur-snap="ctrl.curSnap"
+                ng-if="ctrl.curPath"></file-action>
+
+</div>

@@ -1,0 +1,40 @@
+<div class="btn-group">
+  <button type="button" class="btn btn-default" ng-click="viewFile()" ng-disabled="! fileIsViewable"fileHasTextContent>
+    <span class="glyphicon glyphicon-eye-open"></span> View
+  </button>
+  <button type="button" class="btn btn-default" ng-click="compareFile()" ng-disabled="! fileIsComparable">
+    <span class="glyphicon glyphicon-random"></span> Diff
+  </button>  
+  <button type="button" class="btn btn-default" ng-click="downloadFile()">
+    <span class="glyphicon glyphicon-download"></span> Download
+  </button>
+  <button type="button" class="btn btn-default" ng-click="restoreFile()">
+    <span class="glyphicon glyphicon-import"></span> Restore
+  </button>
+</div>
+
+
+
+
+<!-- file diff -->
+<div class="panel panel-default"
+     ng-bind-html="fileDiff"
+     ng-show="fileDiff"></div>
+
+<!-- text file content -->
+<div class="panel panel-default center-block" ng-show="textFileContent">
+  <div class="panel-heading">{{curSnap.Name}}</div>
+  <div class="pandel-body">{{textFileContent}}</div>
+</div>
+
+
+<!-- embedded binary content -->
+<div class="panel panel-default center-block" ng-show="binaryFileContent">
+  <div class="panel-heading">{{curSnap.Name}}</div>
+  <div class="pandel-body" style="width: 90%">
+    <embed embed-src="{{binaryFileContent}}"
+           ng-src="{{binaryFileContent}}"
+           class="panel-body"
+           style="width:100%;height:100%"></embed>
+  </div>
+</div>
