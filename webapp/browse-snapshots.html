@@ -1,19 +1,19 @@
 <div class="container">
-  <snapshots snapshots="ctrl.snapshots"
-             on-snapshot-selected="ctrl.snapshotSelected(snap)"></snapshots>
+  <zsd-snapshots snapshots="ctrl.snapshots"
+                 on-snapshot-selected="ctrl.snapshotSelected(snap)"></zsd-snapshots>
+   
+
+  <zsd-dir-browser ng-if="ctrl.curSnap"
+                   start-entries="ctrl.startEntries"
+                   on-file-selected="ctrl.fileSelected(entries)"
+                   on-dir-selected="ctrl.dirSelected(entries)"></zsd-dir-browser>
 
 
-  <dir-browser ng-if="ctrl.curSnap"
-               start-entries="ctrl.startEntries"
-               on-file-selected="ctrl.fileSelected(entries)"
-               on-dir-selected="ctrl.dirSelected(entries)"></dir-browser>
 
 
-
-
-  <file-actions path="ctrl.curPath"
-                path-from="snapshot"
-                cur-snap="ctrl.curSnap"
-                ng-show="ctrl.curPath"></file-action>
+  <zsd-file-actions path="ctrl.curPath"
+                    path-from="snapshot"
+                    cur-snap="ctrl.curSnap"
+                    ng-show="ctrl.curPath"></zsd-file-action>
 
 </div>
