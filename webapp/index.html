@@ -37,6 +37,13 @@
       {{mainCtrl.error}}
     </div>
 
+    <!-- warning -->
+    <div class="container alert alert-warning" ng-show="mainCtrl.warning">
+      <span class="glyphicon glyphicon-remove" ng-click="mainCtrl.warning = ''"></span>
+      {{mainCtrl.warning}}
+    </div>
+
+    
     <!-- loading spinner -->
     <div class="spinner" ng-show="mainCtrl.loading">
     </div>

@@ -9,6 +9,10 @@ zsd.controller('MainCtrl', ['$location', '$rootScope', '$timeout', 'Config', fun
     self.error = args.data;
   });
 
+  $rootScope.$on('zsd:warning', function(event, msg){
+    self.warning = msg;
+  });
+  
 
   $rootScope.$on('http-activity', function(event, args){
     // first http request pending
