@@ -1,6 +1,7 @@
 package main
 
 type FrontendConfig struct {
-	ZFSMountPoint   string
-	DiffContextSize int
+	ZFSMountPoint     string
+	DiffContextSize   int
+	DefaultFileAction string
 }

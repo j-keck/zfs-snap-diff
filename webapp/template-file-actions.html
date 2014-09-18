@@ -1,14 +1,26 @@
 <div class="btn-group">
-  <button type="button" class="btn btn-default" ng-click="viewFile()" ng-disabled="! fileIsViewable"fileHasTextContent>
+  <button type="button"
+          class="btn btn-primary"
+          ng-class="activeClassIfSelected('viewFile')"
+          ng-click="viewFile()"
+          ng-disabled="! fileIsViewable"fileHasTextContent>
     <span class="glyphicon glyphicon-eye-open"></span> View
   </button>
-  <button type="button" class="btn btn-default" ng-click="compareFile()" ng-disabled="! fileIsComparable">
+  <button type="button"
+          class="btn btn-primary"
+          ng-class="activeClassIfSelected('compareFile')"
+          ng-click="compareFile()"
+          ng-disabled="! fileIsComparable">
     <span class="glyphicon glyphicon-random"></span> Diff
   </button>  
-  <button type="button" class="btn btn-default" ng-click="downloadFile()">
+  <button type="button"
+          class="btn btn-primary"
+          ng-click="downloadFile()">
     <span class="glyphicon glyphicon-download"></span> Download
   </button>
-  <button type="button" class="btn btn-default" ng-click="restoreFile()">
+  <button type="button"
+          class="btn btn-primary"
+          ng-click="restoreFile()">
     <span class="glyphicon glyphicon-import"></span> Restore
   </button>
 </div>

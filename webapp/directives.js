@@ -1,5 +1,5 @@
 
-zsd.directive('fileActions', ['$window', '$sce', 'FileUtils', 'Backend', 'Difflib', 'PathUtils', function($window, $sce, FileUtils, Backend, Difflib, PathUtils){
+zsd.directive('fileActions', ['$window', '$sce', '$rootScope', 'FileUtils', 'Backend', 'Difflib', 'PathUtils', 'Config', function($window, $sce, $rootScope, FileUtils, Backend, Difflib, PathUtils, Config){
   return {
     restrict: 'E',
     templateUrl: 'template-file-actions.html',
@@ -9,61 +9,72 @@ zsd.directive('fileActions', ['$window', '$sce', 'FileUtils', 'Backend', 'Diffli
       curSnap: "="
     },
     link: function(scope, element, attrs){
-      scope.viewFile = function(){
+      
+      scope.viewFile = function viewFile(){
         scope.lastAction = scope.viewFile;
         delete scope.fileDiff;
         delete scope.binaryFileContent;
 
-        if(! scope.fileIsViewable) return;
-
         var path = realPath();
-        FileUtils.isText(path).then(function(isText){
-          if(isText){
-            Backend.readTextFile(path).then(function(res){
-              scope.textFileContent = res;
-            });
-          }else{
-            Backend.readBinaryFile(path).then(function(res){
-              var url = URL.createObjectURL(res);
-              scope.binaryFileContent = $sce.trustAsResourceUrl(url);              
-            });
-          }
+        FileUtils.whenIsViewable(path, function(){
+          FileUtils.isText(path).then(function(isText){
+            if(isText){
+              Backend.readTextFile(path).then(function(res){
+                scope.textFileContent = res;
+                //hljs.initHighlighting();
+              });
+            }else{
+              Backend.readBinaryFile(path).then(function(res){
+                var url = URL.createObjectURL(res);
+                scope.binaryFileContent = $sce.trustAsResourceUrl(url);              
+              });
+            }
+          });
         });
       }
       
-      scope.compareFile = function(){
+      scope.compareFile = function compareFile(){
         scope.lastAction = scope.compareFile;
         delete scope.textFileContent;
         delete scope.binaryFileContent;
 
-        if(! scope.fileIsComparable) return;
-
-        var actualPath, snapPath;
-        if(scope.pathFrom === 'actual'){
-          actualPath = scope.path;
-          snapPath = PathUtils.convertToSnapPath(actualPath, scope.curSnap.Name);
-        }else if(scope.pathFrom === 'snapshot'){
-          snapPath = scope.path;
-          actualPath = PathUtils.convertToActualPath(snapPath);
-        }else{
-          throw 'Invalid "path-from": ' + scope.pathFrom;
-        }
-        
-        Difflib.diffFiles(actualPath, scope.curSnap.Name, snapPath).then(function(diff){
-          scope.fileDiff = diff;
+        FileUtils.whenIsComparable(realPath(), function(){
+          var actualPath, snapPath;
+          if(scope.pathFrom === 'actual'){
+            actualPath = scope.path;
+            snapPath = PathUtils.convertToSnapPath(actualPath, scope.curSnap.Name);
+          }else if(scope.pathFrom === 'snapshot'){
+            snapPath = scope.path;
+            actualPath = PathUtils.convertToActualPath(snapPath);
+          }else{
+            throw 'Invalid "path-from": ' + scope.pathFrom;
+          }
+          
+          Difflib.diffFiles(actualPath, scope.curSnap.Name, snapPath).then(function(diff){
+            scope.fileDiff = diff;
+          });
         });
       };
         
-      scope.downloadFile = function(){
+      scope.downloadFile = function downloadFile(){
         delete scope.lastAction;
         $window.location = "/read-file?path="+realPath();
       };
       
-      scope.restoreFile = function(){
+      scope.restoreFile = function restoreFile(){
         delete scope.lastAction;
       };
 
-      
+      scope.activeClassIfSelected = function(name){
+        if(typeof scope.lastAction === 'undefined') return;
+
+        if(scope.lastAction.name === name){
+          return "active";
+        }
+      };
+
+     
+
       scope.$watch('path', function(){
         if(typeof scope.path === 'undefined') return;
 
@@ -72,6 +83,7 @@ zsd.directive('fileActions', ['$window', '$sce', 'FileUtils', 'Backend', 'Diffli
         delete scope.textFileContent;
         delete scope.binaryFileContent;
 
+        triggerLastAction();
 
         FileUtils.isViewable(scope.path).then(function(res){
           scope.fileIsViewable = res;
@@ -83,12 +95,36 @@ zsd.directive('fileActions', ['$window', '$sce', 'FileUtils', 'Backend', 'Diffli
 
       });
 
+
       scope.$watch('curSnap', function(){
+        triggerLastAction();
+      });
+
+      
+      function triggerLastAction(){
+        if(typeof scope.path === 'undefined') return;
         if(typeof scope.curSnap === 'undefined') return;
 
-        if(typeof scope.lastAction === 'undefined') return;
+        if(typeof scope.lastAction === 'undefined'){
+          // initialize default action in 'lastAction'
+          var actions = {'off': function(){},
+                         'view': scope.viewFile,
+                         'diff': scope.compareFile,
+                         'download': scope.downloadFile,
+                         'restore': scope.restoreFile};
+          
+          var defaultAction = Config.get('DefaultFileAction');
+          if(defaultAction in actions){
+            scope.lastAction = actions[Config.get('DefaultFileAction')];
+          }else{
+            $rootScope.$broadcast('zsd:warning', 'Invalid "default-file-action": "'+ defaultAction +'"');
+            scope.lastAction = actions['off'];
+          }
+        }
+
+        // trigger last action
         scope.lastAction();
-      });
+      }
 
       function realPath(){
         var path;

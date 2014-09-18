@@ -29,6 +29,7 @@ func main() {
 	printVersionFlag := flag.Bool("V", false, "print version and exit")
 	// frontend
 	diffContextSizeFlag := flag.Int("diff-context-size", 5, "context size in diff")
+	defaultFileActionFlag := flag.String("default-file-action", "view", "default file action in frontend when a file is selected: 'off', 'view', 'diff', 'download', 'restore'")
 
 	flag.Parse()
 
@@ -73,6 +74,7 @@ func main() {
 	frontendConfig := FrontendConfig{
 		zfsMountPoint,
 		*diffContextSizeFlag,
+		*defaultFileActionFlag,
 	}
 
 	// startup web server
