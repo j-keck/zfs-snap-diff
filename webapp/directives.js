@@ -20,8 +20,9 @@ zsd.directive('fileActions', ['$window', '$sce', '$rootScope', 'FileUtils', 'Bac
           FileUtils.isText(path).then(function(isText){
             if(isText){
               Backend.readTextFile(path).then(function(res){
-                scope.textFileContent = res;
-                //hljs.initHighlighting();
+                // apply syntax highlight
+                var hljsRes = hljs.highlightAuto(res);
+                scope.textFileContent = hljsRes.value;
               });
             }else{
               Backend.readBinaryFile(path).then(function(res){
