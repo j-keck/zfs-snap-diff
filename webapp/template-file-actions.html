@@ -1,3 +1,22 @@
+
+<zsd-modal show="showRestoreFileConfirmation">
+  <div class="panel panel-heading">
+    <span class="alert alert-warning" role="alert">
+      <strong>Warning!</strong>
+    </span>
+  </div>
+  <div class="panel panel-body">
+    Replace the actual file under {{actualPath}} with an <strong>old</strong> version <br/>
+    from the snapshot {{curSnap.Name}}?</div>
+
+  <button type="button" class="btn btn-default" ng-click="hideRestoreFileConfirmation()"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+  <button type="button" class="btn btn-default btn-success" ng-click="restoreFileAcked()"><span class="glyphicon glyphicon-ok"></span> OK</button>
+</zsd-modal>
+
+  
+  
+    
+
 <div class="btn-group">
   <button type="button"
           class="btn btn-primary"

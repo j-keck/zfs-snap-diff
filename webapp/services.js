@@ -91,6 +91,11 @@ factory('Backend', ["$http", "Config", function($http, Config){
       return $http.get("file-info", {"params": {"path": path}, "cache": true}).then(function(res){
         return res.data;
       })
+    },
+    restoreFile: function(path, snapName){
+      return $http.put("restore-file", {'path': path, 'snapshot-name': snapName}).then(function(res){
+        return res.data;
+      });
     }
   }
 }]).

@@ -44,6 +44,14 @@
       {{mainCtrl.warning}}
     </div>
 
+    <!-- success -->
+    <div class="container alert alert-success" ng-show="mainCtrl.success">
+      <span class="glyphicon glyphicon-remove" ng-click="mainCtrl.success = ''"></span>
+      {{mainCtrl.success}}
+    </div>
+
+    
+
     
     <!-- loading spinner -->
     <div class="spinner" ng-show="mainCtrl.loading">

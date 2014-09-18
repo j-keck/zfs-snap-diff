@@ -71,3 +71,37 @@ table.diff {
     to {transform: rotate(359deg);}
 }
 /* end loading spinner */
+
+
+
+
+/* zsd-modal
+ */
+.zsd-modal-overlay {
+    position:absolute;
+    z-index:9999;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background-color:#E9ECEA;
+    opacity: 0.8;
+}
+.zsd-modal-dialog {
+    z-index:10000;
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    -webkit-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+
+    background-color: #fff;
+    box-shadow: 4px 4px 80px #cfcfcf;
+
+    font-size: large;
+}
+.zsd-modal-dialog-content {
+    padding:10px;
+    }
+/* end modal */

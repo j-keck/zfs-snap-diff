@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // mime types for static content (serve static content from binary)
@@ -28,6 +29,7 @@ func listenAndServe(addr string, frontendConfig FrontendConfig) {
 	http.HandleFunc("/list-dir", listDirHndl)
 	http.HandleFunc("/read-file", readFileHndl)
 	http.HandleFunc("/file-info", fileInfoHndl)
+	http.HandleFunc("/restore-file", restoreFileHndl)
 
 	// serve static content from 'webapp' directory if environment has 'ZSD_SERVE_FROM_WEBAPP' set (for dev)
 	if envHasSet("ZSD_SERVE_FROM_WEBAPP") {
@@ -90,6 +92,7 @@ func snapshotDiffHndl(w http.ResponseWriter, r *http.Request) {
 	snapName, snapNameFound := params["snapshot-name"]
 	if !snapNameFound {
 		respondWithParamMissing(w, "snapshot-name")
+		return
 	}
 
 	diffs, err := ScanZFSDiffs(zfsName, snapName)
@@ -118,10 +121,8 @@ func listDirHndl(w http.ResponseWriter, r *http.Request) {
 		respondWithParamMissing(w, "path")
 	}
 
-	if !isUnderZMP(path) {
-		respondWithIllegalRequest(w, r, fmt.Sprintf("path: '%s' not under zfs-mount-point: '%s'", path, zfsMountPoint))
-		return
-	}
+	// verify path
+	verifyPathIsUnderZMP(path, w, r)
 
 	dirEntries, err := ScanDirEntries(path)
 	if err != nil {
@@ -147,12 +148,11 @@ func readFileHndl(w http.ResponseWriter, r *http.Request) {
 	path, pathFound := params["path"]
 	if !pathFound {
 		respondWithParamMissing(w, "path")
-	}
-
-	if !isUnderZMP(path) {
-		respondWithIllegalRequest(w, r, fmt.Sprintf("path: '%s' not under zfs-mount-point: '%s'", path, zfsMountPoint))
 		return
 	}
+
+	// verify path
+	verifyPathIsUnderZMP(path, w, r)
 
 	fh, err := NewFileHandle(path)
 
@@ -185,12 +185,11 @@ func fileInfoHndl(w http.ResponseWriter, r *http.Request) {
 	path, pathFound := params["path"]
 	if !pathFound {
 		respondWithParamMissing(w, "path")
-	}
-
-	if !isUnderZMP(path) {
-		respondWithIllegalRequest(w, r, fmt.Sprintf("path: '%s' not under zfs-mount-point: '%s'", path, zfsMountPoint))
 		return
 	}
+
+	// verify path
+	verifyPathIsUnderZMP(path, w, r)
 
 	fh, err := NewFileHandle(path)
 	if err != nil {
@@ -215,6 +214,53 @@ func fileInfoHndl(w http.ResponseWriter, r *http.Request) {
 	// respond
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
+}
+
+func restoreFileHndl(w http.ResponseWriter, r *http.Request) {
+	params, _ := extractParams(r)
+	path, pathFound := params["path"]
+	if !pathFound {
+		respondWithParamMissing(w, "path")
+		return
+	}
+
+	// verify path
+	verifyPathIsUnderZMP(path, w, r)
+
+	// get parameter snapshot-name
+	snapName, snapNameFound := params["snapshot-name"]
+	if !snapNameFound {
+		respondWithParamMissing(w, "snapshot-name")
+		return
+	}
+
+	// get file-handle for the actual file
+	actualFh, err := NewFileHandle(path)
+	if err != nil {
+		http.Error(w, "unable to restore - actual file not found: "+err.Error(), 400)
+		return
+	}
+
+	// get file-handle for the file from the snashot
+	snapFh, err := NewFileHandleInSnapshot(path, snapName)
+	if err != nil {
+		http.Error(w, "unable to restore - file from snapshot not found: "+err.Error(), 400)
+		return
+	}
+
+	// rename the actual file: <FILENAME>_<TIMESTAMP>
+	newName := fmt.Sprintf("%s_%s", actualFh.Name, time.Now().Format("20060102_150405"))
+	if err := actualFh.Rename(newName); err != nil {
+		http.Error(w, "unable to restore: "+err.Error(), 500)
+		return
+	}
+
+	// copy the file from the snapshot as the actual file
+	if err := snapFh.Copy(path); err != nil {
+		http.Error(w, "unable to restore: "+err.Error(), 500)
+	} else {
+		fmt.Fprintf(w, "file '%s' successful restored from snapshot: '%s'", path, snapName)
+	}
 }
 
 // serve content from binary
@@ -270,22 +316,21 @@ func extractParams(r *http.Request) (map[string]string, error) {
 	return params, nil
 }
 
-// respond with 400
+// respond parameter missing
 func respondWithParamMissing(w http.ResponseWriter, name string) {
 	http.Error(w, fmt.Sprintf("parameter '%s' missing", name), 400)
 }
 
-// respond with 403
-func respondWithIllegalRequest(w http.ResponseWriter, r *http.Request, logMsg string) {
-	http.Error(w, "illegal request", 403)
-	log.Printf("illegal request - url-path: '%s', msg: %s, from client: '%s' -> SHUTDOWN SERVER!",
-		r.URL.Path, logMsg, r.RemoteAddr)
+// verified that the given path is under zfs-mount-point
+//  * responds with a illegal request if not
+//  * and shutdowns the server
+func verifyPathIsUnderZMP(path string, w http.ResponseWriter, r *http.Request) {
+	if !strings.HasPrefix(filepath.Clean(path), zfsMountPoint) {
+		http.Error(w, "illegal request", 403)
+		log.Printf("illegal request - file-path: '%s', url-path: '%s', from client: '%s' -> SHUTDOWN SERVER!",
+			path, r.URL.Path, r.RemoteAddr)
 
-	// trigger shutdown in a goroutine, to give the server time serve the 403 error
-	go os.Exit(1)
-}
-
-// check if given path is under zfs-mount-point
-func isUnderZMP(path string) bool {
-	return strings.HasPrefix(filepath.Clean(path), zfsMountPoint)
+		// trigger shutdown in a goroutine, to give the server time serve the 403 error
+		go os.Exit(1)
+	}
 }

@@ -10,13 +10,12 @@ directive('zsdFileActions', ['$window', '$sce', '$rootScope', 'FileUtils', 'Back
       curSnap: "="
     },
     link: function(scope, element, attrs){
-      
       scope.viewFile = function viewFile(){
         scope.lastAction = scope.viewFile;
         delete scope.fileDiff;
         delete scope.binaryFileContent;
 
-        var path = realPath();
+        var path = getSnapPath();
         FileUtils.whenIsViewable(path, function(){
           FileUtils.isText(path).then(function(isText){
             if(isText){
@@ -40,7 +39,7 @@ directive('zsdFileActions', ['$window', '$sce', '$rootScope', 'FileUtils', 'Back
         delete scope.textFileContent;
         delete scope.binaryFileContent;
 
-        FileUtils.whenIsComparable(realPath(), function(){
+        FileUtils.whenIsComparable(getSnapPath(), function(){
           var actualPath, snapPath;
           if(scope.pathFrom === 'actual'){
             actualPath = scope.path;
@@ -59,13 +58,29 @@ directive('zsdFileActions', ['$window', '$sce', '$rootScope', 'FileUtils', 'Back
       };
         
       scope.downloadFile = function downloadFile(){
-        delete scope.lastAction;
-        $window.location = "/read-file?path="+realPath();
+        $window.location = "/read-file?path="+getSnapPath();
       };
+
       
       scope.restoreFile = function restoreFile(){
-        delete scope.lastAction;
+        // save actual-path in the scope for the ui
+        scope.actualPath = getActualPath();
+        
+        scope.showRestoreFileConfirmation = true;
       };
+
+      scope.restoreFileAcked = function(){
+        scope.hideRestoreFileConfirmation();
+
+        Backend.restoreFile(getActualPath(), scope.curSnap.Name).then(function(res){
+          $rootScope.$broadcast('zsd:success', res);
+        });
+      };
+
+      scope.hideRestoreFileConfirmation = function(){
+        delete scope.showRestoreFileConfirmation;
+      };
+    
 
       scope.activeClassIfSelected = function(name){
         if(typeof scope.lastAction === 'undefined') return;
@@ -128,17 +143,25 @@ directive('zsdFileActions', ['$window', '$sce', '$rootScope', 'FileUtils', 'Back
         scope.lastAction();
       }
 
-      function realPath(){
-        var path;
+      function getSnapPath(){
         if(scope.pathFrom === 'actual'){
-          path = PathUtils.convertToSnapPath(scope.path, scope.curSnap.Name);
+          return PathUtils.convertToSnapPath(scope.path, scope.curSnap.Name);
         }else if(scope.pathFrom === 'snapshot'){
-          path = scope.path;
+          return scope.path;
         }else{
           throw 'Invalid "path-from": ' + scope.pathFrom;
         }
-        return path;
       }
+
+      function getActualPath(){
+        if(scope.pathFrom === 'actual'){
+          return scope.path;
+        }else if(scope.pathFrom === 'snapshot'){
+          return PathUtils.convertToActualPath(scope.path);
+        }else{
+          throw 'Invalid "path-from": ' + scope.pathFrom;
+        }
+      }      
     }
   }
 }]).
@@ -303,6 +326,26 @@ directive('zsdDirBrowser', ['Backend', 'PathUtils', function(Backend, PathUtils)
 
     }
   };
+}]).
+
+directive('zsdModal', [function(){
+  return {
+    restrict: 'E',
+    scope: {
+      show: '='
+    },
+    replace: true,
+    transclude: true,
+    link: function(scope, element, attrs) {
+      scope.dialogStyle = {};
+      if (attrs.width)
+        scope.dialogStyle.width = attrs.width;
+      if (attrs.height)
+        scope.dialogStyle.height = attrs.height;
+    },
+    template: "<div class='zsd-modal' ng-show='show'>\n <div class='zsd-modal-overlay'></div>\n <div class='zsd-modal-dialog panel panel-default' ng-style='dialogStyle'>\n <div class='zsd-modal-dialog-content' ng-transclude></div>\n</div>\n</div>"
+    
+  }
 }]);
 
 

@@ -14,6 +14,10 @@ controller('MainCtrl', ['$location', '$rootScope', '$timeout', 'Config', functio
   $rootScope.$on('zsd:warning', function(event, msg){
     self.warning = msg;
   });
+
+  $rootScope.$on('zsd:success', function(event, msg){
+    self.success = msg;
+  });
   
 
   $rootScope.$on('zsd:http-activity', function(event, args){

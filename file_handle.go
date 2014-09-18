@@ -96,3 +96,65 @@ func (fh *FileHandle) HasChanged(other *FileHandle) bool {
 
 	return timeChanged || sizeChanged
 }
+
+// Rename renames a file under the same directory
+func (fh *FileHandle) Rename(newName string) error {
+	newPath := fmt.Sprintf("%s/%s", filepath.Dir(fh.Path), newName)
+	if err := os.Rename(fh.Path, newPath); err != nil {
+		return err
+	}
+
+	// update file name / path
+	fh.Name = newName
+	fh.Path = newPath
+	return nil
+}
+
+// Move moves / renames a file
+func (fh *FileHandle) Move(newPath string) error {
+	if err := os.Rename(fh.Path, newPath); err != nil {
+		return err
+	}
+
+	// update file name / path
+	fh.Name = filepath.Base(newPath)
+	fh.Path = newPath
+	return nil
+}
+
+// Copy copies a file
+func (fh *FileHandle) Copy(path string) (err error) {
+	// open src
+	in, err := os.Open(fh.Path)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+
+	// open dest
+	out, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		closeErr := out.Close()
+		if err == nil {
+			err = closeErr
+
+			if err == nil {
+				// copy success - update file name / path
+				fh.Name = filepath.Base(path)
+				fh.Path = path
+			}
+		}
+	}()
+
+	// copy
+	if _, err = io.Copy(out, in); err != nil {
+		return
+	}
+
+	// sync
+	err = out.Sync()
+	return
+}
