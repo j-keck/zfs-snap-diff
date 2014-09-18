@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -22,11 +24,12 @@ var mimeTypes = map[string]string{
 func listenAndServe(addr string, frontendConfig FrontendConfig) {
 	http.HandleFunc("/config", configHndl(frontendConfig))
 	http.HandleFunc("/list-snapshots", listSnapshotsHndl)
-	http.HandleFunc("/snapshot-diff", verifyParamExistsHndl("snapshot-name", snapshotDiffHndl))
-	http.HandleFunc("/list-dir", verifyParamExistsHndl("path", verifyParamUnderZMPHndl("path", listDirHndl)))
-	http.HandleFunc("/read-file", verifyParamExistsHndl("path", verifyParamUnderZMPHndl("path", readFileHndl)))
-	http.HandleFunc("/file-info", verifyParamExistsHndl("path", verifyParamUnderZMPHndl("path", fileInfoHndl)))
-	// serve static content from 'webapps' directory if environment has 'ZSD_SERVE_FROM_WEBAPPS' set (for dev)
+	http.HandleFunc("/snapshot-diff", snapshotDiffHndl)
+	http.HandleFunc("/list-dir", listDirHndl)
+	http.HandleFunc("/read-file", readFileHndl)
+	http.HandleFunc("/file-info", fileInfoHndl)
+
+	// serve static content from 'webapp' directory if environment has 'ZSD_SERVE_FROM_WEBAPP' set (for dev)
 	if envHasSet("ZSD_SERVE_FROM_WEBAPP") {
 		log.Println("serve from webapp")
 		http.Handle("/", http.FileServer(http.Dir("webapp")))
@@ -34,40 +37,6 @@ func listenAndServe(addr string, frontendConfig FrontendConfig) {
 		http.HandleFunc("/", serveStaticContentFromBinaryHndl)
 	}
 	http.ListenAndServe(addr, nil)
-}
-
-// ensures the query parameter 'paramName' exists
-//   * calls the 'next' HndlFunc when query parameter found
-//   * complete the request with a 400 code if the parameter is missing
-func verifyParamExistsHndl(paramName string, next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if _, ok := getQueryParameter(r, paramName); ok {
-			next.ServeHTTP(w, r)
-		} else {
-			http.Error(w, fmt.Sprintf("parameter '%s' missing", paramName), 400)
-		}
-	}
-}
-
-// ensures the query param value points under zfsMountPoint
-//   * calls the 'next' HndlFunc when the security test succeed
-//   * complete the request with a 403 code and !! SHUTDOWNS THE PROGRAMM !! when the test fails
-func verifyParamUnderZMPHndl(paramName string, next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		paramValue, _ := getQueryParameter(r, paramName)
-
-		// check if 'paramValue' are under 'zfsMountPoint'
-		if strings.HasPrefix(filepath.Clean(paramValue), zfsMountPoint) {
-			next.ServeHTTP(w, r)
-		} else {
-			http.Error(w, fmt.Sprintf("invalid '%s'", paramName), 403)
-			log.Printf("illegal request - url-path: %s, param: '%s', value: '%s' from client: '%s' -> SHUTDOWN SERVER!",
-				r.URL.Path, paramName, paramValue, r.RemoteAddr)
-
-			// trigger shutdown in a goroutine, to give the server time serve the 403 error
-			go os.Exit(1)
-		}
-	}
 }
 
 // frontend-config
@@ -98,7 +67,8 @@ func listSnapshotsHndl(w http.ResponseWriter, r *http.Request) {
 
 	// when paramter 'where-file-modified' given, filter snaphots where the
 	// given file was modified
-	if path, ok := getQueryParameter(r, "where-file-modified"); ok {
+	params, _ := extractParams(r)
+	if path, ok := params["where-file-modified"]; ok {
 		snapshots = snapshots.FilterWhereFileWasModified(path)
 	}
 
@@ -116,7 +86,11 @@ func listSnapshotsHndl(w http.ResponseWriter, r *http.Request) {
 
 // diff from a given snapshot to the current filesystem state
 func snapshotDiffHndl(w http.ResponseWriter, r *http.Request) {
-	snapName, _ := getQueryParameter(r, "snapshot-name")
+	params, _ := extractParams(r)
+	snapName, snapNameFound := params["snapshot-name"]
+	if !snapNameFound {
+		respondWithParamMissing(w, "snapshot-name")
+	}
 
 	diffs, err := ScanZFSDiffs(zfsName, snapName)
 	if err != nil {
@@ -138,7 +112,16 @@ func snapshotDiffHndl(w http.ResponseWriter, r *http.Request) {
 
 // directory contents for directory given by 'path'
 func listDirHndl(w http.ResponseWriter, r *http.Request) {
-	path, _ := getQueryParameter(r, "path")
+	params, _ := extractParams(r)
+	path, pathFound := params["path"]
+	if !pathFound {
+		respondWithParamMissing(w, "path")
+	}
+
+	if !isUnderZMP(path) {
+		respondWithIllegalRequest(w, r, fmt.Sprintf("path: '%s' not under zfs-mount-point: '%s'", path, zfsMountPoint))
+		return
+	}
 
 	dirEntries, err := ScanDirEntries(path)
 	if err != nil {
@@ -160,7 +143,16 @@ func listDirHndl(w http.ResponseWriter, r *http.Request) {
 
 // read the file given in the query param 'path'
 func readFileHndl(w http.ResponseWriter, r *http.Request) {
-	path, _ := getQueryParameter(r, "path")
+	params, _ := extractParams(r)
+	path, pathFound := params["path"]
+	if !pathFound {
+		respondWithParamMissing(w, "path")
+	}
+
+	if !isUnderZMP(path) {
+		respondWithIllegalRequest(w, r, fmt.Sprintf("path: '%s' not under zfs-mount-point: '%s'", path, zfsMountPoint))
+		return
+	}
 
 	fh, err := NewFileHandle(path)
 
@@ -187,8 +179,18 @@ func readFileHndl(w http.ResponseWriter, r *http.Request) {
 	fh.CopyTo(w)
 }
 
+// file (meta) info
 func fileInfoHndl(w http.ResponseWriter, r *http.Request) {
-	path, _ := getQueryParameter(r, "path")
+	params, _ := extractParams(r)
+	path, pathFound := params["path"]
+	if !pathFound {
+		respondWithParamMissing(w, "path")
+	}
+
+	if !isUnderZMP(path) {
+		respondWithIllegalRequest(w, r, fmt.Sprintf("path: '%s' not under zfs-mount-point: '%s'", path, zfsMountPoint))
+		return
+	}
 
 	fh, err := NewFileHandle(path)
 	if err != nil {
@@ -228,7 +230,62 @@ func serveStaticContentFromBinaryHndl(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
-func getQueryParameter(r *http.Request, name string) (string, bool) {
-	value := r.URL.Query().Get(name)
-	return value, len(value) > 0
+//
+func extractParams(r *http.Request) (map[string]string, error) {
+	params := make(map[string]string)
+
+	if r.Method == "GET" {
+		// extract query params
+		for key, values := range r.URL.Query() {
+			if len(values) > 0 {
+				params[key] = values[0]
+			}
+		}
+		return params, nil
+	}
+
+	if r.Method == "PUT" || r.Method == "POST" {
+		// extract from body if content-type is 'application/json'
+		contentType := r.Header.Get("Content-Type")
+		if strings.HasPrefix(contentType, "application/json") {
+			body, err := ioutil.ReadAll(r.Body)
+			if err != nil {
+				log.Println("unable to read body:", err.Error())
+				return nil, err
+			}
+
+			// abort if body is empty
+			if len(body) == 0 {
+				return nil, errors.New("empty body")
+			}
+
+			if err := json.Unmarshal(body, &params); err != nil {
+				log.Println("unable to parse json:", err.Error())
+				return nil, err
+			}
+			return params, nil
+		}
+	}
+
+	return params, nil
+}
+
+// respond with 400
+func respondWithParamMissing(w http.ResponseWriter, name string) {
+	http.Error(w, fmt.Sprintf("parameter '%s' missing", name), 400)
+}
+
+// respond with 403
+func respondWithIllegalRequest(w http.ResponseWriter, r *http.Request, logMsg string) {
+	http.Error(w, "illegal request", 403)
+	log.Printf("illegal request - url-path: '%s', msg: %s, from client: '%s' -> SHUTDOWN SERVER!",
+		r.URL.Path, logMsg, r.RemoteAddr)
+
+	// trigger shutdown in a goroutine, to give the server time serve the 403 error
+	go os.Exit(1)
+}
+
+// check if given path is under zfs-mount-point
+func isUnderZMP(path string) bool {
+	return strings.HasPrefix(filepath.Clean(path), zfsMountPoint)
 }
