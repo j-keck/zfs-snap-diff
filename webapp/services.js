@@ -4,19 +4,19 @@ zsd.factory('HTTPActivityInterceptor', ['$q', '$rootScope', '$timeout', function
   return {
     'request': function(config){
       activityCounter++;
-      $rootScope.$broadcast('http-activity', activityCounter);
+      $rootScope.$broadcast('zsd:http-activity', activityCounter);
 
       return config
     },
     'response': function(response){
       activityCounter--;
-      $rootScope.$broadcast('http-activity', activityCounter);
+      $rootScope.$broadcast('zsd:http-activity', activityCounter);
 
       return response;
     },
     'responseError': function(rejection){
       activityCounter--;
-      $rootScope.$broadcast('http-activity', activityCounter);
+      $rootScope.$broadcast('zsd:http-activity', activityCounter);
       
       return $q.reject(rejection);      
     }
@@ -26,7 +26,7 @@ zsd.factory('HTTPActivityInterceptor', ['$q', '$rootScope', '$timeout', function
 zsd.factory('HTTPErrorInterceptor', ['$q', '$rootScope', function($q, $rootScope){
   return {
     'responseError': function(rejection){
-      $rootScope.$broadcast('response-error', rejection);
+      $rootScope.$broadcast('zsd:error', rejection.data);
       return $q.reject(rejection);      
     }
   };

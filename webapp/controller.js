@@ -5,8 +5,8 @@ zsd.controller('MainCtrl', ['$location', '$rootScope', '$timeout', 'Config', fun
     self.config = Config.config();
   });
 
-  $rootScope.$on('response-error', function(event, args){
-    self.error = args.data;
+  $rootScope.$on('zsd:error', function(event, msg){
+    self.error = msg;
   });
 
   $rootScope.$on('zsd:warning', function(event, msg){
@@ -14,7 +14,7 @@ zsd.controller('MainCtrl', ['$location', '$rootScope', '$timeout', 'Config', fun
   });
   
 
-  $rootScope.$on('http-activity', function(event, args){
+  $rootScope.$on('zsd:http-activity', function(event, args){
     // first http request pending
     if(typeof self.timeoutHndl === 'undefined'){
       // delayed - only show spinner when duration > 'delay'
