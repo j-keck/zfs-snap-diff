@@ -1,4 +1,4 @@
-var zsd = angular.module('ZFSSnapDiff', ['ngRoute', 'ngSanitize', 'ngAnimate']);
+var zsd = angular.module('ZFSSnapDiff', ['ngRoute', 'ngSanitize', 'ngAnimate', 'zsdControllers', 'zsdUtils', 'zsdServices', 'zsdDirectives']);
 
 zsd.config(['$routeProvider', function($routeProvider){
   $routeProvider.

@@ -1,4 +1,7 @@
-zsd.factory('FileUtils', ['Backend', function(Backend){
+angular.module('zsdUtils', ['zsdServices']).
+
+// FileUtils
+factory('FileUtils', ['Backend', function(Backend){
   var comparableMimeTypePrefixes = ["text"];
   var viewableMimeTypePrefixes = ["text", "image", "application/pdf"];
 
@@ -35,10 +38,11 @@ zsd.factory('FileUtils', ['Backend', function(Backend){
       })
     }
   }
-}]);
+}]).
 
 
-zsd.factory('PathUtils', ['Config', function(Config){
+// PathUtils
+factory('PathUtils', ['Config', function(Config){
   return {
     convertToSnapPath: function(path, snapName){
       var relativePath = path.substring(Config.get('ZFSMountPoint').length)
@@ -87,12 +91,12 @@ zsd.factory('PathUtils', ['Config', function(Config){
       return newEntries;
     }
 
-   
+    
   }
-}]);
+}]).
 
 
-zsd.factory('StringUtils', function(){
+factory('StringUtils', function(){
   return {
     trimPrefix: function(s, prefix){
       if(s.indexOf(prefix) === 0){

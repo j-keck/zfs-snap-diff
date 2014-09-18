@@ -1,4 +1,6 @@
-zsd.directive('zsdFileActions', ['$window', '$sce', '$rootScope', 'FileUtils', 'Backend', 'Difflib', 'PathUtils', 'Config', function($window, $sce, $rootScope, FileUtils, Backend, Difflib, PathUtils, Config){
+angular.module('zsdDirectives', ['zsdUtils', 'zsdServices']).
+  
+directive('zsdFileActions', ['$window', '$sce', '$rootScope', 'FileUtils', 'Backend', 'Difflib', 'PathUtils', 'Config', function($window, $sce, $rootScope, FileUtils, Backend, Difflib, PathUtils, Config){
   return {
     restrict: 'E',
     templateUrl: 'template-file-actions.html',
@@ -139,13 +141,13 @@ zsd.directive('zsdFileActions', ['$window', '$sce', '$rootScope', 'FileUtils', '
       }
     }
   }
-}]);
+}]).
 
 
 
 
 
-zsd.directive('zsdSnapshots', ['$location', '$anchorScroll', function($location, $anchorScroll){
+directive('zsdSnapshots', ['$location', '$anchorScroll', function($location, $anchorScroll){
   return {
     restrict: 'E',
     templateUrl: 'template-snapshots.html',
@@ -202,7 +204,7 @@ zsd.directive('zsdSnapshots', ['$location', '$anchorScroll', function($location,
       }
     }
   };
-}]);
+}]).
 
 
 
@@ -210,7 +212,7 @@ zsd.directive('zsdSnapshots', ['$location', '$anchorScroll', function($location,
 
 
 // https://github.com/angular/angular.js/issues/339
-zsd.directive('zsdEmbedSrc', function () {
+directive('zsdEmbedSrc', function () {
   return {
     restrict: 'A',
     link: function (scope, element, attrs) {
@@ -224,13 +226,13 @@ zsd.directive('zsdEmbedSrc', function () {
       });
     }
   };
-});
+}).
 
 
 
 
 
-zsd.directive('zsdDirBrowser', ['Backend', 'PathUtils', function(Backend, PathUtils){
+directive('zsdDirBrowser', ['Backend', 'PathUtils', function(Backend, PathUtils){
   return {
     restrict: 'E',
     templateUrl: 'template-dir-browser.html',

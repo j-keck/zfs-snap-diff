@@ -1,4 +1,6 @@
-zsd.factory('HTTPActivityInterceptor', ['$q', '$rootScope', '$timeout', function($q, $rootScope, $timeout){
+angular.module('zsdServices', []).
+
+factory('HTTPActivityInterceptor', ['$q', '$rootScope', '$timeout', function($q, $rootScope, $timeout){
   var activityCounter = 0;
   var timeoutHandlers = [];
   return {
@@ -21,19 +23,19 @@ zsd.factory('HTTPActivityInterceptor', ['$q', '$rootScope', '$timeout', function
       return $q.reject(rejection);      
     }
   };
-}]);
+}]).
 
-zsd.factory('HTTPErrorInterceptor', ['$q', '$rootScope', function($q, $rootScope){
+factory('HTTPErrorInterceptor', ['$q', '$rootScope', function($q, $rootScope){
   return {
     'responseError': function(rejection){
       $rootScope.$broadcast('zsd:error', rejection.data);
       return $q.reject(rejection);      
     }
   };
-}]);
+}]).
 
 
-zsd.factory('Config', ["$http", function($http){
+factory('Config', ["$http", function($http){
   var config;
   var promise = $http.get('config').then(function(res){
     config = res.data;
@@ -49,8 +51,9 @@ zsd.factory('Config', ["$http", function($http){
       return config[key]
     }
   };
-}]);
-zsd.factory('Backend', ["$http", "Config", function($http, Config){
+}]).
+  
+factory('Backend', ["$http", "Config", function($http, Config){
   return {
     listSnapshots: function(whereFileModified){
       var params = {};
@@ -90,10 +93,10 @@ zsd.factory('Backend', ["$http", "Config", function($http, Config){
       })
     }
   }
-}]);
+}]).
 
 
-zsd.factory('Difflib', ['Config', 'Backend', function(Config, Backend){
+factory('Difflib', ['Config', 'Backend', function(Config, Backend){
   return {
     diffText: function(actualContent, snapName, snapContent){
       var actualLines = difflib.stringAsLines(actualContent);

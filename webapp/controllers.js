@@ -1,4 +1,6 @@
-zsd.controller('MainCtrl', ['$location', '$rootScope', '$timeout', 'Config', function($location, $rootScope, $timeout, Config){
+angular.module('zsdControllers', ['zsdServices', 'zsdUtils']).
+  
+controller('MainCtrl', ['$location', '$rootScope', '$timeout', 'Config', function($location, $rootScope, $timeout, Config){
   var self = this;
   
   Config.promise.then(function(){
@@ -37,12 +39,12 @@ zsd.controller('MainCtrl', ['$location', '$rootScope', '$timeout', 'Config', fun
     return {active: $location.path() === path};
   };
 
-}]);
+}]).
 
 
 
 
-zsd.controller('BrowseActualCtrl', ['Backend', 'PathUtils', function(Backend, PathUtils){
+controller('BrowseActualCtrl', ['Backend', 'PathUtils', function(Backend, PathUtils){
   var self = this;
 
   self.fileSelected = function(entries){
@@ -68,12 +70,12 @@ zsd.controller('BrowseActualCtrl', ['Backend', 'PathUtils', function(Backend, Pa
     self.curSnap = snap;
   };
 
-}]);
+}]).
 
 
 
 
-zsd.controller('BrowseSnapshotsCtrl', ['Backend', 'PathUtils', function(Backend, PathUtils){
+controller('BrowseSnapshotsCtrl', ['Backend', 'PathUtils', function(Backend, PathUtils){
   var self = this;
 
   Backend.listSnapshots().then(function(snapshots){
@@ -104,12 +106,12 @@ zsd.controller('BrowseSnapshotsCtrl', ['Backend', 'PathUtils', function(Backend,
     delete self.curPath;
   };
 
-}]);
+}]).
 
 
 
 
-zsd.controller('BrowseSnapshotDiffCtrl', ['Backend', function(Backend){
+controller('BrowseSnapshotDiffCtrl', ['Backend', function(Backend){
   var self = this;
 
   Backend.listSnapshots().then(function(snapshots){
