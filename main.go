@@ -28,7 +28,6 @@ func main() {
 	listenOnAllInterfacesFlag := flag.Bool("a", false, "listen on all interfaces")
 	printVersionFlag := flag.Bool("V", false, "print version and exit")
 	// frontend
-	maxFileSizeFlag := flag.Int("max-file-size", 100*1024*1024, "max file size for inline view")
 	diffContextSizeFlag := flag.Int("diff-context-size", 5, "context size in diff")
 
 	flag.Parse()
@@ -73,7 +72,6 @@ func main() {
 	// frontend-config
 	frontendConfig := FrontendConfig{
 		zfsMountPoint,
-		*maxFileSizeFlag,
 		*diffContextSizeFlag,
 	}
 
