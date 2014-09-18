@@ -52,6 +52,28 @@ describe('FileUtils', function(){
   });
 
 
+  // whenIsViewable
+  describe('whenIsViewable', function(){
+    it('should execute the given function when its a viewable file', inject(function(FileUtils){
+      var executed = false;
+      FileUtils.whenIsViewable("text-file", function(){
+        executed = true;
+      });
+      rootScope.$apply();
+      expect(executed).toEqual(true);
+    }));
+
+    it('should NOT execute the given function when its no viewable file', inject(function(FileUtils){
+      var executed = false;
+      FileUtils.whenIsViewable("video-file", function(){
+        executed = true;
+      });
+      rootScope.$apply();
+      expect(executed).toEqual(false);
+    }));
+  });
+
+
 
   // isComparable
   describe('isComparable', function(){
@@ -76,5 +98,27 @@ describe('FileUtils', function(){
       rootScope.$apply();    
     }));
   });
+
+  // whenIsComparable
+  describe('whenIsComparable', function(){
+    it('should execute the given function when its a comparable file', inject(function(FileUtils){
+      var executed = false;
+      FileUtils.whenIsComparable("text-file", function(){
+        executed = true;
+      });
+      rootScope.$apply();
+      expect(executed).toEqual(true);
+    }));
+
+    it('should NOT execute the given function when its no comparable file', inject(function(FileUtils){
+      var executed = false;
+      FileUtils.whenIsComparable("video-file", function(){
+        executed = true;
+      });
+      rootScope.$apply();
+      expect(executed).toEqual(false);
+    }));
+  });
+  
   
 });

@@ -12,12 +12,22 @@ zsd.factory('FileUtils', ['Backend', function(Backend){
         }).length > 0
       });
     },
+    whenIsViewable: function(path, f){
+      this.isViewable(path).then(function(isViewable){
+        if(isViewable) f();
+      });
+    },
     isComparable: function(path){
       return Backend.fileInfo(path).then(function(fi){
         return comparableMimeTypePrefixes.filter(function(prefix){
           return fi.MimeType.indexOf(prefix) >= 0;
         }).length > 0
       })
+    },
+    whenIsComparable: function(path, f){
+      this.isComparable(path).then(function(isComparable){
+        if(isComparable) f();
+      });
     },
     isText: function(path){
       return Backend.fileInfo(path).then(function(fi){
