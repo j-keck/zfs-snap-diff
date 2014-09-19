@@ -38,7 +38,7 @@ func listenAndServe(addr string, frontendConfig FrontendConfig) {
 	} else {
 		http.HandleFunc("/", serveStaticContentFromBinaryHndl)
 	}
-	http.ListenAndServe(addr, nil)
+	log.Fatal(http.ListenAndServe(addr, nil))
 }
 
 // frontend-config
