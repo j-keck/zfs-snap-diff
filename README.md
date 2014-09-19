@@ -1,20 +1,21 @@
 # Background
   
 I make every 5 minutes a snapshot (keep it for 1 day) and once a day for long term (keep it for one month) from my home partition on a ZFS filesystem.
-If i messed up a file, i need to search a clean state from the file in the snapshots - not always easy if don't realize it directly.
+If i messed up a file, i need to search a clean state from the file in the snapshots - not always easy if i don't realize it directly.
 
 `zfs-snap-diff` is a little tool to help me for such cases.
 
 
 # Description
 
-With `zfs-snap-diff` you can explore file differences from different zfs snapshots.
+With `zfs-snap-diff` you can explore file differences from different zfs snapshots to the actual file version or browse in old snapshots.
 
   
 `zfs-snap-diff` has a web frontend, so it can run on your local work machine or on your remote file / backup server (no Xserver necesarry).
 
 To keep it protable and independent, it's made as a single executable with all html / js stuff included.
-The backend is implemented in golang, the frontend with [angularjs](https://angularjs.org), [bootstrap](http://getbootstrap.com) and [jsdifflib](https://github.com/cemerick/jsdifflib).
+The backend is implemented in golang, the frontend with [angularjs](https://angularjs.org), [bootstrap](http://getbootstrap.com) ,[jsdifflib](https://github.com/cemerick/jsdifflib) 
+and [highlight.js](https://github.com/isagalaev/highlight.js).
 
 
   
@@ -25,13 +26,31 @@ The backend is implemented in golang, the frontend with [angularjs](https://angu
 #Usage
 
 
-### Startup a server instance
+## Startup a server instance
 
-      ./zfs_snap_diff <ZFS_NAME>
+      ./zfs-snap-diff [OPT_ARGS] <ZFS_NAME>
+  
+  * starts a web server on port http://127.0.0.1:12345
+  * optional arguments:
+    * -a: listen on all interfaces
+    * -default-file-action: default file action when a file is selected:
+      * off: no action
+      * view: view the file from the given snapshot
+      * diff: diff the file from the given snapshot with the actual version
+      * download: download the file from the given snapshot
+      * restore: restore the file from the given snapshot
+    * -diff-context-size: context size in diff
+    * -p: web server port
 
-### Connect with your web browser
+  
+
+## Connect with your web browser
 
       http://localhost:12345
+
+
+  
+## Browse actual filesystem state 
 
 ### Search a file
   
@@ -39,6 +58,8 @@ Search a file in the file browser.
     
 ![File browser](doc/zsd-file-browser.png)
 
+
+  
 ### Select a file
 
 When a file is selected, `zsd-snap-diff` search all snapshots where the selected file was modified (currently it compares only mod-time and file-size).
@@ -49,24 +70,44 @@ When a file is selected, `zsd-snap-diff` search all snapshots where the selected
 
 ### Select a snapshot
 
+When you select a snapshot, you can view, diff, download or restore the selected file.
 
-When you select a snapshot, and
+#### View
+![File View](doc/zsd-snap-selected-view-file.png)
 
-  * the file size is > 100MB: it downloads the selected file
-  * the file is a text file: it shows a diff from the selected snapshot to the current state
-  * the file is a binary file: it embed the file (per embed tag)
-
-![File Diff](doc/zsd-snap-selected.png)  
-
+#### Diff
+![File Diff](doc/zsd-snap-selected-diff-file.png)    
 
 
+## Browse snapshot state
+
+### Search a snaphot
+
+Search a snapshot in the snapshot browser. All snapshots are displayed in this view.
+  
+![Snapshot Browser](doc/zsd-snapshots.png)
+
+
+### Select a snapshot
+
+When a snapshot is selected, the file-browser shows the content from this snapshot.
+From here you can easy restore / view a deleted file.
+  
+![File Browser](doc/zsd-snapshots-file-browser.png)
+
+
+  
 #Notes
 
   * if you download a file from a snapshot, the generated file name has the snapshot name included:
 
         <ORG_FILE_NAME>-<SNAPSHOT_NAME>.<FILE_SUFFIX>
+
+  * if you restore a file, the orginal file will be renamed as:
+
+        <ORG_FLILE_NAME><TIMESTAMP>
   
-  * for snapshot differences, you need to set the diff permission:
+  * for snapshot differences (Browse snapshot diff), you need to set the diff permission:
 
         zfs allow -u <USER_NAME> diff <ZFS_NAME>
 
@@ -74,8 +115,15 @@ When you select a snapshot, and
   
 
 
+# Installation
   
-# Build:
+## Prebuild
+
+  Get a package for your platform from: https://github.com/j-keck/zfs-snap-diff/releases/latest
+
+ *ping me if your platform is missing*
+    
+## Manual build
 
   * clone the repository
 
@@ -103,25 +151,17 @@ When you select a snapshot, and
 
 
   
-# Run:
-  
-        ./zfs-snap-diff <ZFS_NAME> 
-
-  * starts a web server on port http://127.0.0.1:12345
-  * check `-h` for currently supported parameters
-
-
-### for dev:
-  
-        ZSD_SERVE_FROM_WEBAPP=YES ./zfs-snap-diff <ZFS_NAME> 
-
-  * serve static content from webapp dir
-
-
-  
 # Changelog
 
 ###0.0.X###
+0.0.4:
+  * view, diff, download or restore file from a snapshot
+  * view file with syntax highlight
+  * browse old snapshot versions
+  * easy switch "versions" per 'Older' / 'Newer' buttons
+  * cleanup frontend
+  * refactor backend
+  
 0.0.3:
   * show server errors on frontend
   * show waiting spinner when loading
