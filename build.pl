@@ -39,7 +39,7 @@ for my $os(<freebsd linux>){
         system($cmd) && die "build error";
 
         # pack it
-        zip "zfs-snap-diff" => "build-output/zfs-snap-diff-${version}-${os}-${arch}.zip" || die "zip failed: $ZipError\n";
+        zip ["zfs-snap-diff", "LICENSE"] => "build-output/zfs-snap-diff-${version}-${os}-${arch}.zip" || die "zip failed: $ZipError\n";
 
         # delete org binary
         unlink "zfs-snap-diff" || die $!;
