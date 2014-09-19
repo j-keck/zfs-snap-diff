@@ -5,9 +5,9 @@ import (
 )
 
 var snapshots = ZFSSnapshots{
-	ZFSSnapshot{"snap1", "t1"},
-	ZFSSnapshot{"snap2", "t2"},
-	ZFSSnapshot{"SNAP3", "T3"},
+	ZFSSnapshot{"snap1", "t1", "/path/.zfs/snapshot/snap1"},
+	ZFSSnapshot{"snap2", "t2", "/path/.zfs/snapshot/snap1"},
+	ZFSSnapshot{"SNAP3", "T3", "/path/.zfs/snapshot/snap1"},
 }
 
 func TestReverse(t *testing.T) {
