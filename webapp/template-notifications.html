@@ -1,0 +1,22 @@
+<div ng-repeat="notification in notifications">
+  
+  <!-- error -->
+  <div class="container alert alert-danger animate-show" ng-show="notification.type === 'error'">
+    <span class="glyphicon glyphicon-remove" ng-click="removeMessage(notification.id)"></span>
+    {{notification.msg}}
+  </div>
+
+  <!-- warning -->
+  <div class="container alert alert-warning animate-show" ng-show="notification.type === 'warning'">
+    <span class="glyphicon glyphicon-remove" ng-click="removeMessage(notification.id)"></span>
+    {{notification.msg}}
+  </div>
+
+  <!-- success -->
+  <div class="container alert alert-success animate-show" ng-show="notification.type === 'success'">
+    <span class="glyphicon glyphicon-remove" ng-click="removeMessage(notification.id)"></span>
+    {{notification.msg}}
+  </div>
+
+</div>
+

@@ -33,25 +33,9 @@
     </div>
 
 
-    <!-- error -->
-    <div class="container alert alert-danger" ng-show="mainCtrl.error">
-      <span class="glyphicon glyphicon-remove" ng-click="mainCtrl.error = ''"></span>
-      {{mainCtrl.error}}
-    </div>
 
-    <!-- warning -->
-    <div class="container alert alert-warning" ng-show="mainCtrl.warning">
-      <span class="glyphicon glyphicon-remove" ng-click="mainCtrl.warning = ''"></span>
-      {{mainCtrl.warning}}
-    </div>
-
-    <!-- success -->
-    <div class="container alert alert-success" ng-show="mainCtrl.success">
-      <span class="glyphicon glyphicon-remove" ng-click="mainCtrl.success = ''"></span>
-      {{mainCtrl.success}}
-    </div>
-
-    
+    <!-- notificatons - success, warnings or errors -->
+    <notifications timeout="5000" class="container"></notifications>
 
     
     <!-- loading spinner -->

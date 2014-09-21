@@ -404,6 +404,55 @@ directive('zsdModal', [function(){
     template: "<div class='zsd-modal' ng-show='show'>\n <div class='zsd-modal-overlay'></div>\n <div class='zsd-modal-dialog panel panel-default' ng-style='dialogStyle'>\n <div class='zsd-modal-dialog-content' ng-transclude></div>\n</div>\n</div>"
     
   }
-}]);
+}]).
+
+
+
+
+
+// notifications from $rootScope
+//   * react on 'zsd:error', 'zsd:warning' and 'zsd.success'
+directive('notifications', ['$rootScope', '$timeout', function($rootScope, $timeout){
+  return {
+    restrict: 'E',
+    scope: {
+      // timeout after the message is removed
+      timeout: '@'
+    },
+    link: function(scope, element, attrs){
+      scope.notifications = [];
+      scope.idCounter = 0;
+      
+      $rootScope.$on('zsd:error', function(event, msg){
+        addMessage('error', msg);
+      });
+
+      $rootScope.$on('zsd:warning', function(event, msg){
+        addMessage('warning', msg);
+      });
+
+      $rootScope.$on('zsd:success', function(event, msg){
+        addMessage('success', msg);
+      });
+
+      scope.removeMessage = function(id){
+        scope.notifications = scope.notifications.filter(function(n){return n.id !== id});
+      }
+
+      function addMessage(type, msg){
+        var id = scope.idCounter++;
+        scope.notifications.push({id: id, type: type, msg: msg})
+
+        // auto-remove old messages only when 'timeout' are given
+        if(angular.isDefined(scope.timeout)){
+          $timeout(function(){
+            scope.removeMessage(id);
+          }, scope.timeout);
+        }
+      }
+    },
+    templateUrl: "template-notifications.html"
+  }
+}])
 
 
