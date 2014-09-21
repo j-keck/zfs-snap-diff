@@ -28,8 +28,20 @@ factory('HTTPActivityInterceptor', ['$q', '$rootScope', '$timeout', function($q,
 factory('HTTPErrorInterceptor', ['$q', '$rootScope', function($q, $rootScope){
   return {
     'responseError': function(rejection){
-      $rootScope.$broadcast('zsd:error', rejection.data);
-      return $q.reject(rejection);      
+
+
+      if(rejection.config.responseType === 'blob'){
+        // convert message to string if result type is a blob and broadcast the error
+        var reader = new FileReader();
+        reader.readAsBinaryString(rejection.data);
+        reader.onloadend = function(){
+          $rootScope.$broadcast('zsd:error', reader.result);
+        }
+      }else{
+        // already text - broadcast the error
+        $rootScope.$broadcast('zsd:error', rejection.data);
+      }
+      return $q.reject(rejection);                      
     }
   };
 }]).
