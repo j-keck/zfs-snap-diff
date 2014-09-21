@@ -370,6 +370,9 @@
     "@hr-border": "@gray-lighter"
   },
   "css": [
+    "print.less",
+    "type.less",
+    "code.less",
     "grid.less",
     "tables.less",
     "forms.less",
@@ -384,8 +387,9 @@
     "labels.less",
     "alerts.less",
     "list-group.less",
-    "panels.less"
+    "panels.less",
+    "close.less"
   ],
   "js": [],
-  "customizerUrl": "http://getbootstrap.com/customize/?id=9aa8ae62f63314b5e26f"
+  "customizerUrl": "http://getbootstrap.com/customize/?id=cb6fcc4a3b02e14bb9d2"
 }
