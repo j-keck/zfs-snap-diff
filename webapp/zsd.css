@@ -6,6 +6,7 @@ body{
     cursor: pointer;
 }
 
+
 /* center diff table */
 table.diff {
     margin-right: auto;
@@ -13,7 +14,7 @@ table.diff {
 }
 
 
-
+/* animations */
 .animate-show {
     line-height:20px;
     opacity:1;
@@ -32,6 +33,8 @@ table.diff {
     opacity:0;
     padding:0 10px;
 }
+/* end animations */
+
 
 
 
