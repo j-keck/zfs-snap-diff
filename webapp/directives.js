@@ -252,7 +252,46 @@ directive('zsdEmbedSrc', function () {
 }).
 
 
+// zsd-show-if-defined is like ng-show but:
+//  * shows content if 'angular.isDefined' returns true
+//  * empty strings, lists or objects are defined
+//    (not so with ng-show)
+directive('zsdShowIfDefined', function(){
+  return {
+    restrict: 'A',
+    link: function(scope, element, attrs){
+      scope.$watch(function(){ return scope.$eval(attrs.zsdShowIfDefined)}, function(value){
+        if(angular.isDefined(value)){
+          attrs.$removeClass('hide');          
+        }else{
+          attrs.$addClass('hide');
+        }
+      });
+    }
+  }
+}).
 
+
+// zsd-show-if-empty is like ng-show but:
+//  * shows content if 'angular.isDefined' returns true and value.length == 0
+//     -> value is undefined: hide content
+//     -> value is defined but empty: show content
+//     -> value is defined and not empty: hide content
+//  * usable for notifications like 'no xxx found'
+directive('zsdShowIfEmpty', function(){
+  return {
+    restrict: 'A',
+    link: function(scope, element, attrs){
+      scope.$watch(function(){ return scope.$eval(attrs.zsdShowIfEmpty)}, function(value){
+        if(angular.isDefined(value) && value.length == 0){
+          attrs.$removeClass('hide');          
+        }else{
+          attrs.$addClass('hide');
+        }
+      });
+    }
+  }
+}).
 
 
 directive('zsdDirBrowser', ['Backend', 'PathUtils', function(Backend, PathUtils){
