@@ -96,11 +96,11 @@ directive('zsdFileActions', ['$window', '$sce', '$rootScope', 'FileUtils', 'Back
                      'download': scope.downloadFile,
                      'restore': scope.restoreFile};
       
-      var defaultAction = Config.get('DefaultFileAction');
-      if(defaultAction in actions){
-        scope.lastAction = actions[Config.get('DefaultFileAction')];
+      var defaultFileAction = Config.get('defaultFileAction');
+      if(defaultFileAction in actions){
+        scope.lastAction = actions[defaultFileAction];
       }else{
-        $rootScope.$broadcast('zsd:warning', 'Invalid "default-file-action": "'+ defaultAction +'"');
+        $rootScope.$broadcast('zsd:warning', 'Invalid "default-file-action": "'+ defaultFileAction +'"');
         scope.lastAction = actions['off'];
       }
       

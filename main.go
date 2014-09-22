@@ -15,6 +15,9 @@ var (
 	zfsMountPoint string
 )
 
+// FrontendConfig hold the configuration for the ui
+type FrontendConfig map[string]interface{}
+
 func main() {
 	// formate help
 	flag.Usage = func() {
@@ -72,9 +75,9 @@ func main() {
 
 	// frontend-config
 	frontendConfig := FrontendConfig{
-		zfsMountPoint,
-		*diffContextSizeFlag,
-		*defaultFileActionFlag,
+		"zfsMountPoint":     zfsMountPoint,
+		"diffContextSize":   *diffContextSizeFlag,
+		"defaultFileAction": *defaultFileActionFlag,
 	}
 
 	// startup web server

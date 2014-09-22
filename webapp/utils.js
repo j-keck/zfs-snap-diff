@@ -27,12 +27,12 @@ factory('FileUtils', [function(){
 factory('PathUtils', ['Config', function(Config){
   return {
     convertToSnapPath: function(path, snapName){
-      var relativePath = path.substring(Config.get('ZFSMountPoint').length)
-      return Config.get('ZFSMountPoint') + "/.zfs/snapshot/" + snapName + relativePath;
+      var relativePath = path.substring(Config.get('zfsMountPoint').length)
+      return Config.get('zfsMountPoint') + "/.zfs/snapshot/" + snapName + relativePath;
     },
     
     convertToActualPath: function(path){
-      var mountPoint = Config.get('ZFSMountPoint');
+      var mountPoint = Config.get('zfsMountPoint');
       var snapName = this.extractSnapName(path);
 
       var prefix = mountPoint + "/.zfs/snapshot/" + snapName;
@@ -45,7 +45,7 @@ factory('PathUtils', ['Config', function(Config){
       var pathElements = path.split('/');
 
       // remove mount point path-prefix
-      for(var _ in Config.get('ZFSMountPoint').split('/')){
+      for(var _ in Config.get('zfsMountPoint').split('/')){
         pathElements.shift();
       }
 

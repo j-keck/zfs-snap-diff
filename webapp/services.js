@@ -127,7 +127,7 @@ factory('Difflib', ['Config', 'Backend', function(Config, Backend){
         newTextName: "Actual Version",
         newTextLines: actualLines,
         opcodes: sm.get_opcodes(),
-        contextSize: Config.get("DiffContextSize"),
+        contextSize: Config.get("diffContextSize"),
         viewType: 0 }).outerHTML;
     },
 
