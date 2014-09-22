@@ -1,4 +1,5 @@
 
+<!-- restore file confirmation dialog --> 
 <zsd-modal show="showRestoreFileConfirmation">
   <div class="panel panel-heading">
     <span class="alert alert-warning" role="alert">
@@ -8,15 +9,12 @@
   <div class="panel panel-body">
     Replace the actual file under {{actualPath}} with an <strong>old</strong> version <br/>
     from the snapshot {{curSnap.Name}}?</div>
-
   <button type="button" class="btn btn-default" ng-click="hideRestoreFileConfirmation()"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
   <button type="button" class="btn btn-default btn-success" ng-click="restoreFileAcked()"><span class="glyphicon glyphicon-ok"></span> OK</button>
 </zsd-modal>
 
-  
-  
-    
 
+<!-- action buttons -->
 <div class="btn-group">
   <button type="button"
           class="btn btn-primary"
@@ -52,6 +50,7 @@
      ng-bind-html="fileDiff"
      ng-show="fileDiff"></div>
 
+
 <!-- text file content -->
 <div class="panel panel-default center-block" ng-show="textFileContent">
   <div class="panel-heading">{{curSnap.Name}}</div>
@@ -60,12 +59,13 @@
 
 
 <!-- embedded binary content -->
+<!-- FIXME: remove / fix styles (grml frontend is not my world!) -->
 <div class="panel panel-default center-block" ng-show="binaryFileContent">
   <div class="panel-heading">{{curSnap.Name}}</div>
-  <div class="pandel-body" style="width: 90%">
+  <div class="pandel-body" style="width: 90%; height: 100%">
     <embed embed-src="{{binaryFileContent}}"
            ng-src="{{binaryFileContent}}"
            class="panel-body"
-           style="width:100%;height:100%"></embed>
+           style="width:100%;height:800px"></embed>
   </div>
 </div>
