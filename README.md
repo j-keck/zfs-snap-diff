@@ -32,15 +32,25 @@ and [highlight.js](https://github.com/isagalaev/highlight.js).
   
   * starts a web server on port http://127.0.0.1:12345
   * optional arguments:
-    * -a: listen on all interfaces
-    * -default-file-action: default file action when a file is selected:
+    * -a: listen on all interfaces (default: listen only on localhost)
+    * -p: web server port (default: 12345)
+    * -default-file-action: file action when a file is selected (default: view):
       * off: no action
       * view: view the file from the given snapshot
       * diff: diff the file from the given snapshot with the actual version
       * download: download the file from the given snapshot
       * restore: restore the file from the given snapshot
-    * -diff-context-size: context size in diff
-    * -p: web server port
+    * -diff-context-size: context size in diff (default: 5)
+    * -scan-snap-limit: limit how many snapshots are scan to search older file version (default: scan all)
+      * negative limit: scan all snapshots
+      * recommended if you have many snapshots
+    * -compare-file-method: compare method when searching in snapshots for other file versions (default: size+modTime)
+      * supported methods:
+        * size+modTime: compares per size and modification time (very cheap)
+        * size: compares per size (very cheap)
+        * md5: compares per md5 (VERY EXPENSIVE! combine it with '-scan-snap-limit' and use it only for text files!)
+      * use size or md5 when you work on files in a scm where you switch branches (this updates the file modTime).
+
 
   
 
@@ -62,7 +72,7 @@ Search a file in the file browser.
   
 ### Select a file
 
-When a file is selected, `zsd-snap-diff` search all snapshots where the selected file was modified (currently it compares only mod-time and file-size).
+When a file is selected, `zsd-snap-diff` search all snapshots where the selected file was modified (default: size+modTime, optional: size or md5).
     
 ![File selected](doc/zsd-file-selected.png)
   
@@ -105,7 +115,7 @@ From here you can easy restore / view a deleted file.
 
   * if you restore a file, the orginal file will be renamed as:
 
-        <ORG_FLILE_NAME><TIMESTAMP>
+        <ORG_FLILE_NAME>_<TIMESTAMP>
   
   * for snapshot differences (Browse snapshot diff), you need to set the diff permission:
 
@@ -154,6 +164,13 @@ From here you can easy restore / view a deleted file.
 # Changelog
 
 ###0.0.X###
+  
+0.0.5:
+  * file compare method configurable: size+modTime (default) or md5
+  * optional limit how many snapshots are scan to search older file version
+  * autohide messages in frontend
+  * show message if no snapshots found
+  
 0.0.4:
   * view, diff, download or restore file from a snapshot
   * view file with syntax highlight
@@ -169,7 +186,6 @@ From here you can easy restore / view a deleted file.
 0.0.2 :
   * partial frontend configuration from server
   * fix firefox ui
-
 
 0.0.1:
   * prototype  
