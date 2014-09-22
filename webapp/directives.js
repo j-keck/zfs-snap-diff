@@ -5,163 +5,182 @@ directive('zsdFileActions', ['$window', '$sce', '$rootScope', 'FileUtils', 'Back
     restrict: 'E',
     templateUrl: 'template-file-actions.html',
     scope:{
-      path: "=",
-      pathFrom: "@",
+      fromActualPath: "=",
+      fromSnapPath: "=",
       curSnap: "="
     },
     link: function(scope, element, attrs){
+
+      // ********************************************************************************
+      // scope actions
+      // 
+
+      
+      // view the file content from the selected snapshot
       scope.viewFile = function viewFile(){
         scope.lastAction = scope.viewFile;
-        delete scope.fileDiff;
-        delete scope.binaryFileContent;
-
-        var path = getSnapPath();
-        FileUtils.whenIsViewable(path, function(){
-          FileUtils.isText(path).then(function(isText){
-            if(isText){
-              Backend.readTextFile(path).then(function(res){
-                // apply syntax highlight
-                var hljsRes = hljs.highlightAuto(res);
-                scope.textFileContent = hljsRes.value;
-              });
-            }else{
-              Backend.readBinaryFile(path).then(function(res){
-                var url = URL.createObjectURL(res);
-                scope.binaryFileContent = $sce.trustAsResourceUrl(url);              
-              });
-            }
+        
+        if(FileUtils.isText(scope.fileInfo)){
+          Backend.readTextFile(scope.pathInSnap).then(function(res){
+            clearOthersButKeep('textFileContent');
+            
+            // apply syntax highlight
+            var hljsRes = hljs.highlightAuto(res);
+            scope.textFileContent = hljsRes.value;
           });
-        });
+        }else{
+          Backend.readBinaryFile(scope.pathInSnap).then(function(res){
+            clearOthersButKeep('binaryFileContent');
+            
+            var url = URL.createObjectURL(res);
+            scope.binaryFileContent = $sce.trustAsResourceUrl(url);              
+          });
+        }
       }
-      
+
+      // compare the file content from the selected snapshot with the actual state
       scope.compareFile = function compareFile(){
         scope.lastAction = scope.compareFile;
-        delete scope.textFileContent;
-        delete scope.binaryFileContent;
 
-        FileUtils.whenIsComparable(getSnapPath(), function(){
-          var actualPath, snapPath;
-          if(scope.pathFrom === 'actual'){
-            actualPath = scope.path;
-            snapPath = PathUtils.convertToSnapPath(actualPath, scope.curSnap.Name);
-          }else if(scope.pathFrom === 'snapshot'){
-            snapPath = scope.path;
-            actualPath = PathUtils.convertToActualPath(snapPath);
-          }else{
-            throw 'Invalid "path-from": ' + scope.pathFrom;
-          }
+        Difflib.diffFiles(scope.pathInActual, scope.curSnap.Name, scope.pathInSnap).then(function(diff){
+          clearOthersButKeep('fileDiff');
           
-          Difflib.diffFiles(actualPath, scope.curSnap.Name, snapPath).then(function(diff){
-            scope.fileDiff = diff;
-          });
+          scope.fileDiff = diff;
         });
       };
-        
+
+      // download the file from the selected snapshot
       scope.downloadFile = function downloadFile(){
-        $window.location = "/read-file?path="+getSnapPath();
+        $window.location = "/read-file?path=" + scope.pathInSnap;
       };
 
-      
+
+      // show restore confirmation
       scope.restoreFile = function restoreFile(){
-        // save actual-path in the scope for the ui
-        scope.actualPath = getActualPath();
-        
         scope.showRestoreFileConfirmation = true;
       };
 
+      // restore the file from the selected snapshot
       scope.restoreFileAcked = function(){
         scope.hideRestoreFileConfirmation();
 
-        Backend.restoreFile(getActualPath(), scope.curSnap.Name).then(function(res){
+        Backend.restoreFile(scope.pathInActual, scope.curSnap.Name).then(function(res){
           $rootScope.$broadcast('zsd:success', res);
         });
       };
 
+      // hide restore confirmation
       scope.hideRestoreFileConfirmation = function(){
         delete scope.showRestoreFileConfirmation;
       };
     
 
+      // returns 'active' if a given name equals the function name from the lastAction
+      //   * for action buttons 'toggle'
       scope.activeClassIfSelected = function(name){
-        if(typeof scope.lastAction === 'undefined') return;
-
         if(scope.lastAction.name === name){
           return "active";
         }
       };
 
+
+
+      // *******************************************************************************
+      // initializations
+      // 
+
+      // initialize lastAction to a default value from the config
+      var actions = {'off': function(){},
+                     'view': scope.viewFile,
+                     'diff': scope.compareFile,
+                     'download': scope.downloadFile,
+                     'restore': scope.restoreFile};
+      
+      var defaultAction = Config.get('DefaultFileAction');
+      if(defaultAction in actions){
+        scope.lastAction = actions[Config.get('DefaultFileAction')];
+      }else{
+        $rootScope.$broadcast('zsd:warning', 'Invalid "default-file-action": "'+ defaultAction +'"');
+        scope.lastAction = actions['off'];
+      }
+      
+
+      // when given path is from actual fs
+      //  * watch for path changes (user change the current file)
+      //  * watch for snapshot changes (user switch between file versions) 
+      if(angular.isDefined(scope.fromActualPath)){
+        // watch for path changes
+        scope.$watch('fromActualPath', function(p){
+          // update path vars
+          scope.pathInActual = p;
+          scope.pathInSnap = PathUtils.convertToSnapPath(p, scope.curSnap.Name);
+          
+          // trigger fileSelected
+          fileSelected();
+
+        });
+
+        // watch for new snapshot selected
+        scope.$watch('curSnap', function(snap){
+          // update path vars (pathInActual doesn't change when browsing in the history)
+          scope.pathInSnap = PathUtils.convertToSnapPath(scope.pathInActual, snap.Name)
+
+          // trigger fileSelected
+          fileSelected();
+        });
+      }
+
+      // when given path is from snapshot
+      //   * watch for patch changes (user change the current file / switch between file versions)
+      //     path starts with the snapshot mount-point, no need to observe snapshot changes
+      if(angular.isDefined(scope.fromSnapPath)){
+        // watch for path changes
+        scope.$watch('fromSnapPath', function(p){
+          if(angular.isUndefined(p)) return;
+
+          // update path vars
+          scope.pathInActual = PathUtils.convertToActualPath(p);
+          scope.pathInSnap = p;
+          
+          // trigger fileSelected
+          fileSelected();
+        });
+      }
      
 
-      scope.$watch('path', function(){
-        if(typeof scope.path === 'undefined') return;
-
-        // clear old state
-        delete scope.fileDiff;
-        delete scope.textFileContent;
-        delete scope.binaryFileContent;
-
-        triggerLastAction();
-
-        FileUtils.isViewable(scope.path).then(function(res){
-          scope.fileIsViewable = res;
-        });
-        
-        FileUtils.isComparable(scope.path).then(function(res){
-          scope.fileIsComparable = res;
-        });
-
-      });
-
-
-      scope.$watch('curSnap', function(){
-        triggerLastAction();
-      });
-
       
-      function triggerLastAction(){
-        if(typeof scope.path === 'undefined') return;
-        if(typeof scope.curSnap === 'undefined') return;
+      // ********************************************************************************
+      // private actions
+      // 
+      
 
-        if(typeof scope.lastAction === 'undefined'){
-          // initialize default action in 'lastAction'
-          var actions = {'off': function(){},
-                         'view': scope.viewFile,
-                         'diff': scope.compareFile,
-                         'download': scope.downloadFile,
-                         'restore': scope.restoreFile};
-          
-          var defaultAction = Config.get('DefaultFileAction');
-          if(defaultAction in actions){
-            scope.lastAction = actions[Config.get('DefaultFileAction')];
-          }else{
-            $rootScope.$broadcast('zsd:warning', 'Invalid "default-file-action": "'+ defaultAction +'"');
-            scope.lastAction = actions['off'];
-          }
-        }
+      // trigger actions if a file is selected
+      function fileSelected(){
+        // fetch file-info
+        Backend.fileInfo(scope.pathInActual).then(function(fi){
+          scope.fileInfo = fi;
 
-        // trigger last action
-        scope.lastAction();
+          // for ui: enable / disable view and diff buttons
+          scope.fileIsViewable = FileUtils.isViewable(fi);
+          scope.fileIsComparable = FileUtils.isComparable(fi);
+
+          // trigger lastAction
+          scope.lastAction();
+        });
+      };
+
+
+      // clear other content, but keep the content with the given name
+      function clearOthersButKeep(keep){
+        if(keep !== 'fileDiff')
+          delete scope.fileDiff;
+
+        if(keep !== 'textFileContent')
+          delete scope.textFileContent;
+
+        if(keep !== 'binaryFileContent')
+          delete scope.binaryFileContent;
       }
-
-      function getSnapPath(){
-        if(scope.pathFrom === 'actual'){
-          return PathUtils.convertToSnapPath(scope.path, scope.curSnap.Name);
-        }else if(scope.pathFrom === 'snapshot'){
-          return scope.path;
-        }else{
-          throw 'Invalid "path-from": ' + scope.pathFrom;
-        }
-      }
-
-      function getActualPath(){
-        if(scope.pathFrom === 'actual'){
-          return scope.path;
-        }else if(scope.pathFrom === 'snapshot'){
-          return PathUtils.convertToActualPath(scope.path);
-        }else{
-          throw 'Invalid "path-from": ' + scope.pathFrom;
-        }
-      }      
     }
   }
 }]).

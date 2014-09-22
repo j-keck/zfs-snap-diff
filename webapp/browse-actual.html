@@ -10,8 +10,7 @@
                  zsd-show-if-defined="ctrl.snapshots"></zsd-snapshots>
   
 
-  <zsd-file-actions path="ctrl.curPath"
-                    path-from="actual"
+  <zsd-file-actions from-actual-path="ctrl.curPath"
                     cur-snap="ctrl.curSnap"
-                    ng-show="ctrl.curSnap"></zsd-file-action>
+                    ng-if="ctrl.curSnap"></zsd-file-action>
 </div>
