@@ -259,10 +259,10 @@ directive('zsdEmbedSrc', function () {
     restrict: 'A',
     link: function (scope, element, attrs) {
       var current = element;
-      scope.$watch(function() { return attrs.embedSrc; }, function () {
+      scope.$watch(function() { return attrs.zsdEmbedSrc; }, function () {
         var clone = element
           .clone()
-          .attr('src', attrs.embedSrc);
+          .attr('src', attrs.zsdEmbedSrc);
         current.replaceWith(clone);
         current = clone;
       });
