@@ -52,12 +52,12 @@ func (s *ZFSSnapshots) Filter(f func(ZFSSnapshot) bool) ZFSSnapshots {
 	return newS
 }
 
-func (s *ZFSSnapshots) FilterWhereFileWasModified(path string) ZFSSnapshots {
+func (s *ZFSSnapshots) FilterWhereFileWasModified(path string, compareFunc CompareFileFunc) ZFSSnapshots {
 	fh, _ := NewFileHandle(path)
 	return s.Filter(func(snap ZFSSnapshot) bool {
 		// ignore errors here if file not found (e.g. was deleted)
 		if snapFileFh, err := NewFileHandleInSnapshot(path, snap.Name); err == nil {
-			if snapFileFh.HasChanged(fh) {
+			if compareFunc(snapFileFh, fh) {
 				// file changed in snapshot
 				fh = snapFileFh
 				return true

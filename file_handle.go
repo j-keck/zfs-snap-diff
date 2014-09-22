@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"crypto/md5"
 	"fmt"
 	"io"
 	"net/http"
@@ -88,15 +90,6 @@ func (fh *FileHandle) CopyTo(w io.Writer) error {
 	return err
 }
 
-// HashChanged compares two FileHandles
-//   * currently only per mod-time and size - performance reasons FIXME
-func (fh *FileHandle) HasChanged(other *FileHandle) bool {
-	timeChanged := !fh.ModTime.Equal(other.ModTime)
-	sizeChanged := fh.Size != other.Size
-
-	return timeChanged || sizeChanged
-}
-
 // Rename renames a file under the same directory
 func (fh *FileHandle) Rename(newName string) error {
 	newPath := fmt.Sprintf("%s/%s", filepath.Dir(fh.Path), newName)
@@ -157,4 +150,70 @@ func (fh *FileHandle) Copy(path string) (err error) {
 	// sync
 	err = out.Sync()
 	return
+}
+
+// CompareFileFuncByName resturns a compare-file function by name
+func CompareFileFuncByName(compareFileMethod string) (CompareFileFunc, error) {
+	switch compareFileMethod {
+	case "size+modTime":
+		return CompareFileBySizeAndModTime(), nil
+	case "size":
+		return CompareFileBySize(), nil
+	case "md5":
+		return CompareFileByMD5(), nil
+	default:
+		return nil, fmt.Errorf("no such compare method: '%s' - avaliable: 'size+modTime', 'size' or 'md5'", compareFileMethod)
+	}
+}
+
+// CompareFileFunc for different compare methods
+type CompareFileFunc func(*FileHandle, *FileHandle) bool
+
+// CompareFileBySize compares files per size
+func CompareFileBySize() CompareFileFunc {
+	return func(a *FileHandle, b *FileHandle) bool {
+		return a.Size != b.Size
+	}
+}
+
+// CompareFileBySizeAndModTime compares files per size+modTime
+func CompareFileBySizeAndModTime() CompareFileFunc {
+	return func(a *FileHandle, b *FileHandle) bool {
+		timeChanged := !a.ModTime.Equal(b.ModTime)
+		sizeChanged := a.Size != b.Size
+
+		return timeChanged || sizeChanged
+	}
+}
+
+// CompareFileByMD5 compares files per md5
+func CompareFileByMD5() CompareFileFunc {
+	calculateMD5 := func(fh *FileHandle) []byte {
+		in, err := os.Open(fh.Path)
+		if err != nil {
+			panic(err)
+		}
+		defer in.Close()
+
+		buf := make([]byte, 1024)
+		hash := md5.New()
+		for {
+			n, err := in.Read(buf)
+			if err != nil && err != io.EOF {
+				panic(err)
+			}
+			if n == 0 {
+				break
+			}
+
+			if _, err := io.WriteString(hash, string(buf[:n])); err != nil {
+				panic(err)
+			}
+		}
+		return hash.Sum(nil)
+	}
+
+	return func(a *FileHandle, b *FileHandle) bool {
+		return bytes.Compare(calculateMD5(a), calculateMD5(b)) != 0
+	}
 }

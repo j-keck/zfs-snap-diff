@@ -87,7 +87,33 @@ func listSnapshotsHndl(w http.ResponseWriter, r *http.Request) {
 				snapshots = snapshots[:limit]
 			}
 		}
-		snapshots = snapshots.FilterWhereFileWasModified(path)
+
+		// when parameter 'compare-file-method' given, use the given method.
+		// if not, use size+modTime as default
+		var compareFileFunc CompareFileFunc
+		if compareFileMethod, ok := params["compare-file-method"]; ok {
+			if compareFileFunc, err = CompareFileFuncByName(compareFileMethod); err != nil {
+				log.Printf("ERROR: Invalid value for 'compare-file-method'! - %s\n", err.Error())
+				http.Error(w, err.Error(), 400)
+				return
+			}
+
+			if compareFileMethod == "md5" {
+				// log warning / notice
+				if _, ok := params["scan-snap-limit"]; ok {
+					log.Println("NOTICE: compare files with md5 - expect high cpu usage!")
+				} else {
+					log.Println("WARNING: no 'scan-snap-limit' was given and compare file with md5 - expect VERY HIGH cpu usage / VERY LONG runtime!!!!")
+				}
+			}
+
+		} else {
+			// use size+modTime
+			compareFileFunc = CompareFileBySizeAndModTime()
+		}
+
+		// filter snapshots
+		snapshots = snapshots.FilterWhereFileWasModified(path, compareFileFunc)
 	}
 
 	// marshal

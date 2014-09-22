@@ -61,7 +61,8 @@ controller('BrowseActualCtrl', ['Backend', 'PathUtils', 'Config', function(Backe
 
     Backend.listSnapshots(
       path,
-      Config.get('scanSnapLimit')
+      Config.get('scanSnapLimit'),
+      Config.get('compareFileMethod')
     ).then(function(snapshots){
       self.snapshots = snapshots;
     });   
