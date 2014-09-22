@@ -1,41 +1,23 @@
 angular.module('zsdUtils', ['zsdServices']).
 
 // FileUtils
-factory('FileUtils', ['Backend', function(Backend){
+factory('FileUtils', [function(){
   var comparableMimeTypePrefixes = ["text"];
   var viewableMimeTypePrefixes = ["text", "image", "application/pdf"];
 
-  // angular cache is enabled for 'fileInfo' in the Backend
-  // so multiple request for the same file are ok
   return {
-    isViewable: function(path){
-      return Backend.fileInfo(path).then(function(fi){
-        return viewableMimeTypePrefixes.filter(function(prefix){
-          return fi.MimeType.indexOf(prefix) >= 0;
-        }).length > 0
-      });
+    isViewable: function(fileInfo){
+      return viewableMimeTypePrefixes.filter(function(prefix){
+        return fileInfo.MimeType.indexOf(prefix) >= 0;
+      }).length > 0
     },
-    whenIsViewable: function(path, f){
-      this.isViewable(path).then(function(isViewable){
-        if(isViewable) f();
-      });
+    isComparable: function(fileInfo){
+      return comparableMimeTypePrefixes.filter(function(prefix){
+        return fileInfo.MimeType.indexOf(prefix) >= 0;
+      }).length > 0
     },
-    isComparable: function(path){
-      return Backend.fileInfo(path).then(function(fi){
-        return comparableMimeTypePrefixes.filter(function(prefix){
-          return fi.MimeType.indexOf(prefix) >= 0;
-        }).length > 0
-      })
-    },
-    whenIsComparable: function(path, f){
-      this.isComparable(path).then(function(isComparable){
-        if(isComparable) f();
-      });
-    },
-    isText: function(path){
-      return Backend.fileInfo(path).then(function(fi){
-        return fi.MimeType.indexOf("text") >= 0;
-      })
+    isText: function(fileInfo){
+      return fileInfo.MimeType.indexOf("text") >= 0;
     }
   }
 }]).
