@@ -68,9 +68,25 @@ func listSnapshotsHndl(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// when paramter 'where-file-modified' given, filter snaphots where the
-	// given file was modified
+	// given file was modified.
 	params, _ := extractParams(r)
 	if path, ok := params["where-file-modified"]; ok {
+		log.Printf("scan snapshots where file: '%s' was modified\n", path)
+
+		// if 'scan-snap-limit' is given, limit scan to the given value
+		if scanSnapLimit, ok := params["scan-snap-limit"]; ok {
+			limit, err := strconv.Atoi(scanSnapLimit)
+			if err != nil {
+				log.Printf("WARNING: Invalid value for 'scan-snap-limit'! - %s\n", err.Error())
+				http.Error(w, err.Error(), 400)
+				return
+			}
+
+			if len(snapshots) > limit {
+				log.Printf("NOTICE: scan only %d snapshots for other file versions (%d snapshots available)\n", limit, len(snapshots))
+				snapshots = snapshots[:limit]
+			}
+		}
 		snapshots = snapshots.FilterWhereFileWasModified(path)
 	}
 

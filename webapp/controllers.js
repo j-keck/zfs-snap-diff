@@ -48,7 +48,7 @@ controller('MainCtrl', ['$location', '$rootScope', '$timeout', 'Config', functio
 
 
 
-controller('BrowseActualCtrl', ['Backend', 'PathUtils', function(Backend, PathUtils){
+controller('BrowseActualCtrl', ['Backend', 'PathUtils', 'Config', function(Backend, PathUtils, Config){
   var self = this;
 
   self.fileSelected = function(entries){
@@ -57,7 +57,12 @@ controller('BrowseActualCtrl', ['Backend', 'PathUtils', function(Backend, PathUt
 
     var path = PathUtils.entriesToPath(entries);
     self.curPath = path;
-    Backend.listSnapshots(path).then(function(snapshots){
+
+
+    Backend.listSnapshots(
+      path,
+      Config.get('scanSnapLimit')
+    ).then(function(snapshots){
       self.snapshots = snapshots;
     });   
   }

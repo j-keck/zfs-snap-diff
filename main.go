@@ -34,6 +34,8 @@ func main() {
 	diffContextSizeFlag := flag.Int("diff-context-size", 5, "context size in diff")
 	defaultFileActionFlag := flag.String("default-file-action", "view", "default file action in frontend when a file is selected: 'off', 'view', 'diff', 'download', 'restore'")
 
+	scanSnapLimitFlag := flag.Int("scan-snap-limit", -1, "scan snapshots where file was modified limit (negative values: scan all snapshots)")
+
 	flag.Parse()
 
 	if *printVersionFlag {
@@ -78,6 +80,10 @@ func main() {
 		"zfsMountPoint":     zfsMountPoint,
 		"diffContextSize":   *diffContextSizeFlag,
 		"defaultFileAction": *defaultFileActionFlag,
+	}
+	if *scanSnapLimitFlag >= 0 {
+		// only add positive values - negative values: scan all snapshots
+		frontendConfig["scanSnapLimit"] = *scanSnapLimitFlag
 	}
 
 	// startup web server

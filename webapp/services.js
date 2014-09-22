@@ -67,9 +67,11 @@ factory('Config', ["$http", function($http){
   
 factory('Backend', ["$http", "Config", function($http, Config){
   return {
-    listSnapshots: function(whereFileModified){
+    listSnapshots: function(whereFileModified, scanSnapLimit){
       var params = {};
-      if(whereFileModified !== undefined) params['where-file-modified'] = whereFileModified;
+
+      if(angular.isDefined(whereFileModified)) params['where-file-modified'] = whereFileModified;
+      if(angular.isDefined(scanSnapLimit)) params['scan-snap-limit'] = scanSnapLimit;
       
       return $http.get("list-snapshots", {"params": params}).then(function(res){
         return res.data
