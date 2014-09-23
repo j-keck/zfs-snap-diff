@@ -19,7 +19,7 @@ say `git submodule update`;
 
 # bindata.go
 say "generate bindata.go ...";
-say `go-bindata -ignore=.git -ignore=config.json -ignore=README -ignore=angular-mocks.js -ignore=webapp/tests webapp/...`;
+say `go-bindata -ignore=.git -ignore=config.json -ignore=README -ignore=angular-mocks.js -ignore=webapp/tests -ignore='emacs.*core' webapp/...`;
 
 
 # create build-output
