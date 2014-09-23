@@ -7,19 +7,6 @@ controller('MainCtrl', ['$location', '$rootScope', '$timeout', 'Config', functio
     self.config = Config.config();
   });
 
-  $rootScope.$on('zsd:error', function(event, msg){
-    self.error = msg;
-  });
-
-  $rootScope.$on('zsd:warning', function(event, msg){
-    self.warning = msg;
-  });
-
-  $rootScope.$on('zsd:success', function(event, msg){
-    self.success = msg;
-  });
-  
-
   $rootScope.$on('zsd:http-activity', function(event, args){
     // first http request pending
     if(typeof self.timeoutHndl === 'undefined'){
