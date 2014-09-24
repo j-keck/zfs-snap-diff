@@ -11,8 +11,7 @@ import (
 var VERSION string
 
 var (
-	zfsName       string
-	zfsMountPoint string
+	zfs *ZFS
 )
 
 // FrontendConfig hold the configuration for the ui
@@ -45,7 +44,7 @@ func main() {
 	}
 
 	// last argument is the zfs name
-	zfsName = flag.Arg(0)
+	zfsName := flag.Arg(0)
 
 	// abort if zfs name is missing
 	if len(zfsName) == 0 {
@@ -54,14 +53,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	// lookup zfs mount point
-	out, err := zfs("get -H -o value mountpoint " + zfsName)
+	var err error
+	zfs, err = NewZFS(zfsName)
 	if err != nil {
-		log.Print(out)
+		log.Print(err.Error())
 		os.Exit(1)
 	}
-	zfsMountPoint = out
-	log.Printf("work on zfs: %s wich is mounted under: %s\n", zfsName, zfsMountPoint)
+	log.Printf("work on zfs: %s wich is mounted under: %s\n", zfs.Name, zfs.MountPoint)
 
 	// listen on localhost - if flag '-a' is given, listen on all interfaces
 	var addr string
@@ -78,7 +76,7 @@ func main() {
 
 	// frontend-config
 	frontendConfig := FrontendConfig{
-		"zfsMountPoint":     zfsMountPoint,
+		"zfsMountPoint":     zfs.MountPoint,
 		"diffContextSize":   *diffContextSizeFlag,
 		"defaultFileAction": *defaultFileActionFlag,
 		"compareFileMethod": *compareFileMethodFlag,

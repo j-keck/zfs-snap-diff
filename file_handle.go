@@ -27,8 +27,8 @@ func NewFileHandle(path string) (*FileHandle, error) {
 
 // NewFileHandleInSnapshot creates a new FileHandle from a file in the given snapshot
 func NewFileHandleInSnapshot(path, snapName string) (*FileHandle, error) {
-	relativePath := strings.TrimPrefix(path, zfsMountPoint)
-	pathInSnap := fmt.Sprintf("%s/.zfs/snapshot/%s%s", zfsMountPoint, snapName, relativePath)
+	relativePath := strings.TrimPrefix(path, zfs.MountPoint)
+	pathInSnap := fmt.Sprintf("%s/.zfs/snapshot/%s%s", zfs.MountPoint, snapName, relativePath)
 
 	return newFileHandle(pathInSnap)
 }
@@ -44,10 +44,9 @@ func newFileHandle(path string) (*FileHandle, error) {
 }
 
 func (fh *FileHandle) UniqueName() string {
-	// file under a snapshot?
-	if strings.HasPrefix(fh.Path, zfsMountPoint+"/.zfs/snapshot") {
+	if strings.HasPrefix(fh.Path, zfs.MountPoint+"/.zfs/snapshot") {
 		// extract snapshot-name
-		s := strings.TrimPrefix(fh.Path, zfsMountPoint)
+		s := strings.TrimPrefix(fh.Path, zfs.MountPoint)
 		s = strings.TrimPrefix(s, "/.zfs/snapshot/")
 		snapName := strings.Split(s, "/")[0]
 

@@ -61,7 +61,7 @@ func configHndl(config FrontendConfig) http.HandlerFunc {
 // list zfs snapshots
 //   * optional filter snaphots where a given file was modified
 func listSnapshotsHndl(w http.ResponseWriter, r *http.Request) {
-	snapshots, err := ScanZFSSnapshots(zfsName)
+	snapshots, err := zfs.ScanSnapshots()
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
@@ -137,7 +137,7 @@ func snapshotDiffHndl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	diffs, err := ScanZFSDiffs(zfsName, snapName)
+	diffs, err := zfs.ScanDiffs(snapName)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
@@ -367,7 +367,7 @@ func respondWithParamMissing(w http.ResponseWriter, name string) {
 //  * responds with a illegal request if not
 //  * and shutdowns the server
 func verifyPathIsUnderZMP(path string, w http.ResponseWriter, r *http.Request) {
-	if !strings.HasPrefix(filepath.Clean(path), zfsMountPoint) {
+	if !strings.HasPrefix(filepath.Clean(path), zfs.MountPoint) {
 		http.Error(w, "illegal request", 403)
 		log.Printf("illegal request - file-path: '%s', url-path: '%s', from client: '%s' -> SHUTDOWN SERVER!",
 			path, r.URL.Path, r.RemoteAddr)
