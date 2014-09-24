@@ -18,13 +18,15 @@
 <div class="btn-group">
   <button type="button"
           class="btn btn-primary"
+          id="viewFile"
           ng-class="activeClassIfSelected('viewFile')"
           ng-click="viewFile()"
-          ng-disabled="! fileIsViewable"fileHasTextContent>
+          ng-disabled="! fileIsViewable">
     <span class="glyphicon glyphicon-eye-open"></span> View
   </button>
   <button type="button"
           class="btn btn-primary"
+          id="compareFile"
           ng-class="activeClassIfSelected('compareFile')"
           ng-click="compareFile()"
           ng-disabled="! fileIsComparable">
@@ -32,11 +34,13 @@
   </button>  
   <button type="button"
           class="btn btn-primary"
+          id="downloadFile"
           ng-click="downloadFile()">
     <span class="glyphicon glyphicon-download"></span> Download
   </button>
   <button type="button"
           class="btn btn-primary"
+          id="restoreFile"
           ng-click="restoreFile()">
     <span class="glyphicon glyphicon-import"></span> Restore
   </button>
@@ -48,11 +52,11 @@
 <!-- file diff -->
 <div class="panel panel-default"
      ng-bind-html="fileDiff"
-     ng-show="fileDiff"></div>
+     ng-if="fileDiff"></div>
 
 
 <!-- text file content -->
-<div class="panel panel-default center-block" ng-show="textFileContent">
+<div class="panel panel-default center-block" ng-if="textFileContent">
   <div class="panel-heading">{{curSnap.Name}}</div>
   <div class="pandel-body"><pre><code ng-bind-html="textFileContent"></code></pre></div>
 </div>
@@ -60,7 +64,7 @@
 
 <!-- embedded binary content -->
 <!-- FIXME: remove / fix styles (grml frontend is not my world!) -->
-<div class="panel panel-default center-block" ng-show="binaryFileContent">
+<div class="panel panel-default center-block" ng-if="binaryFileContent">
   <div class="panel-heading">{{curSnap.Name}}</div>
   <div class="pandel-body" style="width: 90%; height: 100%">
     <embed zsd-embed-src="{{binaryFileContent}}"
