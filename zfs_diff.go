@@ -26,7 +26,10 @@ func (zfs *ZFS) ScanDiffs(snapName string) (ZFSDiffs, error) {
 	for _, line := range strings.Split(out, "\n") {
 		//FIXME: filter only files, directories?
 		//FIXME: type rename: '/' -> 'D' ...
-		fields := strings.Split(line, "\t")
+		fields := strings.SplitN(line, "\t", 3)
+		if len(fields) != 3 {
+			break
+		}
 		zfsDiff := ZFSDiff{fields[0], fields[1], replacer.Replace(fields[2])}
 
 		diffs = append(diffs, zfsDiff)

@@ -19,6 +19,9 @@ func (zfs *ZFS) ScanSnapshots() (ZFSSnapshots, error) {
 	for _, line := range strings.Split(out, "\n") {
 		// extract fields
 		fields := strings.SplitN(line, "\t", 2)
+		if len(fields) != 2 {
+			break
+		}
 		snapName := lastElement(fields[0], "@")
 		creation := fields[1]
 
