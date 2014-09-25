@@ -213,9 +213,21 @@ func CompareFileByMD5() FileHasChangedFunc {
 		return hash.Sum(nil)
 	}
 
+	var cached []byte
 	return func(a, b *FileHandle) bool {
-		aMD5 := calculateMD5(a)
+		var aMD5 []byte
+
+		// use the cached value for aMD5 if it's not empty
+		if cached == nil {
+			aMD5 = calculateMD5(a)
+		} else {
+			aMD5 = cached
+		}
+
 		bMD5 := calculateMD5(b)
+
+		// cache the current bMD5 for the next aMD5
+		cached = bMD5
 		return bytes.Compare(aMD5, bMD5) != 0
 	}
 }
