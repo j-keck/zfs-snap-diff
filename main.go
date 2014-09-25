@@ -74,6 +74,15 @@ func main() {
 		addr = fmt.Sprintf("127.0.0.1:%d", *portFlag)
 	}
 
+	// print warning if file-compare method md5 is used
+	if *compareFileMethodFlag == "md5" {
+		if *scanSnapLimitFlag > 0 {
+			log.Println("NOTICE: compare files with md5 - expect high cpu usage!")
+		} else {
+			log.Println("WARNING: no 'scan-snap-limit' was given and compare file with md5 - expect VERY HIGH cpu usage / VERY LONG runtime!!!!")
+		}
+	}
+
 	// frontend-config
 	frontendConfig := FrontendConfig{
 		"zfsMountPoint":     zfs.MountPoint,
