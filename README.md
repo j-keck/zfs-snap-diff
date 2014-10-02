@@ -14,8 +14,7 @@ With `zfs-snap-diff` you can explore file differences from different zfs snapsho
 `zfs-snap-diff` has a web frontend, so it can run on your local work machine or on your remote file / backup server (no Xserver necesarry).
 
 To keep it protable and independent, it's made as a single executable with all html / js stuff included.
-The backend is implemented in golang, the frontend with [angularjs](https://angularjs.org), [bootstrap](http://getbootstrap.com) ,[jsdifflib](https://github.com/cemerick/jsdifflib) 
-and [highlight.js](https://github.com/isagalaev/highlight.js).
+The backend is implemented in golang, the frontend with [angularjs](https://angularjs.org), [bootstrap](http://getbootstrap.com) and [highlight.js](https://github.com/isagalaev/highlight.js).
 
 
   
@@ -44,12 +43,12 @@ and [highlight.js](https://github.com/isagalaev/highlight.js).
     * -scan-snap-limit: limit how many snapshots are scan to search older file version (default: scan all)
       * negative limit: scan all snapshots
       * recommended if you have many snapshots
-    * -compare-file-method: compare method when searching in snapshots for other file versions (default: size+modTime)
+    * -compare-file-method: compare method when searching in snapshots for other file versions (default: auto)
       * supported methods:
+        * auto: compares text files per md5, others by size+modTime
         * size+modTime: compares per size and modification time (very cheap)
         * size: compares per size (very cheap)
         * md5: compares per md5 (VERY EXPENSIVE! combine it with '-scan-snap-limit' and use it only for text files!)
-      * use size or md5 when you work on files in a scm where you switch branches (this updates the file modTime).
 
 
   
@@ -72,7 +71,7 @@ Search a file in the file browser.
   
 ### Select a file
 
-When a file is selected, `zsd-snap-diff` search all snapshots where the selected file was modified (default: size+modTime, optional: size or md5).
+When a file is selected, `zsd-snap-diff` search all snapshots where the selected file was modified (text files per md5, others per size+modTime).
     
 ![File selected](doc/zsd-file-selected.png)
   
@@ -116,7 +115,7 @@ From here you can easy restore / view a deleted file.
   * if you restore a file, the orginal file will be renamed as:
 
         <ORG_FLILE_NAME>_<TIMESTAMP>
-  
+
   * for snapshot differences (Browse snapshot diff), you need to set the diff permission:
 
         zfs allow -u <USER_NAME> diff <ZFS_NAME>
@@ -143,17 +142,17 @@ From here you can easy restore / view a deleted file.
 
         cd zfs-snap-diff
 
-  * init submodule
+  * fetch dependencies 
 
-        git submodule init
-
-  * update submodule
-
-        git submodule update
+        go get -u
 
   * generate golang src from static web content (this generates bindata.go)
-  
+    
         go-bindata webapp/...
+
+    or start it later per `ZSD_SERVE_FROM_WEBAPP=YES ./zfs-snap-diff <ZFS_NAME>`
+    to serve the static content from the `webapp` folder.
+   
 
   * build it
   
@@ -168,7 +167,7 @@ From here you can easy restore / view a deleted file.
 0.0.5:
   * file compare method configurable: size+modTime (default) or md5
   * optional limit how many snapshots are scan to search older file version
-  * autohide messages in frontend
+  * autohide notifications in frontend
   * show message if no snapshots found
   
 0.0.4:
