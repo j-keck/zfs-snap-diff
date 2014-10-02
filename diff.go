@@ -60,6 +60,11 @@ func Diff(from, target string, contextSize int) DiffResult {
 	// make a line based diff - for side by side
 	fromLines, targetLines, lines := dmp.DiffLinesToChars(from, target)
 	lineBasedDiffs := dmp.DiffMain(fromLines, targetLines, false)
+
+	if len(lineBasedDiffs) == 1 && lineBasedDiffs[0].Type == 0 {
+		// cancel if no differences found
+		return DiffResult{Deltas{}, Deltas{}, []string{}}
+	}
 	lineBasedDiffs = dmp.DiffCleanupSemantic(lineBasedDiffs)
 	lineBasedDiffs = dmp.DiffCharsToLines(lineBasedDiffs, lines)
 	lineBasedDeltas := createDeltasFromDiffs(lineBasedDiffs, contextSize)
