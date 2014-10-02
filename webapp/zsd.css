@@ -8,16 +8,29 @@ body{
 
 
 
-/* round buttons */
-.btn-circle {
-    width: 30px;
-    height: 30px;
-    text-align: center;
-    padding: 6px 0;
-    font-size: 12px;
-    line-height: 1.42;
-    border-radius: 15px;
+/* diff */
+.line-nr {
+    padding-right: 10px;
+    text-align: right;
+    width: 40px;
+    background-color: #f6f6f6;
 }
+
+
+.ins {
+    background-color: #e6ffe6;
+}
+
+.del {
+    background-color: #ffb6c7;
+}
+
+.side-by-side-diff {
+    width: 98%;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+/* end diff */
 
 
 /* animations */
@@ -112,5 +125,5 @@ body{
 }
 .zsd-modal-dialog-content {
     padding:10px;
-    }
+}
 /* end modal */

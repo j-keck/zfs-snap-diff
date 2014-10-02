@@ -48,35 +48,6 @@
 </div>
 
 
-
-
-<style>
-
-  .line-nr {
-  padding-right: 10px;
-  text-align: right;
-  width: 40px;
-  background-color: #f6f6f6;
-  }
-  
-  
-  .ins {
-  background-color: #e6ffe6;
-  }
-
-  .del {
-  background-color: #ffb6c7;
-  }
-
-  .side-by-side-diff {
-  width: 100%;
-  margin-left: 10px;
-  margin-right: 10px;
-  }
-</style>
-
-
-
 <div class="container" ng-show="diffResult">
   <ul class="nav nav-tabs nav-justified" role="tablist" ng-init="diffType = 'intext'">
     <li ng-class="activeClassIfDiffTypeIs('intext')" ng-click="diffType = 'intext'"><a href="">Intext</a></li>
