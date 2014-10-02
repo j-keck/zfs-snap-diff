@@ -56,35 +56,45 @@
 </div>
 
 <!-- intext -->
-<div class="container" ng-show="diffType === 'intext'">
-  <div ng-repeat="diffContext in diffResult.intext">
-    <div style="margin-bottom: 5px;">
-      <!-- controls -->
-      <button type="button"
-              class="btn btn-primary btn-small"
-              ng-click="revertChange($index)"
-              title="Revert Change">
-        <span class="glyphicon glyphicon-share"></span>
-      </button>           
+<div class="container" ng-show="diffResult && diffType === 'intext'">
+  <div class="panel panel-default center-block">
+    <div class="panel-heading">{{curSnap.Name}}</div>
+    <div class="pandel-body">
+      <div ng-repeat="diffContext in diffResult.intext">
+        <div style="margin-bottom: 5px;">
+          <!-- controls -->
+          <button type="button"
+                  class="btn btn-primary btn-small"
+                  ng-click="revertChange($index)"
+                  title="Revert Change">
+            <span class="glyphicon glyphicon-share"></span>
+          </button>           
+        </div>
+        <pre><code ng-bind-html="diffContext"></code></pre>
+      </div>
     </div>
-    <pre><code ng-bind-html="diffContext"></code></pre>
   </div>
 </div>
 
 <!-- side by side -->
-<div ng-if="diffType ==='sideBySide'">
-  <table class="side-by-side-diff">
-    <tr zsd-side-by-side-diff-rows blocks="diffResult.sideBySide">
-      <td colspan="4" style="padding-top: 30px; padding-bottom: 5px;">
-        <button type="button"
-                class="btn btn-primary btn-small"
-                ng-click="revertChange(zsdIndex)"
-                title="Revert Change">
-          <span class="glyphicon glyphicon-share"></span>
-        </button>           
-      </td>
-    </tr>
-  </table>
+<div ng-show="diffResult && diffType ==='sideBySide'">
+  <div class="panel panel-default center-block">
+    <div class="panel-heading">{{curSnap.Name}}</div>
+    <div class="pandel-body">  
+      <table class="side-by-side-diff">
+        <tr zsd-side-by-side-diff-rows blocks="diffResult.sideBySide">
+          <td colspan="4" style="padding-top: 30px; padding-bottom: 5px;">
+            <button type="button"
+                    class="btn btn-primary btn-small"
+                    ng-click="revertChange(zsdIndex)"
+                    title="Revert Change">
+              <span class="glyphicon glyphicon-share"></span>
+            </button>           
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
 </div>
 
 
