@@ -34,7 +34,7 @@ func main() {
 	defaultFileActionFlag := flag.String("default-file-action", "view", "default file action in frontend when a file is selected: 'off', 'view', 'diff', 'download', 'restore'")
 
 	scanSnapLimitFlag := flag.Int("scan-snap-limit", -1, "scan snapshots where file was modified limit (negative values: scan all snapshots)")
-	compareFileMethodFlag := flag.String("compare-file-method", "size+modTime", "compare method when searching snapshots for other file versions: 'size+modTime', 'size' or 'md5'")
+	compareFileMethodFlag := flag.String("compare-file-method", "auto", "compare method when searching snapshots for other file versions: 'auto', 'size+modTime', 'size' or 'md5'")
 
 	flag.Parse()
 
@@ -77,7 +77,7 @@ func main() {
 	// print warning if file-compare method md5 is used
 	if *compareFileMethodFlag == "md5" {
 		if *scanSnapLimitFlag > 0 {
-			log.Println("NOTICE: compare files with md5 - expect high cpu usage!")
+			log.Println("NOTICE: compare all files only with md5 - expect high cpu usage!")
 		} else {
 			log.Println("WARNING: no 'scan-snap-limit' was given and compare file with md5 - expect VERY HIGH cpu usage / VERY LONG runtime!!!!")
 		}

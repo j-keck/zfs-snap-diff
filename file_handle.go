@@ -297,6 +297,15 @@ func NewFileHasChangedFuncGenByName(method string) (FileHasChangedFuncGen, error
 		return CompareFileBySize, nil
 	case "md5":
 		return CompareFileByMD5, nil
+	case "auto":
+		// use md5 for text files, size+modTime for others
+		return func(actual *FileHandle) FileHasChangedFunc {
+			mimeType, _ := actual.MimeType()
+			if strings.HasPrefix(mimeType, "text") {
+				return CompareFileByMD5(actual)
+			}
+			return CompareFileBySizeAndModTime(actual)
+		}, nil
 	default:
 		return nil, fmt.Errorf("no such compare method: '%s' - avaliable: 'size+modTime', 'size', 'md5'", method)
 	}

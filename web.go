@@ -91,7 +91,7 @@ func listSnapshotsHndl(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// when parameter 'compare-file-method' given, use the given method.
-		// if not, use size+modTime as default
+		// if not, use auto as default
 		var fileHasChangedFuncGen FileHasChangedFuncGen
 		if compareFileMethod, ok := params["compare-file-method"]; ok {
 			if fileHasChangedFuncGen, err = NewFileHasChangedFuncGenByName(compareFileMethod); err != nil {
@@ -100,8 +100,8 @@ func listSnapshotsHndl(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		} else {
-			// no compare-file-method given, use size+modTime as default
-			fileHasChangedFuncGen = CompareFileBySizeAndModTime
+			// no compare-file-method given, use auto as default
+			fileHasChangedFuncGen, _ = NewFileHasChangedFuncGenByName("auto")
 		}
 
 		// filter snapshots
