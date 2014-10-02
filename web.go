@@ -92,20 +92,20 @@ func listSnapshotsHndl(w http.ResponseWriter, r *http.Request) {
 
 		// when parameter 'compare-file-method' given, use the given method.
 		// if not, use size+modTime as default
-		var fileHasChangedFunc FileHasChangedFunc
+		var fileHasChangedFuncGen FileHasChangedFuncGen
 		if compareFileMethod, ok := params["compare-file-method"]; ok {
-			if fileHasChangedFunc, err = NewFileHasChangedFuncByName(compareFileMethod); err != nil {
+			if fileHasChangedFuncGen, err = NewFileHasChangedFuncGenByName(compareFileMethod); err != nil {
 				log.Printf("ERROR: Invalid value for 'compare-file-method'! - %s\n", err.Error())
 				http.Error(w, err.Error(), 400)
 				return
 			}
 		} else {
 			// no compare-file-method given, use size+modTime as default
-			fileHasChangedFunc = CompareFileBySizeAndModTime()
+			fileHasChangedFuncGen = CompareFileBySizeAndModTime
 		}
 
 		// filter snapshots
-		snapshots = snapshots.FilterWhereFileWasModified(path, fileHasChangedFunc)
+		snapshots = snapshots.FilterWhereFileWasModified(path, fileHasChangedFuncGen)
 	}
 
 	// marshal

@@ -274,44 +274,57 @@ func (fh *FileHandle) Patch(deltas Deltas) error {
 	return nil
 }
 
+// FileHasChangedFunGen to create a FileHasChangedFunc
+type FileHasChangedFuncGen func(*FileHandle) FileHasChangedFunc
+
 // FileHasChangedFunc to detect if a file has changed
 type FileHasChangedFunc func(*FileHandle, *FileHandle) bool
 
-// NewFileHasChangedFuncByName returns a FileHasChangedFunc which implements
-// a file changes algorithm by the given name
-func NewFileHasChangedFuncByName(method string) (FileHasChangedFunc, error) {
+// NewFileHasChangedFuncGenByName returns a generator for a FileHasChangedFunc
+// which implements a file changes algorithm by the given name
+//   example:
+//     hasChangedGen := NewFileHasChangedFuncGenByName("md5")
+//     hasChanged := hasChangedGen(actualFH)
+//     if hasChanged(snap1FH, snap2FH) {
+//       -> actualFH content is different from snap1FH and snap2FH
+//     }
+func NewFileHasChangedFuncGenByName(method string) (FileHasChangedFuncGen, error) {
 	switch method {
 
 	case "size+modTime":
-		return CompareFileBySizeAndModTime(), nil
+		return CompareFileBySizeAndModTime, nil
 	case "size":
-		return CompareFileBySize(), nil
+		return CompareFileBySize, nil
 	case "md5":
-		return CompareFileByMD5(), nil
+		return CompareFileByMD5, nil
 	default:
 		return nil, fmt.Errorf("no such compare method: '%s' - avaliable: 'size+modTime', 'size', 'md5'", method)
 	}
 }
 
 // CompareFileBySize returns a FileHasChangedFunc which compares files per their size
-func CompareFileBySize() FileHasChangedFunc {
+func CompareFileBySize(actual *FileHandle) FileHasChangedFunc {
 	return func(a, b *FileHandle) bool {
 		return a.Size != b.Size
 	}
 }
 
 // CompareFileBySizeAndModTime returns a FileHasChangedFunc which compares files per their size+modTime
-func CompareFileBySizeAndModTime() FileHasChangedFunc {
-	return func(a, b *FileHandle) bool {
+func CompareFileBySizeAndModTime(actual *FileHandle) FileHasChangedFunc {
+	hasChanged := func(a, b *FileHandle) bool {
 		timeChanged := !a.ModTime.Equal(b.ModTime)
 		sizeChanged := a.Size != b.Size
 
 		return timeChanged || sizeChanged
 	}
+
+	return func(a, b *FileHandle) bool {
+		return hasChanged(a, b)
+	}
 }
 
 // CompareFileByMD5 returns a FileHasChangedFunc which compares files per their md5 sum
-func CompareFileByMD5() FileHasChangedFunc {
+func CompareFileByMD5(actual *FileHandle) FileHasChangedFunc {
 	calculateMD5 := func(fh *FileHandle) []byte {
 		in, err := os.Open(fh.Path)
 		if err != nil {
@@ -337,6 +350,8 @@ func CompareFileByMD5() FileHasChangedFunc {
 		return hash.Sum(nil)
 	}
 
+	actualMD5 := calculateMD5(actual)
+
 	var cached []byte
 	return func(a, b *FileHandle) bool {
 		var aMD5 []byte
@@ -352,6 +367,6 @@ func CompareFileByMD5() FileHasChangedFunc {
 
 		// cache the current bMD5 for the next aMD5
 		cached = bMD5
-		return bytes.Compare(aMD5, bMD5) != 0
+		return bytes.Compare(actualMD5, bMD5) != 0 && bytes.Compare(aMD5, bMD5) != 0
 	}
 }

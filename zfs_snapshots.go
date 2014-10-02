@@ -55,8 +55,9 @@ func (s *ZFSSnapshots) Filter(f func(ZFSSnapshot) bool) ZFSSnapshots {
 	return newS
 }
 
-func (s *ZFSSnapshots) FilterWhereFileWasModified(path string, fileHasChangedFunc FileHasChangedFunc) ZFSSnapshots {
+func (s *ZFSSnapshots) FilterWhereFileWasModified(path string, fileHasChangedFuncGen FileHasChangedFuncGen) ZFSSnapshots {
 	fh, _ := NewFileHandle(path)
+	fileHasChangedFunc := fileHasChangedFuncGen(fh)
 
 	return s.Filter(func(snap ZFSSnapshot) bool {
 		// ignore errors here if file not found (e.g. was deleted)
