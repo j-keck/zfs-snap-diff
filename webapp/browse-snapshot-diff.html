@@ -1,8 +1,8 @@
-<div class="container">
-  <zsd-snapshots snapshots="ctrl.snapshots"
+<zsd-snapshots snapshots="ctrl.snapshots"
                  on-snapshot-selected="ctrl.snapshotSelected(snap)"></zsd-snapshots>
 
 
+<div class="container">
   <div class="panel panel-default center-block" ng-show="ctrl.snapshotDiff">
     <div class="panel-heading">{{ctrl.curSnap.Name}}</div>
     <div class="pandel-body">
@@ -23,5 +23,6 @@
         </tr>
       </table>
     </div>
-  </div>  
+  </div>
 </div>
+

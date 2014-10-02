@@ -105,7 +105,7 @@ directive('zsdFileActions', ['$window', '$sce', '$rootScope', '$http', 'FileUtil
       };
 
       scope.revertChange = function(idx){
-        console.log("revert change: " + idx);
+        // FIXME: move in Backend service
         $http.put('/revert-change', {path: scope.pathInActual, deltas: scope.diffResult.deltas[idx]}).then(function(res){
           scope.compareFile();
         });

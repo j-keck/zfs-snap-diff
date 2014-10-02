@@ -1,4 +1,3 @@
-
 <!-- restore file confirmation dialog --> 
 <zsd-modal show="showRestoreFileConfirmation">
   <div class="panel panel-heading">
@@ -15,35 +14,37 @@
 
 
 <!-- action buttons -->
-<div class="btn-group">
-  <button type="button"
-          class="btn btn-primary"
-          id="viewFile"
-          ng-class="activeClassIfSelected('viewFile')"
-          ng-click="viewFile()"
-          ng-disabled="! fileIsViewable">
-    <span class="glyphicon glyphicon-eye-open"></span> View
-  </button>
-  <button type="button"
-          class="btn btn-primary"
-          id="compareFile"
-          ng-class="activeClassIfSelected('compareFile')"
-          ng-click="compareFile()"
-          ng-disabled="! fileIsComparable">
-    <span class="glyphicon glyphicon-random"></span> Diff
-  </button>  
-  <button type="button"
-          class="btn btn-primary"
-          id="downloadFile"
-          ng-click="downloadFile()">
-    <span class="glyphicon glyphicon-download"></span> Download
-  </button>
-  <button type="button"
-          class="btn btn-primary"
-          id="restoreFile"
-          ng-click="restoreFile()">
-    <span class="glyphicon glyphicon-import"></span> Restore
-  </button>
+<div class="container">
+  <div class="btn-group">
+    <button type="button"
+            class="btn btn-primary"
+            id="viewFile"
+            ng-class="activeClassIfLastActionIs('viewFile')"
+            ng-click="viewFile()"
+            ng-disabled="! fileIsViewable">
+      <span class="glyphicon glyphicon-eye-open"></span> View
+    </button>
+    <button type="button"
+            class="btn btn-primary"
+            id="compareFile"
+            ng-class="activeClassIfLastActionIs('compareFile')"
+            ng-click="compareFile()"
+            ng-disabled="! fileIsComparable">
+      <span class="glyphicon glyphicon-random"></span> Diff
+    </button>  
+    <button type="button"
+            class="btn btn-primary"
+            id="downloadFile"
+            ng-click="downloadFile()">
+      <span class="glyphicon glyphicon-download"></span> Download
+    </button>
+    <button type="button"
+            class="btn btn-primary"
+            id="restoreFile"
+            ng-click="restoreFile()">
+      <span class="glyphicon glyphicon-import"></span> Restore
+    </button>
+  </div>
 </div>
 
 
@@ -58,17 +59,6 @@
   background-color: #f6f6f6;
   }
   
-  .side-by-side-diff {
-  width: 100%;
-  border-collapse: collapse;
-  display: inline-table;
-
-  }
-
-
-  .change .line-nr {
-  font-weight: bold;
-  }
   
   .ins {
   background-color: #e6ffe6;
@@ -76,81 +66,76 @@
 
   .del {
   background-color: #ffb6c7;
-  //text-decoration: line-through;
   }
 
-  .context-switch {
-  background-color: #bebebe;
-  height: 20px;
+  .side-by-side-diff {
+  width: 100%;
+  margin-left: 10px;
+  margin-right: 10px;
   }
-
-  .side-by-side {
-  overflow: auto; display: block; width: 45%; margin-left: 5px; float: left;
-  }
-  .side-by-side hr {
-  height: 5px;
-  background-color: grey;
-  }
-
 </style>
 
 
 
-<div ng-show="diffResult">
+<div class="container" ng-show="diffResult">
   <ul class="nav nav-tabs nav-justified" role="tablist" ng-init="diffType = 'intext'">
     <li ng-class="activeClassIfDiffTypeIs('intext')" ng-click="diffType = 'intext'"><a href="">Intext</a></li>
     <li ng-class="activeClassIfDiffTypeIs('sideBySide')" ng-click="diffType = 'sideBySide'"><a href="">Side by side</a></li>
   </ul>
+</div>
 
-  <!-- intext -->
-  <div ng-show="diffType === 'intext'">
-    <div ng-repeat="diffContext in diffResult.intext">
-      <div style="margin-bottom: 5px;">
-        <!-- controls -->
+<!-- intext -->
+<div class="container" ng-show="diffType === 'intext'">
+  <div ng-repeat="diffContext in diffResult.intext">
+    <div style="margin-bottom: 5px;">
+      <!-- controls -->
+      <button type="button"
+              class="btn btn-primary btn-small"
+              ng-click="revertChange($index)"
+              title="Revert Change">
+        <span class="glyphicon glyphicon-share"></span>
+      </button>           
+    </div>
+    <pre><code ng-bind-html="diffContext"></code></pre>
+  </div>
+</div>
+
+<!-- side by side -->
+<div ng-if="diffType ==='sideBySide'">
+  <table class="side-by-side-diff">
+    <tr zsd-side-by-side-diff-rows blocks="diffResult.sideBySide">
+      <td colspan="4" style="padding-top: 30px; padding-bottom: 5px;">
         <button type="button"
                 class="btn btn-primary btn-small"
-                ng-click="revertChange($index)"
+                ng-click="revertChange(zsdIndex)"
                 title="Revert Change">
           <span class="glyphicon glyphicon-share"></span>
         </button>           
-      </div>
-      <pre><code ng-bind-html="diffContext"></code></pre>
+      </td>
+    </tr>
+  </table>
+</div>
+
+
+
+<div class="container">
+  <!-- text file content -->  
+  <div class="panel panel-default center-block" ng-if="textFileContent">
+    <div class="panel-heading">{{curSnap.Name}}</div>
+    <div class="pandel-body"><pre><code ng-bind-html="textFileContent"></code></pre></div>
+  </div>
+
+
+  <!-- embedded binary content -->
+  <!-- FIXME: remove / fix styles (grml frontend is not my world!) -->
+  <div class="container panel panel-default center-block" ng-if="binaryFileContent">
+    <div class="panel-heading">{{curSnap.Name}}</div>
+    <div class="pandel-body" style="width: 90%; height: 100%">
+      <embed zsd-embed-src="{{binaryFileContent}}"
+             ng-src="{{binaryFileContent}}"
+             class="panel-body"
+             style="width:100%;height:800px"></embed>
     </div>
   </div>
 
-  <!-- side by side -->
-  <div ng-if="diffType ==='sideBySide'">
-    <table>
-      <tr zsd-side-by-side-diff-rows blocks="diffResult.sideBySide">
-        <td colspan="4" style="padding-top: 30px; padding-bottom: 5px;">
-          <button type="button"
-                  class="btn btn-primary btn-small"
-                  ng-click="revertChange(zsdIndex)"
-                  title="Revert Change">
-            <span class="glyphicon glyphicon-share"></span>
-          </button>           
-        </td>
-      </tr>
-    </table>
-  </div>
-</div>
-
-
-<!-- text file content -->
-<div class="panel panel-default center-block" ng-if="textFileContent">
-  <div class="panel-heading">{{curSnap.Name}}</div>
-  <div class="pandel-body"><pre><code ng-bind-html="textFileContent"></code></pre></div>
-</div>
-
-
-<!-- embedded binary content -->
-<!-- FIXME: remove / fix styles (grml frontend is not my world!) -->
-<div class="panel panel-default center-block" ng-if="binaryFileContent">
-  <div class="panel-heading">{{curSnap.Name}}</div>
-  <div class="pandel-body" style="width: 90%; height: 100%">
-    <embed zsd-embed-src="{{binaryFileContent}}"
-           ng-src="{{binaryFileContent}}"
-           class="panel-body"
-           style="width:100%;height:800px"></embed>
-  </div>
 </div>
