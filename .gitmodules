@@ -1,4 +1,0 @@
-[submodule "jsdifflib"]
-  path = webapp/lib/jsdifflib
-  url = git://github.com/cemerick/jsdifflib.git
-

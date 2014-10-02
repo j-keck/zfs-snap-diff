@@ -30,6 +30,8 @@ func listenAndServe(addr string, frontendConfig FrontendConfig) {
 	http.HandleFunc("/read-file", readFileHndl)
 	http.HandleFunc("/file-info", fileInfoHndl)
 	http.HandleFunc("/restore-file", restoreFileHndl)
+	http.HandleFunc("/diff-file", diffFileHndl)
+	http.HandleFunc("/revert-change", revertChangeHndl)
 
 	// serve static content from 'webapp' directory if environment has 'ZSD_SERVE_FROM_WEBAPP' set (for dev)
 	if envHasSet("ZSD_SERVE_FROM_WEBAPP") {
@@ -293,6 +295,122 @@ func restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Fprintf(w, "file '%s' successful restored from snapshot: '%s'", path, snapName)
 	}
+}
+
+func diffFileHndl(w http.ResponseWriter, r *http.Request) {
+	params, _ := extractParams(r)
+	path, pathFound := params["path"]
+	if !pathFound {
+		respondWithParamMissing(w, "path")
+		return
+	}
+
+	// verify path
+	verifyPathIsUnderZMP(path, w, r)
+
+	// get parameter snapshot-name
+	snapName, snapNameFound := params["snapshot-name"]
+	if !snapNameFound {
+		respondWithParamMissing(w, "snapshot-name")
+		return
+	}
+
+	// get parameter context-size
+	contextSize := 5
+	if contextSizeStr, ok := params["context-size"]; ok {
+		contextSize, _ = strconv.Atoi(contextSizeStr)
+	}
+
+	// read actual file
+	var actualText string
+	if actualFh, err := NewFileHandle(path); err != nil {
+		http.Error(w, "unable to get file-handle for actual file: "+err.Error(), 400)
+		return
+	} else {
+		if actualText, err = actualFh.ReadText(); err != nil {
+			http.Error(w, "unable to read actual file: "+err.Error(), 400)
+			return
+		}
+	}
+
+	// read snap file
+	var snapText string
+	if snapFh, err := NewFileHandleInSnapshot(path, snapName); err != nil {
+		http.Error(w, "unable to get file-handle for snap file: "+err.Error(), 400)
+		return
+	} else {
+		if snapText, err = snapFh.ReadText(); err != nil {
+			http.Error(w, "unable to read snap file: "+err.Error(), 400)
+			return
+		}
+	}
+
+	// execute diff
+	diff := Diff(snapText, actualText, contextSize)
+
+	// marshal
+	js, err := json.Marshal(map[string]interface{}{
+		"sideBySide": diff.AsSideBySideHTML(),
+		"intext":     diff.AsIntextHTML(),
+		"deltas":     diff.DeltasByContext(),
+		"patches":    diff.GNUDiffs,
+	})
+
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	// respond
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
+}
+
+func revertChangeHndl(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Println("unable to read body:", err.Error())
+		return
+	}
+
+	var params map[string]interface{}
+	if err := json.Unmarshal(body, &params); err != nil {
+		log.Println("unable to parse json:", err.Error())
+	}
+
+	path, pathFound := params["path"].(string)
+	if !pathFound {
+		respondWithParamMissing(w, "path")
+		return
+	}
+
+	// verify path
+	verifyPathIsUnderZMP(path, w, r)
+
+	//FIXME!!
+	var deltas Deltas
+	if d, ok := params["deltas"]; ok {
+		js, _ := json.Marshal(d)
+		err = json.Unmarshal(js, &deltas)
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		respondWithParamMissing(w, "deltas")
+		return
+	}
+
+	// get file-handle
+	var fh *FileHandle
+	if fh, err = NewFileHandle(path); err != nil {
+		http.Error(w, "unable to revert change - file not found: "+err.Error(), 400)
+		return
+	}
+
+	if err := fh.Patch(deltas); err != nil {
+		http.Error(w, "unable to revert change: "+err.Error(), 500)
+	}
+
 }
 
 // serve content from binary

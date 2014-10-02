@@ -1,6 +1,6 @@
 angular.module('zsdDirectives', ['zsdUtils', 'zsdServices']).
   
-directive('zsdFileActions', ['$window', '$sce', '$rootScope', 'FileUtils', 'Backend', 'Difflib', 'PathUtils', 'Config', function($window, $sce, $rootScope, FileUtils, Backend, Difflib, PathUtils, Config){
+directive('zsdFileActions', ['$window', '$sce', '$rootScope', '$http', 'FileUtils', 'Backend', 'PathUtils', 'Config', function($window, $sce, $rootScope, $http, FileUtils, Backend, PathUtils, Config){
   return {
     restrict: 'E',
     templateUrl: 'template-file-actions.html',
@@ -42,11 +42,13 @@ directive('zsdFileActions', ['$window', '$sce', '$rootScope', 'FileUtils', 'Back
       scope.compareFile = function compareFile(){
         scope.lastAction = scope.compareFile;
 
-        Difflib.diffFiles(scope.pathInActual, scope.curSnap.Name, scope.pathInSnap).then(function(diff){
-          clearOthersButKeep('fileDiff');
-          
-          scope.fileDiff = diff;
+
+        //FIXME: in backend
+        $http.get('/diff-file', {params: {path: scope.pathInActual, 'snapshot-name': scope.curSnap.Name}}).then(function(res){
+          clearOthersButKeep('diffResult');      
+          scope.diffResult = res.data;
         });
+        
       };
 
       // download the file from the selected snapshot
@@ -77,11 +79,38 @@ directive('zsdFileActions', ['$window', '$sce', '$rootScope', 'FileUtils', 'Back
 
       // returns 'active' if a given name equals the function name from the lastAction
       //   * for action buttons 'toggle'
-      scope.activeClassIfSelected = function(name){
+      scope.activeClassIfLastActionIs = function(name){
         if(scope.lastAction.name === name){
           return "active";
         }
       };
+
+      // returns 'active' if a given name equals the current diffType
+      //   * for diff type tabs
+      scope.activeClassIfDiffTypeIs = function(name){
+        if(scope.diffType === name){
+          return "active";
+        }
+      };
+
+
+      scope.downloadPatch = function(idx){
+        var patch = unescape(scope.diffResult.patches[idx]);
+        var patchName = PathUtils.extractFileName(scope.pathInActual) + ".patch";
+          
+        var link = $window.document.createElement('a');
+        link.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(patch));
+        link.setAttribute('download', patchName);
+        link.click();
+      };
+
+      scope.revertChange = function(idx){
+        console.log("revert change: " + idx);
+        $http.put('/revert-change', {path: scope.pathInActual, deltas: scope.diffResult.deltas[idx]}).then(function(res){
+          scope.compareFile();
+        });
+
+      }
 
 
 
@@ -172,8 +201,9 @@ directive('zsdFileActions', ['$window', '$sce', '$rootScope', 'FileUtils', 'Back
 
       // clear other content, but keep the content with the given name
       function clearOthersButKeep(keep){
-        if(keep !== 'fileDiff')
-          delete scope.fileDiff;
+        if(keep !== 'diffResult'){
+          delete scope.diffResult;
+        }
 
         if(keep !== 'textFileContent')
           delete scope.textFileContent;
@@ -453,6 +483,54 @@ directive('notifications', ['$rootScope', '$timeout', function($rootScope, $time
     },
     templateUrl: "template-notifications.html"
   }
-}])
+}]).
+
+
+
+directive('zsdSideBySideDiffRows', ['$compile', function($compile){
+  return {
+    restrict: 'A',
+    transclude: 'element',
+    scope: {
+      blocks: '='
+    },
+    compile: function(element, attr, linker){
+      return function($scope, $element, $attr) {
+        var parent = $element.parent();
+        $scope.$watchCollection('blocks', function(blocks){
+          // remove old
+          parent.html('');
+
+          //FIXME: cleanup!!!
+          // delegate to downloadPatch from the caller side
+          $scope.downloadPatch = function(idx){
+            $scope.$parent.$parent.downloadPatch(idx);
+          }
+
+          //FIXME: cleanup!!!
+          // delegate to revertChange from the caller side
+          $scope.revertChange = function(idx){
+            $scope.$parent.$parent.revertChange(idx);
+          }
+
+          
+          // add new
+          for(i in blocks){
+            // create a new scope
+            var childScope = $scope.$new(false);
+
+            // pass patch counter as zsdIndex in the scope
+            childScope['zsdIndex'] = i;
+
+            linker(childScope, function(clone){
+              parent.append(clone);
+              parent.append(blocks[i]);
+            });
+          }
+        });
+      }
+    }
+  }
+}]);
 
 

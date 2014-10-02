@@ -71,7 +71,12 @@ factory('PathUtils', ['Config', function(Config){
       newEntries.shift(); // remove root
       newEntries.unshift(newRoot); // add new root
       return newEntries;
-    }
+    },
+
+    extractFileName: function(path){
+      var pathElements = path.split('/');
+      return pathElements[pathElements.length - 1];
+    },
 
     
   }

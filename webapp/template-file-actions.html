@@ -49,10 +49,91 @@
 
 
 
-<!-- file diff -->
-<div class="panel panel-default"
-     ng-bind-html="fileDiff"
-     ng-if="fileDiff"></div>
+<style>
+
+  .line-nr {
+  padding-right: 10px;
+  text-align: right;
+  width: 40px;
+  background-color: #f6f6f6;
+  }
+  
+  .side-by-side-diff {
+  width: 100%;
+  border-collapse: collapse;
+  display: inline-table;
+
+  }
+
+
+  .change .line-nr {
+  font-weight: bold;
+  }
+  
+  .ins {
+  background-color: #e6ffe6;
+  }
+
+  .del {
+  background-color: #ffb6c7;
+  //text-decoration: line-through;
+  }
+
+  .context-switch {
+  background-color: #bebebe;
+  height: 20px;
+  }
+
+  .side-by-side {
+  overflow: auto; display: block; width: 45%; margin-left: 5px; float: left;
+  }
+  .side-by-side hr {
+  height: 5px;
+  background-color: grey;
+  }
+
+</style>
+
+
+
+<div ng-show="diffResult">
+  <ul class="nav nav-tabs nav-justified" role="tablist" ng-init="diffType = 'intext'">
+    <li ng-class="activeClassIfDiffTypeIs('intext')" ng-click="diffType = 'intext'"><a href="">Intext</a></li>
+    <li ng-class="activeClassIfDiffTypeIs('sideBySide')" ng-click="diffType = 'sideBySide'"><a href="">Side by side</a></li>
+  </ul>
+
+  <!-- intext -->
+  <div ng-show="diffType === 'intext'">
+    <div ng-repeat="diffContext in diffResult.intext">
+      <div style="margin-bottom: 5px;">
+        <!-- controls -->
+        <button type="button"
+                class="btn btn-primary btn-small"
+                ng-click="revertChange($index)"
+                title="Revert Change">
+          <span class="glyphicon glyphicon-share"></span>
+        </button>           
+      </div>
+      <pre><code ng-bind-html="diffContext"></code></pre>
+    </div>
+  </div>
+
+  <!-- side by side -->
+  <div ng-if="diffType ==='sideBySide'">
+    <table>
+      <tr zsd-side-by-side-diff-rows blocks="diffResult.sideBySide">
+        <td colspan="4" style="padding-top: 30px; padding-bottom: 5px;">
+          <button type="button"
+                  class="btn btn-primary btn-small"
+                  ng-click="revertChange(zsdIndex)"
+                  title="Revert Change">
+            <span class="glyphicon glyphicon-share"></span>
+          </button>           
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
 
 
 <!-- text file content -->

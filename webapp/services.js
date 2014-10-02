@@ -113,38 +113,4 @@ factory('Backend', ["$http", "Config", function($http, Config){
       });
     }
   }
-}]).
-
-
-factory('Difflib', ['Config', 'Backend', function(Config, Backend){
-  return {
-    diffText: function(actualContent, snapName, snapContent){
-      var actualLines = difflib.stringAsLines(actualContent);
-      var snapLines = difflib.stringAsLines(snapContent);
-      
-      var sm = new difflib.SequenceMatcher(snapLines, actualLines);
-
-      return diffview.buildView({
-        baseTextName: snapName,
-        baseTextLines: snapLines,
-        newTextName: "Actual Version",
-        newTextLines: actualLines,
-        opcodes: sm.get_opcodes(),
-        contextSize: Config.get("diffContextSize"),
-        viewType: 0 }).outerHTML;
-    },
-
-    diffFiles: function(actualFile, snapName, snapFile){
-      var self = this;
-      var p = Backend.readTextFile(actualFile).then(function(actualContent){
-        return Backend.readTextFile(snapFile).then(function(snapContent){
-          return {actualContent: actualContent, snapContent: snapContent};
-        })
-      });
-
-      return p.then(function(r){
-        return self.diffText(r.actualContent, snapName, r.snapContent);
-      });
-    }
-  }
 }]);

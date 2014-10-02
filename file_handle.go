@@ -5,6 +5,7 @@ import (
 	"crypto/md5"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -75,6 +76,14 @@ func (fh *FileHandle) MimeType() (string, error) {
 	}
 
 	return http.DetectContentType(buffer[:n]), nil
+}
+
+func (fh *FileHandle) ReadText() (string, error) {
+	b, err := ioutil.ReadFile(fh.Path)
+	if err != nil && err != io.EOF {
+		return "", fmt.Errorf("unable to read file content: %s", err.Error())
+	}
+	return string(b), nil
 }
 
 // CopyTo copies the file content to the given Writer
@@ -151,6 +160,120 @@ func (fh *FileHandle) Copy(path string) (err error) {
 	return
 }
 
+func (fh *FileHandle) Patch(deltas Deltas) error {
+	var err error
+
+	// verify the equal parts from the deltas are the same as in the given file
+	// returns a error if not
+	verifyDeltasAreApplicable := func() error {
+		var f *os.File
+		if f, err = os.Open(fh.Path); err != nil {
+			return fmt.Errorf("unable to open file: '%s' - %s", fh.Name, err.Error())
+		}
+		defer f.Close()
+
+		for _, delta := range deltas {
+			if delta.Type == Eq {
+				buffer := make([]byte, len(delta.Text))
+				if _, err = f.ReadAt(buffer, delta.StartPosTarget-1); err != nil && err != io.EOF {
+					return fmt.Errorf("unable to read file: '%s' - %s", fh.Name, err.Error())
+				}
+
+				if string(buffer) != delta.Text {
+					msg := "unexpected content in file: '%s' - pos=%d, expected='%s', found='%s' - file changed?"
+					return fmt.Errorf(msg, fh.Name, delta.StartPosTarget, delta.Text, string(buffer))
+				}
+			}
+		}
+		return nil
+	}
+
+	// apply the deltas to a given file
+	applyDeltasTo := func(dstPath string) error {
+		var src, dst *os.File
+		// open src / dst
+		if src, err = os.Open(fh.Path); err != nil {
+			return fmt.Errorf("unable to open src-file: '%s' - %s", fh.Path, err.Error())
+		}
+		defer src.Close()
+
+		if dst, err = os.Create(dstPath); err != nil {
+			return fmt.Errorf("unable to open dst-file: '%s' - %s", dstPath, err.Error())
+		}
+		defer func() {
+			dst.Close()
+			dst.Sync()
+		}()
+
+		// apply deltas
+		var srcPos, offset int64
+		for _, delta := range deltas {
+			if delta.Type == Del {
+				// copy unchanged
+				bytesToRead := delta.StartPosTarget - 1 - srcPos
+				if offset, err = io.CopyN(dst, src, bytesToRead); err != nil && err != io.EOF {
+					return fmt.Errorf("unable to copy unchanged text - %s", err.Error())
+				}
+				srcPos += offset
+
+				// restore deleted text
+				if _, err := dst.Write([]byte(delta.Text)); err != nil {
+					return fmt.Errorf("unable to restore deleted text - %s", err.Error())
+				}
+			}
+
+			if delta.Type == Ins {
+				// copy unchanged
+				bytesToRead := delta.StartPosTarget - 1 - srcPos
+				if offset, err = io.CopyN(dst, src, bytesToRead); err != nil && err != io.EOF {
+					return fmt.Errorf("unable to copy unchanged text - %s", err.Error())
+				}
+				srcPos += offset
+
+				// skip inserted text
+				deletedTextLength := int64(len(delta.Text))
+				if _, err = src.Seek(deletedTextLength, 1); err != nil {
+					return fmt.Errorf("unable to seek - %s", err.Error())
+				}
+
+				srcPos += deletedTextLength
+
+			}
+		}
+		// copy the rest
+		if _, err = io.Copy(dst, src); err != nil && err != io.EOF {
+			return fmt.Errorf("unable to copy rest text - %s", err.Error())
+		}
+
+		return nil
+	}
+
+	// check
+	if err := verifyDeltasAreApplicable(); err != nil {
+		return fmt.Errorf("unable to verify deltas: %s", err.Error())
+	}
+
+	// patch
+	tsString := time.Now().Format("20060102_150405")
+	patchWorkFilePath := fmt.Sprintf("%s/.zsd-patch-in-process-%s_%s", filepath.Dir(fh.Path), fh.Name, tsString)
+	if applyDeltasErr := applyDeltasTo(patchWorkFilePath); applyDeltasErr != nil {
+		// delete patch work file
+		os.Remove(patchWorkFilePath)
+		return fmt.Errorf("unable to apply deltas - keep file untouched - %s", applyDeltasErr.Error())
+	}
+
+	backupFilePath := fmt.Sprintf("%s/%s_%s", filepath.Dir(fh.Path), fh.Name, tsString)
+	if err := os.Rename(fh.Path, backupFilePath); err != nil {
+		return fmt.Errorf("unable to rename orginal file - %s", err.Error())
+	}
+
+	if err := os.Rename(patchWorkFilePath, fh.Path); err != nil {
+		return fmt.Errorf("unable to rename patch file to orginal file - %s", err.Error())
+	}
+
+	return nil
+}
+
 // FileHasChangedFunc to detect if a file has changed
 type FileHasChangedFunc func(*FileHandle, *FileHandle) bool
 
@@ -158,6 +281,7 @@ type FileHasChangedFunc func(*FileHandle, *FileHandle) bool
 // a file changes algorithm by the given name
 func NewFileHasChangedFuncByName(method string) (FileHasChangedFunc, error) {
 	switch method {
+
 	case "size+modTime":
 		return CompareFileBySizeAndModTime(), nil
 	case "size":
