@@ -12,10 +12,9 @@ use IO::Compress::Zip qw(zip $ZipError);
 my $version = `git describe`;
 chomp($version);
 
-# git submodule
-say "update git submodule";
-say `git submodule init`;
-say `git submodule update`;
+# go dependencies
+say "get go dependencies";
+say `go get -v`;
 
 # bindata.go
 say "generate bindata.go ...";
