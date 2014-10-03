@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -35,12 +34,12 @@ func listenAndServe(addr string, frontendConfig FrontendConfig) {
 
 	// serve static content from 'webapp' directory if environment has 'ZSD_SERVE_FROM_WEBAPP' set (for dev)
 	if envHasSet("ZSD_SERVE_FROM_WEBAPP") {
-		log.Println("serve from webapp")
+		logNotice.Println("serve from webapp")
 		http.Handle("/", http.FileServer(http.Dir("webapp")))
 	} else {
 		http.HandleFunc("/", serveStaticContentFromBinaryHndl)
 	}
-	log.Fatal(http.ListenAndServe(addr, nil))
+	logError.Println(http.ListenAndServe(addr, nil))
 }
 
 // frontend-config
@@ -50,6 +49,7 @@ func configHndl(config FrontendConfig) http.HandlerFunc {
 		// marshal
 		js, err := json.Marshal(config)
 		if err != nil {
+			logError.Println(err.Error())
 			http.Error(w, err.Error(), 500)
 			return
 		}
@@ -65,6 +65,7 @@ func configHndl(config FrontendConfig) http.HandlerFunc {
 func listSnapshotsHndl(w http.ResponseWriter, r *http.Request) {
 	snapshots, err := zfs.ScanSnapshots()
 	if err != nil {
+		logError.Println(err.Error())
 		http.Error(w, err.Error(), 500)
 		return
 	}
@@ -73,19 +74,19 @@ func listSnapshotsHndl(w http.ResponseWriter, r *http.Request) {
 	// given file was modified.
 	params, _ := extractParams(r)
 	if path, ok := params["where-file-modified"]; ok {
-		log.Printf("scan snapshots where file: '%s' was modified\n", path)
+		logInfo.Printf("scan snapshots where file: '%s' was modified\n", path)
 
 		// if 'scan-snap-limit' is given, limit scan to the given value
 		if scanSnapLimit, ok := params["scan-snap-limit"]; ok {
 			limit, err := strconv.Atoi(scanSnapLimit)
 			if err != nil {
-				log.Printf("WARNING: Invalid value for 'scan-snap-limit'! - %s\n", err.Error())
+				logWarn.Printf("Invalid value for 'scan-snap-limit'! - %s\n", err.Error())
 				http.Error(w, err.Error(), 400)
 				return
 			}
 
 			if len(snapshots) > limit {
-				log.Printf("NOTICE: scan only %d snapshots for other file versions (%d snapshots available)\n", limit, len(snapshots))
+				logNotice.Printf("scan only %d snapshots for other file versions (%d snapshots available)\n", limit, len(snapshots))
 				snapshots = snapshots[:limit]
 			}
 		}
@@ -95,7 +96,7 @@ func listSnapshotsHndl(w http.ResponseWriter, r *http.Request) {
 		var fileHasChangedFuncGen FileHasChangedFuncGen
 		if compareFileMethod, ok := params["compare-file-method"]; ok {
 			if fileHasChangedFuncGen, err = NewFileHasChangedFuncGenByName(compareFileMethod); err != nil {
-				log.Printf("ERROR: Invalid value for 'compare-file-method'! - %s\n", err.Error())
+				logWarn.Printf("Invalid value for 'compare-file-method'! - %s\n", err.Error())
 				http.Error(w, err.Error(), 400)
 				return
 			}
@@ -111,6 +112,7 @@ func listSnapshotsHndl(w http.ResponseWriter, r *http.Request) {
 	// marshal
 	js, err := json.Marshal(snapshots)
 	if err != nil {
+		logError.Println(err.Error())
 		http.Error(w, err.Error(), 500)
 		return
 	}
@@ -125,12 +127,14 @@ func snapshotDiffHndl(w http.ResponseWriter, r *http.Request) {
 	params, _ := extractParams(r)
 	snapName, snapNameFound := params["snapshot-name"]
 	if !snapNameFound {
+		logWarn.Println("parameter 'snapshot-name' missing")
 		respondWithParamMissing(w, "snapshot-name")
 		return
 	}
 
 	diffs, err := zfs.ScanDiffs(snapName)
 	if err != nil {
+		logError.Println(err.Error())
 		http.Error(w, err.Error(), 500)
 		return
 	}
@@ -138,6 +142,7 @@ func snapshotDiffHndl(w http.ResponseWriter, r *http.Request) {
 	// marshal
 	js, err := json.Marshal(diffs)
 	if err != nil {
+		logError.Println(err.Error())
 		http.Error(w, err.Error(), 500)
 		return
 	}
@@ -152,6 +157,7 @@ func listDirHndl(w http.ResponseWriter, r *http.Request) {
 	params, _ := extractParams(r)
 	path, pathFound := params["path"]
 	if !pathFound {
+		logWarn.Println("parameter 'path' missing")
 		respondWithParamMissing(w, "path")
 	}
 
@@ -160,6 +166,7 @@ func listDirHndl(w http.ResponseWriter, r *http.Request) {
 
 	dirEntries, err := ScanDirEntries(path)
 	if err != nil {
+		logError.Println(err.Error())
 		http.Error(w, err.Error(), 500)
 		return
 	}
@@ -167,6 +174,7 @@ func listDirHndl(w http.ResponseWriter, r *http.Request) {
 	// marshal
 	js, err := json.Marshal(dirEntries)
 	if err != nil {
+		logError.Println(err.Error())
 		http.Error(w, err.Error(), 500)
 		return
 	}
@@ -181,6 +189,7 @@ func readFileHndl(w http.ResponseWriter, r *http.Request) {
 	params, _ := extractParams(r)
 	path, pathFound := params["path"]
 	if !pathFound {
+		logWarn.Println("parameter 'path' missing")
 		respondWithParamMissing(w, "path")
 		return
 	}
@@ -191,14 +200,14 @@ func readFileHndl(w http.ResponseWriter, r *http.Request) {
 	fh, err := NewFileHandle(path)
 
 	if err != nil {
-		log.Println(err)
+		logError.Println(err.Error())
 		http.Error(w, err.Error(), 500)
 		return
 	}
 
 	contentType, err := fh.MimeType()
 	if err != nil {
-		log.Println(err)
+		logError.Println(err.Error())
 		http.Error(w, err.Error(), 500)
 		return
 	}
@@ -218,6 +227,7 @@ func fileInfoHndl(w http.ResponseWriter, r *http.Request) {
 	params, _ := extractParams(r)
 	path, pathFound := params["path"]
 	if !pathFound {
+		logWarn.Println("parameter 'path' missing")
 		respondWithParamMissing(w, "path")
 		return
 	}
@@ -227,6 +237,7 @@ func fileInfoHndl(w http.ResponseWriter, r *http.Request) {
 
 	fh, err := NewFileHandle(path)
 	if err != nil {
+		logError.Println(err.Error())
 		http.Error(w, err.Error(), 400)
 		return
 	}
@@ -241,6 +252,7 @@ func fileInfoHndl(w http.ResponseWriter, r *http.Request) {
 	// marshal
 	js, err := json.Marshal(fi)
 	if err != nil {
+		logError.Println(err.Error())
 		http.Error(w, err.Error(), 500)
 		return
 	}
@@ -254,6 +266,7 @@ func restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 	params, _ := extractParams(r)
 	path, pathFound := params["path"]
 	if !pathFound {
+		logWarn.Println("parameter 'path' missing")
 		respondWithParamMissing(w, "path")
 		return
 	}
@@ -264,6 +277,7 @@ func restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 	// get parameter snapshot-name
 	snapName, snapNameFound := params["snapshot-name"]
 	if !snapNameFound {
+		logWarn.Println("parameter 'snapshot-name' missing")
 		respondWithParamMissing(w, "snapshot-name")
 		return
 	}
@@ -271,6 +285,7 @@ func restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 	// get file-handle for the actual file
 	actualFh, err := NewFileHandle(path)
 	if err != nil {
+		logError.Println(err.Error())
 		http.Error(w, "unable to restore - actual file not found: "+err.Error(), 400)
 		return
 	}
@@ -278,6 +293,7 @@ func restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 	// get file-handle for the file from the snashot
 	snapFh, err := NewFileHandleInSnapshot(path, snapName)
 	if err != nil {
+		logError.Println(err.Error())
 		http.Error(w, "unable to restore - file from snapshot not found: "+err.Error(), 400)
 		return
 	}
@@ -285,12 +301,14 @@ func restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 	// rename the actual file: <FILENAME>_<TIMESTAMP>
 	newName := fmt.Sprintf("%s_%s", actualFh.Name, time.Now().Format("20060102_150405"))
 	if err := actualFh.Rename(newName); err != nil {
+		logError.Println(err.Error())
 		http.Error(w, "unable to restore: "+err.Error(), 500)
 		return
 	}
 
 	// copy the file from the snapshot as the actual file
 	if err := snapFh.CopyAs(path); err != nil {
+		logError.Println(err.Error())
 		http.Error(w, "unable to restore: "+err.Error(), 500)
 	} else {
 		fmt.Fprintf(w, "file '%s' successful restored from snapshot: '%s'", path, snapName)
@@ -301,6 +319,7 @@ func diffFileHndl(w http.ResponseWriter, r *http.Request) {
 	params, _ := extractParams(r)
 	path, pathFound := params["path"]
 	if !pathFound {
+		logWarn.Println("parameter 'path' missing")
 		respondWithParamMissing(w, "path")
 		return
 	}
@@ -311,6 +330,7 @@ func diffFileHndl(w http.ResponseWriter, r *http.Request) {
 	// get parameter snapshot-name
 	snapName, snapNameFound := params["snapshot-name"]
 	if !snapNameFound {
+		logWarn.Println("parameter 'snapshot-name' missing")
 		respondWithParamMissing(w, "snapshot-name")
 		return
 	}
@@ -324,10 +344,12 @@ func diffFileHndl(w http.ResponseWriter, r *http.Request) {
 	// read actual file
 	var actualText string
 	if actualFh, err := NewFileHandle(path); err != nil {
+		logError.Println(err.Error())
 		http.Error(w, "unable to get file-handle for actual file: "+err.Error(), 400)
 		return
 	} else {
 		if actualText, err = actualFh.ReadText(); err != nil {
+			logError.Println(err.Error())
 			http.Error(w, "unable to read actual file: "+err.Error(), 400)
 			return
 		}
@@ -336,10 +358,12 @@ func diffFileHndl(w http.ResponseWriter, r *http.Request) {
 	// read snap file
 	var snapText string
 	if snapFh, err := NewFileHandleInSnapshot(path, snapName); err != nil {
+		logError.Println(err.Error())
 		http.Error(w, "unable to get file-handle for snap file: "+err.Error(), 400)
 		return
 	} else {
 		if snapText, err = snapFh.ReadText(); err != nil {
+			logError.Println(err.Error())
 			http.Error(w, "unable to read snap file: "+err.Error(), 400)
 			return
 		}
@@ -357,6 +381,7 @@ func diffFileHndl(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
+		logError.Println(err.Error())
 		http.Error(w, err.Error(), 500)
 		return
 	}
@@ -369,17 +394,18 @@ func diffFileHndl(w http.ResponseWriter, r *http.Request) {
 func revertChangeHndl(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Println("unable to read body:", err.Error())
+		logWarn.Printf("unable to read body: %s", err.Error())
 		return
 	}
 
 	var params map[string]interface{}
 	if err := json.Unmarshal(body, &params); err != nil {
-		log.Println("unable to parse json:", err.Error())
+		logWarn.Printf("unable to unmarshal json: %s\n", err.Error())
 	}
 
 	path, pathFound := params["path"].(string)
 	if !pathFound {
+		logWarn.Println("parameter 'path' missing")
 		respondWithParamMissing(w, "path")
 		return
 	}
@@ -391,11 +417,13 @@ func revertChangeHndl(w http.ResponseWriter, r *http.Request) {
 	var deltas Deltas
 	if d, ok := params["deltas"]; ok {
 		js, _ := json.Marshal(d)
-		err = json.Unmarshal(js, &deltas)
-		if err != nil {
-			panic(err)
+		if err = json.Unmarshal(js, &deltas); err != nil {
+			logWarn.Println(err.Error())
+			http.Error(w, "unable to unmarshal deltas-json: "+err.Error(), 500)
+			return
 		}
 	} else {
+		logWarn.Println("parameter 'deltas' missing")
 		respondWithParamMissing(w, "deltas")
 		return
 	}
@@ -403,11 +431,13 @@ func revertChangeHndl(w http.ResponseWriter, r *http.Request) {
 	// get file-handle
 	var fh *FileHandle
 	if fh, err = NewFileHandle(path); err != nil {
+		logWarn.Println(err.Error())
 		http.Error(w, "unable to revert change - file not found: "+err.Error(), 400)
 		return
 	}
 
 	if err := fh.Patch(deltas); err != nil {
+		logWarn.Println(err.Error())
 		http.Error(w, "unable to revert change: "+err.Error(), 500)
 	}
 
@@ -446,7 +476,7 @@ func extractParams(r *http.Request) (map[string]string, error) {
 		if strings.HasPrefix(contentType, "application/json") {
 			body, err := ioutil.ReadAll(r.Body)
 			if err != nil {
-				log.Println("unable to read body:", err.Error())
+				logWarn.Println("unable to read body:", err.Error())
 				return nil, err
 			}
 
@@ -456,7 +486,7 @@ func extractParams(r *http.Request) (map[string]string, error) {
 			}
 
 			if err := json.Unmarshal(body, &params); err != nil {
-				log.Println("unable to parse json:", err.Error())
+				logWarn.Println("unable to parse json:", err.Error())
 				return nil, err
 			}
 			return params, nil
@@ -477,7 +507,7 @@ func respondWithParamMissing(w http.ResponseWriter, name string) {
 func verifyPathIsUnderZMP(path string, w http.ResponseWriter, r *http.Request) {
 	if !strings.HasPrefix(filepath.Clean(path), zfs.MountPoint) {
 		http.Error(w, "illegal request", 403)
-		log.Printf("illegal request - file-path: '%s', url-path: '%s', from client: '%s' -> SHUTDOWN SERVER!",
+		logError.Printf("illegal request - file-path: '%s', url-path: '%s', from client: '%s' -> SHUTDOWN SERVER!",
 			path, r.URL.Path, r.RemoteAddr)
 
 		// trigger shutdown in a goroutine, to give the server time serve the 403 error

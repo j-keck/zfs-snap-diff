@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"log"
 	"os/exec"
 	"strings"
 )
@@ -19,7 +18,7 @@ func NewZFS(name string) (*ZFS, error) {
 	// else it returns stderr and the error
 	execZFS := func(first string, rest ...string) (string, error) {
 		args := append(strings.Split(first, " "), rest...)
-		log.Printf("execute: zfs %s %s\n", first, strings.Join(rest, " "))
+		logDebug.Printf("execute: zfs %s %s\n", first, strings.Join(rest, " "))
 
 		cmd := exec.Command("zfs", args...)
 
@@ -30,7 +29,7 @@ func NewZFS(name string) (*ZFS, error) {
 		cmd.Stderr = &stderrBuf
 
 		if cmdErr := cmd.Run(); cmdErr != nil {
-			log.Printf("ERROR: executing zfs cmd: %s: %s\n", cmdErr.Error(), stderrBuf.String())
+			logError.Printf("executing zfs cmd: %s: %s\n", cmdErr.Error(), stderrBuf.String())
 			return stderrBuf.String(), cmdErr
 		}
 

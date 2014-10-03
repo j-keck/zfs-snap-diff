@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"log"
 	"os"
 )
@@ -10,8 +12,16 @@ import (
 // VERSION  a set at buid time (go build -ldflags "-X main.VERSION $(git describe)")
 var VERSION string
 
+// ZFS Handler
+var zfs *ZFS
+
+// Log Handler
 var (
-	zfs *ZFS
+	logDebug  *log.Logger
+	logInfo   *log.Logger
+	logNotice *log.Logger
+	logWarn   *log.Logger
+	logError  *log.Logger
 )
 
 // FrontendConfig hold the configuration for the ui
@@ -29,6 +39,8 @@ func main() {
 	portFlag := flag.Int("p", 12345, "web server port")
 	listenOnAllInterfacesFlag := flag.Bool("a", false, "listen on all interfaces")
 	printVersionFlag := flag.Bool("V", false, "print version and exit")
+	verboseLoggingFlag := flag.Bool("v", false, "verbose logging")
+
 	// frontend
 	diffContextSizeFlag := flag.Int("diff-context-size", 5, "context size in diff")
 	defaultFileActionFlag := flag.String("default-file-action", "view", "default file action in frontend when a file is selected: 'off', 'view', 'diff', 'download', 'restore'")
@@ -41,6 +53,13 @@ func main() {
 	if *printVersionFlag {
 		fmt.Printf("Version: %s\n", VERSION)
 		os.Exit(0)
+	}
+
+	// init logging handler
+	if *verboseLoggingFlag {
+		initLogHandlers(os.Stdout, os.Stdout, os.Stdout, os.Stdout, os.Stderr)
+	} else {
+		initLogHandlers(ioutil.Discard, os.Stdout, os.Stdout, os.Stdout, os.Stderr)
 	}
 
 	// last argument is the zfs name
@@ -57,10 +76,10 @@ func main() {
 	var err error
 	zfs, err = NewZFS(zfsName)
 	if err != nil {
-		log.Print(err.Error())
+		logError.Println(err.Error())
 		os.Exit(1)
 	}
-	log.Printf("work on zfs: %s wich is mounted under: %s\n", zfs.Name, zfs.MountPoint)
+	logInfo.Printf("work on zfs: %s wich is mounted under: %s\n", zfs.Name, zfs.MountPoint)
 
 	// listen on localhost - if flag '-a' is given, listen on all interfaces
 	var addr string
@@ -78,9 +97,9 @@ func main() {
 	// print warning if file-compare method md5 is used
 	if *compareFileMethodFlag == "md5" {
 		if *scanSnapLimitFlag > 0 {
-			log.Println("NOTICE: compare all files only with md5 - expect high cpu usage!")
+			logNotice.Println("compare all files only with md5 - expect high cpu usage / long runtime!")
 		} else {
-			log.Println("WARNING: no 'scan-snap-limit' was given and compare file with md5 - expect VERY HIGH cpu usage / VERY LONG runtime!!!!")
+			logNotice.Println("no 'scan-snap-limit' was given and compare all files only with md5 - expect VERY HIGH cpu usage / VERY LONG runtime!!!!")
 		}
 	}
 
@@ -97,6 +116,14 @@ func main() {
 	}
 
 	// startup web server
-	log.Printf("start server and listen on: '%s'\n", addr)
+	logInfo.Printf("start server and listen on: '%s'\n", addr)
 	listenAndServe(addr, frontendConfig)
+}
+
+func initLogHandlers(debugHndl, infoHndl, noticeHndl, warnHndl, errorHndl io.Writer) {
+	logDebug = log.New(debugHndl, "DEBUG:  ", log.Ldate|log.Ltime|log.Lshortfile)
+	logInfo = log.New(infoHndl, "INFO:   ", log.Ldate|log.Ltime)
+	logNotice = log.New(noticeHndl, "NOTICE: ", log.Ldate|log.Ltime)
+	logWarn = log.New(warnHndl, "WARN:   ", log.Ldate|log.Ltime)
+	logError = log.New(errorHndl, "ERROR:  ", log.Ldate|log.Ltime|log.Lshortfile)
 }
