@@ -53,6 +53,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	// initialize zfs handler
 	var err error
 	zfs, err = NewZFS(zfsName)
 	if err != nil {

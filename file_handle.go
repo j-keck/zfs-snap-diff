@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-// FileHandle to access files / meta infos
+// FileHandle for file access / operations and metadata lookup
 type FileHandle struct {
 	Name    string
 	Path    string
@@ -44,6 +44,9 @@ func newFileHandle(path string) (*FileHandle, error) {
 	return &FileHandle{name, path, fi.Size(), fi.ModTime()}, nil
 }
 
+// UniqueName returns the unique file name
+//   * the file name if the file is in the actual filesystem
+//   * <FILE-NAME>-<SNAP-NAME>.<SUFFIX> if the file is from a snapshot
 func (fh *FileHandle) UniqueName() string {
 	if strings.HasPrefix(fh.Path, zfs.MountPoint+"/.zfs/snapshot") {
 		// extract snapshot-name
@@ -68,8 +71,11 @@ func (fh *FileHandle) MimeType() (string, error) {
 	if err != nil {
 		return "", err
 	}
+	defer f.Close()
 
-	buffer := make([]byte, 1024)
+	// read the first 512 bytes
+	//  * http.DetectContentType considers at most 512 bytes
+	buffer := make([]byte, 512)
 	n, err := f.Read(buffer)
 	if err != nil {
 		return "", err
@@ -78,6 +84,7 @@ func (fh *FileHandle) MimeType() (string, error) {
 	return http.DetectContentType(buffer[:n]), nil
 }
 
+// ReadText returns the file content as string
 func (fh *FileHandle) ReadText() (string, error) {
 	b, err := ioutil.ReadFile(fh.Path)
 	if err != nil && err != io.EOF {
@@ -86,29 +93,10 @@ func (fh *FileHandle) ReadText() (string, error) {
 	return string(b), nil
 }
 
-// CopyTo copies the file content to the given Writer
-func (fh *FileHandle) CopyTo(w io.Writer) error {
-	f, err := os.Open(fh.Path)
-
-	if err != nil {
-		return err
-	}
-
-	_, err = io.Copy(w, f)
-	return err
-}
-
 // Rename renames a file under the same directory
 func (fh *FileHandle) Rename(newName string) error {
 	newPath := fmt.Sprintf("%s/%s", filepath.Dir(fh.Path), newName)
-	if err := os.Rename(fh.Path, newPath); err != nil {
-		return err
-	}
-
-	// update file name / path
-	fh.Name = newName
-	fh.Path = newPath
-	return nil
+	return fh.Move(newPath)
 }
 
 // Move moves / renames a file
@@ -123,22 +111,34 @@ func (fh *FileHandle) Move(newPath string) error {
 	return nil
 }
 
-// Copy copies a file
-func (fh *FileHandle) Copy(path string) (err error) {
-	// open src
-	in, err := os.Open(fh.Path)
+// CopyTo copies the file content to the given Writer
+func (fh *FileHandle) CopyTo(w io.Writer) error {
+	f, err := os.Open(fh.Path)
 	if err != nil {
 		return err
 	}
-	defer in.Close()
+	defer f.Close()
+
+	_, err = io.Copy(w, f)
+	return err
+}
+
+// CopyAs copies a file
+func (fh *FileHandle) CopyAs(path string) (err error) {
+	var src, dst *os.File
+
+	// open src
+	if src, err = os.Open(fh.Path); err != nil {
+		return err
+	}
+	defer src.Close()
 
 	// open dest
-	out, err := os.Create(path)
-	if err != nil {
+	if dst, err = os.Create(path); err != nil {
 		return err
 	}
 	defer func() {
-		closeErr := out.Close()
+		closeErr := dst.Close()
 		if err == nil {
 			err = closeErr
 
@@ -151,15 +151,18 @@ func (fh *FileHandle) Copy(path string) (err error) {
 	}()
 
 	// copy
-	if _, err = io.Copy(out, in); err != nil {
+	if _, err = io.Copy(dst, src); err != nil {
 		return
 	}
 
 	// sync
-	err = out.Sync()
+	err = dst.Sync()
 	return
 }
 
+// Patch applys the given deltas to the current file
+//   * deleted entries are inserted
+//   * inserted entries are removed
 func (fh *FileHandle) Patch(deltas Deltas) error {
 	var err error
 
@@ -168,7 +171,7 @@ func (fh *FileHandle) Patch(deltas Deltas) error {
 	verifyDeltasAreApplicable := func() error {
 		var f *os.File
 		if f, err = os.Open(fh.Path); err != nil {
-			return fmt.Errorf("unable to open file: '%s' - %s", fh.Name, err.Error())
+			return fmt.Errorf("open file: '%s' - %s", fh.Name, err.Error())
 		}
 		defer f.Close()
 
@@ -176,7 +179,7 @@ func (fh *FileHandle) Patch(deltas Deltas) error {
 			if delta.Type == Eq {
 				buffer := make([]byte, len(delta.Text))
 				if _, err = f.ReadAt(buffer, delta.StartPosTarget-1); err != nil && err != io.EOF {
-					return fmt.Errorf("unable to read file: '%s' - %s", fh.Name, err.Error())
+					return fmt.Errorf("read file: '%s' - %s", fh.Name, err.Error())
 				}
 
 				if string(buffer) != delta.Text {
@@ -212,13 +215,13 @@ func (fh *FileHandle) Patch(deltas Deltas) error {
 				// copy unchanged
 				bytesToRead := delta.StartPosTarget - 1 - srcPos
 				if offset, err = io.CopyN(dst, src, bytesToRead); err != nil && err != io.EOF {
-					return fmt.Errorf("unable to copy unchanged text - %s", err.Error())
+					return fmt.Errorf("copy unchanged text - %s", err.Error())
 				}
 				srcPos += offset
 
 				// restore deleted text
 				if _, err := dst.Write([]byte(delta.Text)); err != nil {
-					return fmt.Errorf("unable to restore deleted text - %s", err.Error())
+					return fmt.Errorf("restore deleted text - %s", err.Error())
 				}
 			}
 
@@ -226,14 +229,14 @@ func (fh *FileHandle) Patch(deltas Deltas) error {
 				// copy unchanged
 				bytesToRead := delta.StartPosTarget - 1 - srcPos
 				if offset, err = io.CopyN(dst, src, bytesToRead); err != nil && err != io.EOF {
-					return fmt.Errorf("unable to copy unchanged text - %s", err.Error())
+					return fmt.Errorf("copy unchanged text - %s", err.Error())
 				}
 				srcPos += offset
 
 				// skip inserted text
 				deletedTextLength := int64(len(delta.Text))
 				if _, err = src.Seek(deletedTextLength, 1); err != nil {
-					return fmt.Errorf("unable to seek - %s", err.Error())
+					return fmt.Errorf("seek error - %s", err.Error())
 				}
 
 				srcPos += deletedTextLength
@@ -242,7 +245,7 @@ func (fh *FileHandle) Patch(deltas Deltas) error {
 		}
 		// copy the rest
 		if _, err = io.Copy(dst, src); err != nil && err != io.EOF {
-			return fmt.Errorf("unable to copy rest text - %s", err.Error())
+			return fmt.Errorf("copy rest text - %s", err.Error())
 		}
 
 		return nil
@@ -250,16 +253,16 @@ func (fh *FileHandle) Patch(deltas Deltas) error {
 
 	// check
 	if err := verifyDeltasAreApplicable(); err != nil {
-		return fmt.Errorf("unable to verify deltas: %s", err.Error())
+		return fmt.Errorf("verify deltas: %s", err.Error())
 	}
 
 	// patch
 	tsString := time.Now().Format("20060102_150405")
 	patchWorkFilePath := fmt.Sprintf("%s/.zsd-patch-in-process-%s_%s", filepath.Dir(fh.Path), fh.Name, tsString)
-	if applyDeltasErr := applyDeltasTo(patchWorkFilePath); applyDeltasErr != nil {
+	if err := applyDeltasTo(patchWorkFilePath); err != nil {
 		// delete patch work file
 		os.Remove(patchWorkFilePath)
-		return fmt.Errorf("unable to apply deltas - keep file untouched - %s", applyDeltasErr.Error())
+		return fmt.Errorf("unable to apply deltas - keep file untouched - %s", err.Error())
 	}
 
 	backupFilePath := fmt.Sprintf("%s/%s_%s", filepath.Dir(fh.Path), fh.Name, tsString)

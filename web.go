@@ -290,7 +290,7 @@ func restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// copy the file from the snapshot as the actual file
-	if err := snapFh.Copy(path); err != nil {
+	if err := snapFh.CopyAs(path); err != nil {
 		http.Error(w, "unable to restore: "+err.Error(), 500)
 	} else {
 		fmt.Fprintf(w, "file '%s' successful restored from snapshot: '%s'", path, snapName)
