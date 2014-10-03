@@ -162,8 +162,11 @@ func createDeltasFromDiffs(diffs []diffmatchpatch.Diff, contextSize int) Deltas 
 		}
 	}
 	for idx < len(diffs) {
+		var delDiff, insDiff diffmatchpatch.Diff
+		var hasDel, hasIns bool
 
-		delDiff, hasDel := nextDiffIfTypeIs(diffmatchpatch.DiffDelete)
+		// add del-delta if there is a delete
+		delDiff, hasDel = nextDiffIfTypeIs(diffmatchpatch.DiffDelete)
 		if hasDel {
 			deltas = append(deltas, Delta{
 				Del,
@@ -175,7 +178,8 @@ func createDeltasFromDiffs(diffs []diffmatchpatch.Diff, contextSize int) Deltas 
 			})
 		}
 
-		insDiff, hasIns := nextDiffIfTypeIs(diffmatchpatch.DiffInsert)
+		// add ins-delta if there is a insert
+		insDiff, hasIns = nextDiffIfTypeIs(diffmatchpatch.DiffInsert)
 		if hasIns {
 			deltas = append(deltas, Delta{
 				Ins,
@@ -185,30 +189,21 @@ func createDeltasFromDiffs(diffs []diffmatchpatch.Diff, contextSize int) Deltas 
 				startPosTarget,
 				insDiff.Text,
 			})
+
 		}
 
-		if hasDel && hasIns {
-			// delete and insert -> text change on the same position,
-			// both deltas have the same positions
-
-			lineCount := max(countNewLines(delDiff.Text), countNewLines(insDiff.Text))
-			textLength := int64(max(len(delDiff.Text), len(insDiff.Text)))
-
-			lineNrFrom += lineCount
-			lineNrTarget += lineCount
-			startPosFrom += textLength
-			startPosTarget += textLength
-
-		} else if hasDel {
-			// only a delete - update only from pos
+		// update lineNr / startPos
+		//   * after the delta additions!
+		//   * if not after, a text replace has the wrong lineNr / startPos
+		//     in the ins-delta
+		if hasDel {
 			lineCount := countNewLines(delDiff.Text)
 			textLength := int64(len(delDiff.Text))
 
 			lineNrFrom += lineCount
 			startPosFrom += textLength
-		} else if hasIns {
-			// only a insert - update only target pos
-
+		}
+		if hasIns {
 			lineCount := countNewLines(insDiff.Text)
 			textLength := int64(len(insDiff.Text))
 
@@ -216,6 +211,10 @@ func createDeltasFromDiffs(diffs []diffmatchpatch.Diff, contextSize int) Deltas 
 			startPosTarget += textLength
 		}
 
+		// handle equal
+		//   * add after context
+		//   * update line / pos
+		//   * add prev context for the next
 		if diff, ok := nextDiffIfTypeIs(diffmatchpatch.DiffEqual); ok {
 			lineCount := countNewLines(diff.Text)
 			textLength := int64(len(diff.Text))
