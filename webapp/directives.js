@@ -499,6 +499,8 @@ directive('zsdFileDiff', ['Backend', function(Backend){
       };
 
       scope.revertChange = function(idx){
+        delete scope.revertChangeConfirmation;
+        
         Backend.revertChange(scope.path, scope.diffResult.deltas[idx]).then(function(res){
           Backend.diffFile(scope.path, scope.curSnap.Name).then(function(res){
             scope.diffResult = res;
