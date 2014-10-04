@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"time"
 )
 
 // mime types for static content (serve static content from binary)
@@ -298,9 +297,8 @@ func restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// rename the actual file: <FILENAME>_<TIMESTAMP>
-	newName := fmt.Sprintf("%s_%s", actualFh.Name, time.Now().Format("20060102_150405"))
-	if err := actualFh.Rename(newName); err != nil {
+	// move the actual file to the backup location
+	if err := actualFh.MoveToBackup(); err != nil {
 		logError.Println(err.Error())
 		http.Error(w, "unable to restore: "+err.Error(), 500)
 		return

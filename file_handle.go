@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"crypto/md5"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -265,9 +266,8 @@ func (fh *FileHandle) Patch(deltas Deltas) error {
 		return fmt.Errorf("unable to apply deltas - keep file untouched - %s", err.Error())
 	}
 
-	backupFilePath := fmt.Sprintf("%s/%s_%s", filepath.Dir(fh.Path), fh.Name, tsString)
-	if err := os.Rename(fh.Path, backupFilePath); err != nil {
-		return fmt.Errorf("unable to rename orginal file - %s", err.Error())
+	if err := fh.MoveToBackup(); err != nil {
+		return err
 	}
 
 	if err := os.Rename(patchWorkFilePath, fh.Path); err != nil {
@@ -275,6 +275,29 @@ func (fh *FileHandle) Patch(deltas Deltas) error {
 	}
 
 	return nil
+}
+
+func (fh *FileHandle) MoveToBackup() error {
+	backupDir := fmt.Sprintf("%s/.zsd", filepath.Dir(fh.Path))
+
+	// ensure backupDir exists
+	if fi, err := os.Stat(backupDir); os.IsNotExist(err) {
+		logNotice.Printf("create backup directory under: %s\n", backupDir)
+		if err := os.Mkdir(backupDir, 0770); err != nil {
+			logError.Printf("unable to create backup-dir: %s\n", err.Error())
+			return err
+		}
+	} else if !fi.Mode().IsDir() {
+		msg := fmt.Sprintf("backup directory exists (%s)- but is not a directory\n", backupDir)
+		logError.Print(msg)
+		return errors.New(msg)
+	}
+
+	// move file, don't update Name / Path in FileHandle
+	now := time.Now().Format("20060102_150405")
+	backupFilePath := fmt.Sprintf("%s/%s_%s", backupDir, fh.Name, now)
+	logInfo.Printf("move actual file in backup directory: %s\n", backupFilePath)
+	return os.Rename(fh.Path, backupFilePath)
 }
 
 // FileHasChangedFunGen to create a FileHasChangedFunc
