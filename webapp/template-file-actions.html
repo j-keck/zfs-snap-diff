@@ -6,15 +6,19 @@
     </span>
   </div>
   <div class="panel panel-body">
-    Replace the actual file under {{actualPath}} with an <strong>old</strong> version <br/>
-    from the snapshot {{curSnap.Name}}?</div>
+    Replace the actual file under <br/>
+    {{pathInActual}} <br/>
+    with an <strong>old</strong> version from the snapshot<br/>
+    {{curSnap.Name}}?</div>
   <button type="button" class="btn btn-default" ng-click="hideRestoreFileConfirmation()"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
   <button type="button" class="btn btn-default btn-success" ng-click="restoreFileAcked()"><span class="glyphicon glyphicon-ok"></span> OK</button>
 </zsd-modal>
 
 
-<!-- action buttons -->
+
 <div class="container">
+  
+  <!-- action buttons -->
   <div class="btn-group">
     <button type="button"
             class="btn btn-primary"
@@ -45,61 +49,8 @@
       <span class="glyphicon glyphicon-import"></span> Restore
     </button>
   </div>
-</div>
 
-
-<div class="container" ng-show="diffResult">
-  <ul class="nav nav-tabs nav-justified" role="tablist" ng-init="diffType = 'intext'">
-    <li ng-class="activeClassIfDiffTypeIs('intext')" ng-click="diffType = 'intext'"><a href="">Intext</a></li>
-    <li ng-class="activeClassIfDiffTypeIs('sideBySide')" ng-click="diffType = 'sideBySide'"><a href="">Side by side</a></li>
-  </ul>
-</div>
-
-<!-- intext -->
-<div class="container" ng-show="diffResult && diffType === 'intext'">
-  <div class="panel panel-default center-block">
-    <div class="panel-heading">{{curSnap.Name}}</div>
-    <div class="pandel-body">
-      <div ng-repeat="diffContext in diffResult.intext">
-        <div style="margin-bottom: 5px;">
-          <!-- controls -->
-          <button type="button"
-                  class="btn btn-primary btn-small"
-                  ng-click="revertChange($index)"
-                  title="Revert Change">
-            <span class="glyphicon glyphicon-share"></span>
-          </button>           
-        </div>
-        <pre><code ng-bind-html="diffContext"></code></pre>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- side by side -->
-<div ng-show="diffResult && diffType ==='sideBySide'">
-  <div class="panel panel-default center-block">
-    <div class="panel-heading">{{curSnap.Name}}</div>
-    <div class="pandel-body">  
-      <table class="side-by-side-diff">
-        <tr zsd-side-by-side-diff-rows blocks="diffResult.sideBySide">
-          <td colspan="4" style="padding-top: 30px; padding-bottom: 5px;">
-            <button type="button"
-                    class="btn btn-primary btn-small"
-                    ng-click="revertChange(zsdIndex)"
-                    title="Revert Change">
-              <span class="glyphicon glyphicon-share"></span>
-            </button>           
-          </td>
-        </tr>
-      </table>
-    </div>
-  </div>
-</div>
-
-
-
-<div class="container">
+  
   <!-- text file content -->  
   <div class="panel panel-default center-block" ng-if="textFileContent">
     <div class="panel-heading">{{curSnap.Name}}</div>
@@ -118,5 +69,7 @@
              style="width:100%;height:800px"></embed>
     </div>
   </div>
-
 </div>
+
+<zsd-file-diff diff-result="diffResult" path="pathInActual", cur-snap="curSnap">
+</zsd-file-diff>

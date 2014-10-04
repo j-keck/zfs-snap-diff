@@ -111,6 +111,19 @@ factory('Backend', ["$http", "Config", function($http, Config){
       return $http.put("restore-file", {'path': path, 'snapshot-name': snapName}).then(function(res){
         return res.data;
       });
+    },
+
+    diffFile: function(path,snapName){
+      return $http.get('/diff-file', {params: {path: path, 'snapshot-name': snapName, 'context-size': Config.get('diffContextSize')}}).then(function(res){
+        return res.data;
+      });
+    },
+
+    revertChange: function(path, deltas){
+      return $http.put('/revert-change', {path: path, deltas: deltas}).then(function(res){
+        return res.data;
+      });
     }
+
   }
 }]);

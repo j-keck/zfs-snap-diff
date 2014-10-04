@@ -1,6 +1,6 @@
 angular.module('zsdDirectives', ['zsdUtils', 'zsdServices']).
   
-directive('zsdFileActions', ['$window', '$sce', '$rootScope', '$http', 'FileUtils', 'Backend', 'PathUtils', 'Config', function($window, $sce, $rootScope, $http, FileUtils, Backend, PathUtils, Config){
+directive('zsdFileActions', ['$window', '$sce', '$rootScope', 'FileUtils', 'Backend', 'PathUtils', 'Config', function($window, $sce, $rootScope, FileUtils, Backend, PathUtils, Config){
   return {
     restrict: 'E',
     templateUrl: 'template-file-actions.html',
@@ -41,14 +41,10 @@ directive('zsdFileActions', ['$window', '$sce', '$rootScope', '$http', 'FileUtil
       // compare the file content from the selected snapshot with the actual state
       scope.compareFile = function compareFile(){
         scope.lastAction = scope.compareFile;
-
-
-        //FIXME: in backend
-        $http.get('/diff-file', {params: {path: scope.pathInActual, 'snapshot-name': scope.curSnap.Name}}).then(function(res){
+        Backend.diffFile(scope.pathInActual, scope.curSnap.Name).then(function(res){
           clearOthersButKeep('diffResult');      
-          scope.diffResult = res.data;
-        });
-        
+          scope.diffResult = res;          
+        })
       };
 
       // download the file from the selected snapshot
@@ -92,25 +88,6 @@ directive('zsdFileActions', ['$window', '$sce', '$rootScope', '$http', 'FileUtil
           return "active";
         }
       };
-
-
-      scope.downloadPatch = function(idx){
-        var patch = unescape(scope.diffResult.patches[idx]);
-        var patchName = PathUtils.extractFileName(scope.pathInActual) + ".patch";
-          
-        var link = $window.document.createElement('a');
-        link.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(patch));
-        link.setAttribute('download', patchName);
-        link.click();
-      };
-
-      scope.revertChange = function(idx){
-        // FIXME: move in Backend service
-        $http.put('/revert-change', {path: scope.pathInActual, deltas: scope.diffResult.deltas[idx]}).then(function(res){
-          scope.compareFile();
-        });
-
-      }
 
 
 
@@ -487,6 +464,59 @@ directive('notifications', ['$rootScope', '$timeout', function($rootScope, $time
 
 
 
+
+
+directive('zsdFileDiff', ['Backend', function(Backend){
+  return {
+    restrict: 'E',
+    scope: {
+      diffResult: '=',
+      path: '=',
+      curSnap: '='
+    },
+    templateUrl: 'template-file-diff.html',
+    link: function(scope, element, attrs){
+      // ********************************************************************************
+      // scope actions
+      // 
+      
+      scope.showRevertChangeConfirmation = function(idx){
+        scope.revertChangeConfirmation = idx;
+      };
+      scope.showRevertChangeConfirmationFor = function(idx){
+        return  scope.revertChangeConfirmation == idx;
+      };
+
+      scope.downloadPatch = function(idx){
+        var patch = unescape(scope.diffResult.patches[idx]);
+        var patchName = PathUtils.extractFileName(scope.pathInActual) + ".patch";
+          
+        var link = $window.document.createElement('a');
+        link.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(patch));
+        link.setAttribute('download', patchName);
+        link.click();
+      };
+
+      scope.revertChange = function(idx){
+        Backend.revertChange(scope.path, scope.diffResult.deltas[idx]).then(function(res){
+          Backend.diffFile(scope.path, scope.curSnap.Name).then(function(res){
+            scope.diffResult = res;
+          })
+        })
+      };
+
+
+      // ********************************************************************************
+      // initializations      
+      //
+      scope.$watch('curSnap', function(){
+        delete scope.revertChangeConfirmation;
+      });
+      
+    }
+  }
+}]).
+
 directive('zsdSideBySideDiffRows', ['$compile', function($compile){
   return {
     restrict: 'A',
@@ -496,35 +526,50 @@ directive('zsdSideBySideDiffRows', ['$compile', function($compile){
     },
     compile: function(element, attr, linker){
       return function($scope, $element, $attr) {
+        var childScopes = [];
+        
         var parent = $element.parent();
+        var header = parent.children();
         $scope.$watchCollection('blocks', function(blocks){
-          // remove old
+          for(var i in childScopes){
+            childScopes[i].$destroy();
+          }
           parent.html('');
+          parent.append(header);
 
           //FIXME: cleanup!!!
           // delegate to downloadPatch from the caller side
           $scope.downloadPatch = function(idx){
-            $scope.$parent.$parent.downloadPatch(idx);
+            $scope.$parent.downloadPatch(idx);
           }
 
           //FIXME: cleanup!!!
           // delegate to revertChange from the caller side
           $scope.revertChange = function(idx){
-            $scope.$parent.$parent.revertChange(idx);
+            $scope.$parent.revertChange(idx);
           }
 
           
           // add new
           for(i in blocks){
             // create a new scope
-            var childScope = $scope.$new(false);
+            var childScope = $scope.$new();
 
             // pass patch counter as zsdIndex in the scope
-            childScope['zsdIndex'] = i;
+            childScope['zsdIndex'] = +i;
+
+            // FIXME: remove $scope.$parent ($emit / $broadcast?)
+            // pass showRevertChangeConfirmation / showRevertChangeConfirmationFor in the scope
+            childScope['showRevertChangeConfirmation'] = $scope.$parent.showRevertChangeConfirmation;
+            childScope['showRevertChangeConfirmationFor'] = $scope.$parent.showRevertChangeConfirmationFor;
+
 
             linker(childScope, function(clone){
+              // add to the DOM
               parent.append(clone);
               parent.append(blocks[i]);
+
+              childScopes.push(childScope);
             });
           }
         });
@@ -532,5 +577,3 @@ directive('zsdSideBySideDiffRows', ['$compile', function($compile){
     }
   }
 }]);
-
-
