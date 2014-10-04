@@ -64,6 +64,7 @@ directive('zsdFileActions', ['$window', '$sce', '$rootScope', 'FileUtils', 'Back
 
         Backend.restoreFile(scope.pathInActual, scope.curSnap.Name).then(function(res){
           $rootScope.$broadcast('zsd:success', res);
+          scope.lastAction()
         });
       };
 
