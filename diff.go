@@ -98,7 +98,7 @@ func createDeltasFromDiffs(diffs []diffmatchpatch.Diff, contextSize int) Deltas 
 		return diffmatchpatch.Diff{}, false
 	}
 
-	appendPrevContext := func(diff diffmatchpatch.Diff) {
+	createPrevEqDelta := func(diff diffmatchpatch.Diff) Delta {
 		lineCount := countNewLines(diff.Text)
 		lines := splitText(diff.Text)
 
@@ -112,42 +112,43 @@ func createDeltasFromDiffs(diffs []diffmatchpatch.Diff, contextSize int) Deltas 
 		count := countNewLines(text)
 		length := int64(len(text))
 
-		deltas = append(deltas, Delta{
+		return Delta{
 			Eq,
 			lineNrFrom - count,
 			lineNrTarget - count,
 			startPosFrom - length,
 			startPosTarget - length,
 			text,
-		})
+		}
 	}
 
-	appendAfterContext := func(diff diffmatchpatch.Diff) bool {
+	createAfterEqDelta := func(diff diffmatchpatch.Diff) (Delta, bool) {
 		lineCount := countNewLines(diff.Text)
 		lines := splitText(diff.Text)
 
 		var text string
+		nextPrevEqMerged := false
 		if idx < len(diffs) && lineCount < contextSize*2 {
 			// merge - but not the last element
 			text = diff.Text
+			nextPrevEqMerged = true
 		} else if lineCount < contextSize {
 			text = diff.Text
 		} else {
 			text = joinLines(lines[:contextSize])
 		}
 
-		deltas = append(deltas, Delta{
+		return Delta{
 			Eq,
 			lineNrFrom,
 			lineNrTarget,
 			startPosFrom,
 			startPosTarget,
 			text,
-		})
-		return countNewLines(text) > contextSize
+		}, nextPrevEqMerged
 	}
 
-	// first equal block if ther is one
+	// first equal block if there is one
 	if diff, ok := nextDiffIfTypeIs(diffmatchpatch.DiffEqual); ok {
 		lineCount := countNewLines(diff.Text)
 		textLength := int64(len(diff.Text))
@@ -158,7 +159,7 @@ func createDeltasFromDiffs(diffs []diffmatchpatch.Diff, contextSize int) Deltas 
 		startPosTarget += textLength
 
 		if contextSize > 0 {
-			appendPrevContext(diff)
+			deltas = append(deltas, createPrevEqDelta(diff))
 		}
 	}
 	for idx < len(diffs) {
@@ -219,9 +220,11 @@ func createDeltasFromDiffs(diffs []diffmatchpatch.Diff, contextSize int) Deltas 
 			lineCount := countNewLines(diff.Text)
 			textLength := int64(len(diff.Text))
 
-			var merged bool
+			var afterEqDelta Delta
+			var nextPrevEqMerged bool
 			if contextSize > 0 {
-				merged = appendAfterContext(diff)
+				afterEqDelta, nextPrevEqMerged = createAfterEqDelta(diff)
+				deltas = append(deltas, afterEqDelta)
 			}
 
 			lineNrFrom += lineCount
@@ -229,8 +232,13 @@ func createDeltasFromDiffs(diffs []diffmatchpatch.Diff, contextSize int) Deltas 
 			startPosFrom += textLength
 			startPosTarget += textLength
 
-			if contextSize > 0 && idx < len(diffs) && !merged {
-				appendPrevContext(diff)
+			// don't add prevEq if
+			//  * no context requested
+			//  * we are at the end
+			//  * the afterEqDelta has merged the next (this) prevEqDelta, because the context overlap
+			//  * the afterEqDelta contains the whole text
+			if contextSize > 0 && idx < len(diffs) && !nextPrevEqMerged && afterEqDelta.Text != diff.Text {
+				deltas = append(deltas, createPrevEqDelta(diff))
 			}
 		}
 	}
