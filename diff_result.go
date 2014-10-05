@@ -36,7 +36,7 @@ func splitDeltasByContext(deltas Deltas) []Deltas {
 }
 
 func (dr *DiffResult) DeltasByContext() []Deltas {
-	return splitDeltasByContext(dr.CharBasedDeltas)
+	return splitDeltasByContext(dr.LineBasedDeltas)
 }
 
 func (dr *DiffResult) AsSideBySideHTML() []string {
