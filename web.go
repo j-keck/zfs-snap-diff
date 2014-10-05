@@ -73,7 +73,7 @@ func listSnapshotsHndl(w http.ResponseWriter, r *http.Request) {
 	// given file was modified.
 	params, _ := extractParams(r)
 	if path, ok := params["where-file-modified"]; ok {
-		logInfo.Printf("scan snapshots where file: '%s' was modified\n", path)
+		logDebug.Printf("scan snapshots where file: '%s' was modified\n", path)
 
 		// if 'scan-snap-limit' is given, limit scan to the given value
 		if scanSnapLimit, ok := params["scan-snap-limit"]; ok {
@@ -283,7 +283,14 @@ func restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 
 	// get file-handle for the actual file
 	actualFh, err := NewFileHandle(path)
-	if err != nil {
+	if err == nil {
+		// move the actual file to the backup location if the file was found
+		if err := actualFh.MoveToBackup(); err != nil {
+			logError.Println(err.Error())
+			http.Error(w, "unable to restore: "+err.Error(), 500)
+			return
+		}
+	} else if err != nil && !os.IsNotExist(err) {
 		logError.Println(err.Error())
 		http.Error(w, "unable to restore - actual file not found: "+err.Error(), 400)
 		return
@@ -294,13 +301,6 @@ func restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logError.Println(err.Error())
 		http.Error(w, "unable to restore - file from snapshot not found: "+err.Error(), 400)
-		return
-	}
-
-	// move the actual file to the backup location
-	if err := actualFh.MoveToBackup(); err != nil {
-		logError.Println(err.Error())
-		http.Error(w, "unable to restore: "+err.Error(), 500)
 		return
 	}
 
@@ -334,7 +334,7 @@ func diffFileHndl(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get parameter context-size
-	contextSize := 5
+	contextSize := 5 // FIXME: from default value in main.go
 	if contextSizeStr, ok := params["context-size"]; ok {
 		contextSize, _ = strconv.Atoi(contextSizeStr)
 	}
@@ -411,7 +411,7 @@ func revertChangeHndl(w http.ResponseWriter, r *http.Request) {
 	// verify path
 	verifyPathIsUnderZMP(path, w, r)
 
-	//FIXME!!
+	//FIXME: unmarshal without json.Marshal -> json.Unmarshal hack
 	var deltas Deltas
 	if d, ok := params["deltas"]; ok {
 		js, _ := json.Marshal(d)

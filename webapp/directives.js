@@ -123,7 +123,7 @@ directive('zsdFileActions', ['$window', '$sce', '$rootScope', 'FileUtils', 'Back
           scope.pathInSnap = PathUtils.convertToSnapPath(p, scope.curSnap.Name);
           
           // trigger fileSelected
-          fileSelected();
+          fileSelected(scope.pathInActual);
 
         });
 
@@ -133,7 +133,7 @@ directive('zsdFileActions', ['$window', '$sce', '$rootScope', 'FileUtils', 'Back
           scope.pathInSnap = PathUtils.convertToSnapPath(scope.pathInActual, snap.Name)
 
           // trigger fileSelected
-          fileSelected();
+          fileSelected(scope.pathInActual);
         });
       }
 
@@ -150,7 +150,7 @@ directive('zsdFileActions', ['$window', '$sce', '$rootScope', 'FileUtils', 'Back
           scope.pathInSnap = p;
           
           // trigger fileSelected
-          fileSelected();
+          fileSelected(scope.pathInSnap);
         });
       }
      
@@ -162,9 +162,9 @@ directive('zsdFileActions', ['$window', '$sce', '$rootScope', 'FileUtils', 'Back
       
 
       // trigger actions if a file is selected
-      function fileSelected(){
+      function fileSelected(path){
         // fetch file-info
-        Backend.fileInfo(scope.pathInActual).then(function(fi){
+        Backend.fileInfo(path).then(function(fi){
           scope.fileInfo = fi;
 
           // for ui: enable / disable view and diff buttons
