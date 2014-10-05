@@ -8,7 +8,8 @@ If i messed up a file, i need to search a clean state from the file in the snaps
 
 # Description
 
-With `zfs-snap-diff` you can explore file differences from different zfs snapshots to the actual file version or browse in old snapshots.
+With `zfs-snap-diff` you can explore file differences and restore changes from older file versions in different zfs snapshots.
+You can restore the whole file from a older version, or select changes to revert in the 'Diff' view.
 
   
 `zfs-snap-diff` has a web frontend, so it can run on your local work machine or on your remote file / backup server (no Xserver necesarry).
@@ -18,10 +19,6 @@ The backend is implemented in golang, the frontend with [angularjs](https://angu
 
 
   
-*!! it's in a very early dev state - only tested on FreeBSD !!*
-
-
-
 #Usage
 
 
@@ -79,13 +76,18 @@ When a file is selected, `zsd-snap-diff` search all snapshots where the selected
 
 ### Select a snapshot
 
-When you select a snapshot, you can view, diff, download or restore the selected file.
+When you select a snapshot, you can view, diff, download or restore the file from the selected snapshot.
 
 #### View
+View the file content from an older file version.
 ![File View](doc/zsd-snap-selected-view-file.png)
 
 #### Diff
-![File Diff](doc/zsd-snap-selected-diff-file.png)    
+Explore file differences and pick changes to revert.
+  
+![intext diff](doc/zsd-snap-selected-diff-file-intext.png)
+  
+![side by side diff](doc/zsd-snap-selected-diff-file-side-by-side.png)
 
 
 ## Browse snapshot state
@@ -112,9 +114,9 @@ From here you can easy restore / view a deleted file.
 
         <ORG_FILE_NAME>-<SNAPSHOT_NAME>.<FILE_SUFFIX>
 
-  * if you restore a file, the orginal file will be renamed as:
+  * if you restore / patch a file, the orginal file will be saved under:
 
-        <ORG_FLILE_NAME>_<TIMESTAMP>
+        ./zsd/<ORG_FLILE_NAME>_<TIMESTAMP>
 
   * for snapshot differences (Browse snapshot diff), you need to set the diff permission:
 
@@ -142,9 +144,9 @@ From here you can easy restore / view a deleted file.
 
         cd zfs-snap-diff
 
-  * fetch dependencies 
+  * fetch dependencies ([go-diff](https://github.com/sergi/go-diff))
 
-        go get -u
+          go get -u
 
   * generate golang src from static web content (this generates bindata.go)
     
@@ -163,6 +165,16 @@ From here you can easy restore / view a deleted file.
 # Changelog
 
 ###0.0.X###
+
+0.0.6:
+  * check if file in snapshot has changed filetype depend:
+    * text files: md5
+    * others: size+modTime
+  * diffs created in the backend (per [go-diff](https://github.com/sergi/go-diff))
+    * different presentation: intext / side by side
+    * possibility to revert single changes
+  * bugfixes
+   
   
 0.0.5:
   * file compare method configurable: size+modTime (default) or md5
