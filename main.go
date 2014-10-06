@@ -40,7 +40,7 @@ func main() {
 	listenOnAllInterfacesFlag := flag.Bool("a", false, "listen on all interfaces")
 	printVersionFlag := flag.Bool("V", false, "print version and exit")
 	verboseLoggingFlag := flag.Bool("v", false, "verbose logging")
-	useSudoFlag := flag.Bool("sudo", false, "use sudo when executing os commands")
+	useSudoFlag := flag.Bool("use-sudo", false, "use sudo when executing os commands")
 
 	// frontend
 	diffContextSizeFlag := flag.Int("diff-context-size", 5, "context size in diff")
