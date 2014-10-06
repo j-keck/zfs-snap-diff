@@ -27,8 +27,8 @@ func TestFilter(t *testing.T) {
 }
 
 func TestScanSnapshots(t *testing.T) {
-	zfs := &ZFS{"name", "mount", execZFSRes("zfs-name@snap-name\t20140101", nil)}
-	snaps, err := zfs.ScanSnapshots()
+	ds := ZFSDataset{"name", "mount", execZFSMock("zfs-name@snap-name\t20140101", nil)}
+	snaps, err := ds.ScanSnapshots()
 
 	if err != nil {
 		t.Error("unexpected err:", err)
@@ -44,9 +44,9 @@ func TestScanSnapshots(t *testing.T) {
 }
 
 func TestScanSnapshotsEmpty(t *testing.T) {
-	zfs := &ZFS{"name", "mount", execZFSRes("", nil)}
+	ds := ZFSDataset{"name", "mount", execZFSMock("", nil)}
 
-	snaps, err := zfs.ScanSnapshots()
+	snaps, err := ds.ScanSnapshots()
 	if err != nil {
 		t.Error("unexpected err:", err)
 	}
@@ -55,10 +55,4 @@ func TestScanSnapshotsEmpty(t *testing.T) {
 		t.Error("unexpected snaps length: ", len(snaps))
 	}
 
-}
-
-func execZFSRes(res string, err error) func(string, ...string) (string, error) {
-	return func(first string, rest ...string) (string, error) {
-		return res, err
-	}
 }

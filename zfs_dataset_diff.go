@@ -10,10 +10,10 @@ import (
 type ZFSDiffs []ZFSDiff
 
 // ScanZFSDiffs scan zfs differences from the given snapshot to the current filesystem state
-func (zfs *ZFS) ScanDiffs(snapName string) (ZFSDiffs, error) {
+func (ds *ZFSDataset) ScanDiffs(snapName string) (ZFSDiffs, error) {
 	// HINT: process uid needs 'zfs allow -u <USER> diff <ZFS_NAME>'
-	fullSnapName := fmt.Sprintf("%s@%s", zfs.Name, snapName)
-	out, err := zfs.execZFS("diff -H -F", fullSnapName, zfs.Name)
+	fullSnapName := fmt.Sprintf("%s@%s", ds.Name, snapName)
+	out, err := ds.execZFS("diff -H -F", fullSnapName, ds.Name)
 	if err != nil {
 		return nil, errors.New(out)
 	}

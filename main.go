@@ -30,7 +30,7 @@ type FrontendConfig map[string]interface{}
 func main() {
 	// formate help
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, " Usage\n=======\n%s [OPT_ARGS] <ZFS_NAME>\n\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, " Usage\n=======\n%s [OPT_ARGS] <ZFS_NAME>\n", os.Args[0])
 		fmt.Fprint(os.Stderr, "OPT_ARGS:\n")
 		flag.PrintDefaults()
 	}
@@ -80,7 +80,7 @@ func main() {
 		logError.Println(err.Error())
 		os.Exit(1)
 	}
-	logInfo.Printf("work on zfs: %s wich is mounted under: %s\n", zfs.Name, zfs.MountPoint)
+	logInfo.Printf("work on zfs: %s which is mounted under: %s\n", zfs.Datasets.Root().Name, zfs.Datasets.Root().MountPoint)
 
 	// listen on localhost - if flag '-a' is given, listen on all interfaces
 	var addr string
@@ -106,10 +106,10 @@ func main() {
 
 	// frontend-config
 	frontendConfig := FrontendConfig{
-		"zfsMountPoint":     zfs.MountPoint,
 		"diffContextSize":   *diffContextSizeFlag,
 		"defaultFileAction": *defaultFileActionFlag,
 		"compareFileMethod": *compareFileMethodFlag,
+		"datasets":          zfs.Datasets,
 	}
 	if *scanSnapLimitFlag >= 0 {
 		// only add positive values - negative values: scan all snapshots

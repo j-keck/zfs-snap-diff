@@ -22,7 +22,8 @@ var mimeTypes = map[string]string{
 // registers response handlers and starts the web server
 func listenAndServe(addr string, frontendConfig FrontendConfig) {
 	http.HandleFunc("/config", configHndl(frontendConfig))
-	http.HandleFunc("/list-snapshots", listSnapshotsHndl)
+	http.HandleFunc("/snapshots-for-dataset", snapshotsForDatasetHndl)
+	http.HandleFunc("/snapshots-for-file", snapshotsForFileHndl)
 	http.HandleFunc("/snapshot-diff", snapshotDiffHndl)
 	http.HandleFunc("/list-dir", listDirHndl)
 	http.HandleFunc("/read-file", readFileHndl)
@@ -59,21 +60,53 @@ func configHndl(config FrontendConfig) http.HandlerFunc {
 	}
 }
 
-// list zfs snapshots
-//   * optional filter snaphots where a given file was modified
-func listSnapshotsHndl(w http.ResponseWriter, r *http.Request) {
-	snapshots, err := zfs.ScanSnapshots()
-	if err != nil {
-		logError.Println(err.Error())
-		http.Error(w, err.Error(), 500)
-		return
-	}
+func snapshotsForDatasetHndl(w http.ResponseWriter, r *http.Request) {
+	var snapshots ZFSSnapshots
+	var err error
 
-	// when paramter 'where-file-modified' given, filter snaphots where the
-	// given file was modified.
 	params, _ := extractParams(r)
-	if path, ok := params["where-file-modified"]; ok {
+
+	if datasetName, ok := params["dataset-name"]; ok {
+		logDebug.Printf("scan snapshots for dataset: '%s'\n", datasetName)
+
+		var dataset ZFSDataset
+		if dataset, err = zfs.FindDatasetByName(datasetName); err == nil {
+			snapshots, err = dataset.ScanSnapshots()
+		}
+
+		if err != nil {
+			logError.Println(err.Error())
+			http.Error(w, err.Error(), 500)
+			return
+		}
+
+		// marshal
+		js, err := json.Marshal(snapshots)
+		if err != nil {
+			logError.Println(err.Error())
+			http.Error(w, err.Error(), 500)
+			return
+		}
+
+		// respond
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(js)
+
+	} else {
+		logWarn.Println("parameter 'dataset-name' missing")
+		respondWithParamMissing(w, "dataset-name")
+	}
+}
+
+func snapshotsForFileHndl(w http.ResponseWriter, r *http.Request) {
+	var snapshots ZFSSnapshots
+	var err error
+
+	params, _ := extractParams(r)
+	if path, ok := params["path"]; ok {
 		logDebug.Printf("scan snapshots where file: '%s' was modified\n", path)
+		dataset := zfs.FindDatasetForFile(path)
+		snapshots, err = dataset.ScanSnapshots()
 
 		// if 'scan-snap-limit' is given, limit scan to the given value
 		if scanSnapLimit, ok := params["scan-snap-limit"]; ok {
@@ -106,24 +139,40 @@ func listSnapshotsHndl(w http.ResponseWriter, r *http.Request) {
 
 		// filter snapshots
 		snapshots = snapshots.FilterWhereFileWasModified(path, fileHasChangedFuncGen)
-	}
 
-	// marshal
-	js, err := json.Marshal(snapshots)
-	if err != nil {
-		logError.Println(err.Error())
-		http.Error(w, err.Error(), 500)
-		return
-	}
+		if err != nil {
+			logError.Println(err.Error())
+			http.Error(w, err.Error(), 500)
+			return
+		}
 
-	// respond
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(js)
+		// marshal
+		js, err := json.Marshal(snapshots)
+		if err != nil {
+			logError.Println(err.Error())
+			http.Error(w, err.Error(), 500)
+			return
+		}
+
+		// respond
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(js)
+	} else {
+		logWarn.Println("parameter 'path' missing")
+		respondWithParamMissing(w, "path")
+	}
 }
 
 // diff from a given snapshot to the current filesystem state
 func snapshotDiffHndl(w http.ResponseWriter, r *http.Request) {
 	params, _ := extractParams(r)
+	datasetName, datasetNameFound := params["dataset-name"]
+	if !datasetNameFound {
+		logWarn.Println("parameter 'dataset-name' missing")
+		respondWithParamMissing(w, "dataset-name")
+		return
+	}
+
 	snapName, snapNameFound := params["snapshot-name"]
 	if !snapNameFound {
 		logWarn.Println("parameter 'snapshot-name' missing")
@@ -131,7 +180,8 @@ func snapshotDiffHndl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	diffs, err := zfs.ScanDiffs(snapName)
+	dataset, _ := zfs.FindDatasetByName(datasetName)
+	diffs, err := dataset.ScanDiffs(snapName)
 	if err != nil {
 		logError.Println(err.Error())
 		http.Error(w, err.Error(), 500)
@@ -196,7 +246,13 @@ func readFileHndl(w http.ResponseWriter, r *http.Request) {
 	// verify path
 	verifyPathIsUnderZMP(path, w, r)
 
-	fh, err := NewFileHandle(path)
+	var fh *FileHandle
+	var err error
+	if snapName, ok := params["snapshot-name"]; ok {
+		fh, err = NewFileHandleInSnapshot(path, snapName)
+	} else {
+		fh, err = NewFileHandle(path)
+	}
 
 	if err != nil {
 		logError.Println(err.Error())
@@ -503,12 +559,17 @@ func respondWithParamMissing(w http.ResponseWriter, name string) {
 //  * responds with a illegal request if not
 //  * and shutdowns the server
 func verifyPathIsUnderZMP(path string, w http.ResponseWriter, r *http.Request) {
-	if !strings.HasPrefix(filepath.Clean(path), zfs.MountPoint) {
-		http.Error(w, "illegal request", 403)
-		logError.Printf("illegal request - file-path: '%s', url-path: '%s', from client: '%s' -> SHUTDOWN SERVER!",
-			path, r.URL.Path, r.RemoteAddr)
-
-		// trigger shutdown in a goroutine, to give the server time serve the 403 error
-		go os.Exit(1)
+	for _, dataset := range zfs.Datasets {
+		if strings.HasPrefix(filepath.Clean(path), dataset.MountPoint) {
+			return
+		}
 	}
+
+	http.Error(w, "illegal request", 403)
+	logError.Printf("illegal request - file-path: '%s', url-path: '%s', from client: '%s' -> SHUTDOWN SERVER!",
+		path, r.URL.Path, r.RemoteAddr)
+
+	// trigger shutdown in a goroutine, to give the server time serve the 403 error
+	go os.Exit(1)
+
 }

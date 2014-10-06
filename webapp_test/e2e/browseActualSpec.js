@@ -38,21 +38,30 @@ describe('browse-actual', function(){
 
 
   it('should show the file diff when click on "Diff" button', function(){
-    var fileDiffIsPresentShouldBe = function(b){
-      expect(element(by.binding('fileDiff')).isPresent()).toEqual(b)
+    var diffIsPresentShouldBe = function(b){
+      expect(element(by.repeater('diffContext in diffResult.intext')).isPresent()).toEqual(b)
     }
 
-    fileDiffIsPresentShouldBe(false);
-    
+    diffIsPresentShouldBe(false);
+
     clickOnEntry('file1');
-    fileDiffIsPresentShouldBe(false);
+    diffIsPresentShouldBe(false);
 
     clickOnSnapshot('snap1');
-    fileDiffIsPresentShouldBe(false);
+    diffIsPresentShouldBe(false);
 
     // click on "Diff" button
     element(by.id('compareFile')).click();
-    fileDiffIsPresentShouldBe(true);
+    diffIsPresentShouldBe(true);
+  });
+
+
+  it('should show the diff from the child2 dataset when click on "Diff" button in the child2 dataset', function(){
+    clickOnEntry('child2');
+    clickOnEntry('file1');
+    clickOnSnapshot('snap1');
+    element(by.id('compareFile')).click();
+    expect(element(by.binding('diffContext')).getText()).toMatch(/SECOND:child2/);
   });
 
 

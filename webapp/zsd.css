@@ -7,6 +7,10 @@ body{
 }
 
 
+.panel-heading-narrow {
+    padding-top: 5px !important; /* default is 10px */
+    padding-bottom: 5px !important; /* default is 10px */
+}
 
 /* diff */
 .line-nr {

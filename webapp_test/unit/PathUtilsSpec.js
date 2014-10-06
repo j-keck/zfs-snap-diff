@@ -1,6 +1,12 @@
 describe('PathUtils', function(){
 
-  var zfsMountPoint = "/base/path";
+  var datasets = [
+    {Name: 'zp', MountPoint: '/zp'},
+    {Name: 'zp/a', MountPoint: '/zp/a'},
+    {Nmae: 'zp/a/b', MountPoint: '/zp/a/b'},
+  ];
+  
+  var zfsMountPoint = "/zp/a";
   var relativePath  = "/relative/path/to/file";
 
   var testSnapName = "20140001-1d";
@@ -14,7 +20,7 @@ describe('PathUtils', function(){
   beforeEach(module(function($provide){
     $provide.value('Config', {
       get: function(key){
-        return zfsMountPoint;
+        return datasets;
       }
     });
   }));
@@ -27,7 +33,7 @@ describe('PathUtils', function(){
     }));
   });
 
-  describe('convertToLivePath', function(){
+  describe('convertToActualPath', function(){
     it('should convert a path in a snapshot to a path under actual', inject(function(PathUtils){
       var pathInActual = PathUtils.convertToActualPath(testPathInSnapshot);
       expect(pathInActual).toEqual(testPathInActual);
@@ -47,18 +53,6 @@ describe('PathUtils', function(){
       var entries = [{Path: 'home'}, {Path: 'user'}, {Path: 'filename'}];
       expect(PathUtils.entriesToPath(entries)).toEqual('home/user/filename');
     }))
-  });
-
-  describe('entriesTargetsToFile', function(){
-    it('should return true if the last element i a file', inject(function(PathUtils){
-      var entries = [{Type: 'D'}, {Type: 'D'}, {Type: 'F'}];
-      expect(PathUtils.entriesTargetsToFile(entries)).toEqual(true);
-    }));
-
-    it('should return false if the last element i a dir', inject(function(PathUtils){
-      var entries = [{Type: 'D'}, {Type: 'D'}, {Type: 'D'}];
-      expect(PathUtils.entriesTargetsToFile(entries)).toEqual(false);
-    }));
   });
 
 

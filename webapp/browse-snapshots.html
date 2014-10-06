@@ -1,5 +1,10 @@
 <div>
-  <zsd-snapshots snapshots="ctrl.snapshots"
+
+  <zsd-datasets on-dataset-selected="ctrl.datasetSelected(dataset)"></zsd-datasets>
+
+  <zsd-snapshots ng-if="ctrl.curDataset"
+                 title="dataset {{ctrl.curDataset.Name}}"
+                 snapshots="ctrl.snapshots"
                  on-snapshot-selected="ctrl.snapshotSelected(snap)"></zsd-snapshots>
    
 
@@ -11,8 +16,10 @@
 
 
 
-  <zsd-file-actions from-snap-path="ctrl.curPath"
+  <zsd-file-actions zsd-from-snapshot
+                    path="ctrl.curPath"
                     cur-snap="ctrl.curSnap"
                     ng-if="ctrl.curPath"></zsd-file-action>
+
 
 </div>

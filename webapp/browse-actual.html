@@ -1,16 +1,18 @@
 <div>
 
-  <zsd-dir-browser start="mainCtrl.config.zfsMountPoint"
+  <zsd-dir-browser start="ctrl.dirBrowserStart"
                    on-file-selected="ctrl.fileSelected(entries)"
                    on-dir-selected="ctrl.dirSelected(entries)"></zsd-dir-browser>
 
 
-  <zsd-snapshots snapshots="ctrl.snapshots"
+  <zsd-snapshots title="file {{ctrl.curFileName}}"
+                 snapshots="ctrl.snapshots"
                  on-snapshot-selected="ctrl.snapshotSelected(snap)"
                  zsd-show-if-defined="ctrl.snapshots"></zsd-snapshots>
   
 
-  <zsd-file-actions from-actual-path="ctrl.curPath"
+  <zsd-file-actions zsd-from-actual
+                    path="ctrl.curPath"
                     cur-snap="ctrl.curSnap"
                     ng-if="ctrl.curSnap"></zsd-file-action>
 </div>

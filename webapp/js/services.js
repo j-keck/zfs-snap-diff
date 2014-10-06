@@ -67,15 +67,19 @@ factory('Config', ["$http", function($http){
   
 factory('Backend', ["$http", "Config", function($http, Config){
   return {
-    listSnapshots: function(whereFileModified, scanSnapLimit, compareFileMethod){
-      var params = {};
+    snapshotsForFile: function(path, scanSnapLimit, compareFileMethod){
+      var params = {path: path};
 
-      if(angular.isDefined(whereFileModified)) params['where-file-modified'] = whereFileModified;
       if(angular.isDefined(scanSnapLimit)) params['scan-snap-limit'] = scanSnapLimit;
       if(angular.isDefined(compareFileMethod)) params['compare-file-method'] = compareFileMethod;
       
-      return $http.get("list-snapshots", {"params": params}).then(function(res){
+      return $http.get("snapshots-for-file", {"params": params}).then(function(res){
         return res.data
+      });
+    },
+    snapshotsForDataset: function(name){
+      return $http.get("snapshots-for-dataset", {"params": {"dataset-name": name}}).then(function(res){
+        return res.data;
       });
     },
     listDir: function(path){
@@ -83,8 +87,8 @@ factory('Backend', ["$http", "Config", function($http, Config){
         return res.data
       });
     },
-    snapshotDiff: function(snapName){
-      return $http.get("snapshot-diff", {"params": {"snapshot-name": snapName}}).then(function(res){
+    snapshotDiff: function(datasetName, snapName){
+      return $http.get("snapshot-diff", {"params": {"dataset-name": datasetName, "snapshot-name": snapName}}).then(function(res){
         return res.data
       })
     },

@@ -1,0 +1,26 @@
+<div class="container">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">
+        <a href="" ng-click="toggleHideDatasets()" style="text-decoration: none;">
+          <span ng-show="hideDatasets" class="glyphicon glyphicon-chevron-down"></span>
+          <span ng-hide="hideDatasets" class="glyphicon glyphicon-chevron-up"></span>                  
+          Datasets
+        </a>
+      </h3>
+    </div> <!-- end panel-heading -->
+
+    <div class="panel-body animate-show" ng-hide="hideDatasets">
+      <table class="table">
+        <tr>
+          <th>Name</th>
+          <th>Mountpoint</th>
+        </tr>
+        <tr ng-repeat="dataset in datasets" ng-click="datasetSelected(dataset)">
+          <td>{{dataset.Name}}</td>
+          <td>{{dataset.MountPoint}}</td>
+        </tr>
+      </table>
+    </div>
+  </div> <!-- end panel -->
+</div>

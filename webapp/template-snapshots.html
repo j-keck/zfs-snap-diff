@@ -1,43 +1,39 @@
 <div class="container">
-  <nav class="navbar navbar-default">
-    <div class="container-fluid">
-      <div class="navbar-header">
-        <a class="navbar-brand" ng-click="toggleHideSnapshots()">Snapshots
+  <div class="panel panel-default">
+    <div class="panel-heading panel-heading-narrow">
+      <h3 class="panel-title">
+        <a href="" ng-click="toggleHideSnapshots()" style="text-decoration: none;">
           <span ng-show="hideSnapshots" class="glyphicon glyphicon-chevron-down"></span>
-          <span ng-hide="hideSnapshots" class="glyphicon glyphicon-chevron-up"></span>
-        </a>     
-      </div>
-
-      <ul class="nav navbar-nav navbar-right">
-        <li>
-          <a href="" ng-click="showOlderSnap()" class="btn btn-large" ng-disabled="showOlderSnapDisabled()">
+          <span ng-hide="hideSnapshots" class="glyphicon glyphicon-chevron-up"></span>                  
+          Snapshots <small>for {{title}}</small>
+        </a>
+        <div class="btn-group pull-right">
+          <a href="" class="btn btn-default" ng-click="showOlderSnap()" ng-disabled="showOlderSnapDisabled()">
             <span class="glyphicon glyphicon-backward"></span> Older
           </a>
-        </li>
-        <li>
-          <a href="" ng-click="showNewerSnap()" class="btn btn-large" ng-disabled="showNewerSnapDisabled()">
+          <a href="" class="btn btn-default" ng-click="showNewerSnap()" ng-disabled="showNewerSnapDisabled()">
             <span class="glyphicon glyphicon-forward"></span> Newer
           </a>
-        </li>      
-      </ul>   
+        </div>
+        <div class="clearfix"></div>
+      </h3>
+    </div> <!-- end panel-heading -->
+    
+    <div class="panel-body animate-show" ng-hide="hideSnapshots">
+      <table class="table">
+        <tr>
+          <th>Name</th>
+          <th>Created</th>
+        </tr>
+        <tr zsd-show-if-empty="snapshots">
+          <td colspan="2">No snapshots found</td>
+        </tr>
+        <tr ng-repeat="snap in snapshots" ng-click="snapshotSelected(snap)">
+          <td>{{snap.Name}}</td>
+          <td>{{snap.Creation}}</td>
+        </tr>
+      </table>
     </div>
-  </nav>
-
-
-
-  <div>
-    <p zsd-show-if-empty="snapshots" class="text-center">
-      No snapshots found
-    </p>
   </div>
-
-  <div class="animate-show" ng-hide="hideSnapshots">
-    <table class="table">
-      <tr ng-repeat="snap in snapshots" ng-click="snapshotSelected(snap)">
-        <td>{{snap.Name}}</td>
-        <td>{{snap.Creation}}</td>
-      </tr>
-    </table>
-  </div>
-
+  
 </div>

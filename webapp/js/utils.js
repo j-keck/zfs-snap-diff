@@ -25,14 +25,24 @@ factory('FileUtils', [function(){
 
 // PathUtils
 factory('PathUtils', ['Config', function(Config){
+  findDatasetForFile = function(path){
+    var datasets = Config.get('datasets');
+    for(var i = datasets.length - 1; i >= 0; i--){
+      if(path.indexOf(datasets[i].MountPoint) >= 0){
+        return datasets[i]
+      }
+    }
+  }
   return {
     convertToSnapPath: function(path, snapName){
-      var relativePath = path.substring(Config.get('zfsMountPoint').length)
-      return Config.get('zfsMountPoint') + "/.zfs/snapshot/" + snapName + relativePath;
+      var dataset = findDatasetForFile(path);
+      var relativePath = path.substring(dataset.MountPoint.length)
+      return dataset.MountPoint + "/.zfs/snapshot/" + snapName + relativePath;
     },
     
     convertToActualPath: function(path){
-      var mountPoint = Config.get('zfsMountPoint');
+      var dataset = findDatasetForFile(path)      
+      var mountPoint = dataset.MountPoint;
       var snapName = this.extractSnapName(path);
 
       var prefix = mountPoint + "/.zfs/snapshot/" + snapName;
@@ -42,27 +52,16 @@ factory('PathUtils', ['Config', function(Config){
     },
 
     extractSnapName: function(path){
-      var pathElements = path.split('/');
-
-      // remove mount point path-prefix
-      for(var _ in Config.get('zfsMountPoint').split('/')){
-        pathElements.shift();
-      }
-
-      pathElements.shift(); // remove: .zfs
-      pathElements.shift(); // remove: snapshots
-      var snapName = pathElements.shift(); // snapName
+      var dataset = findDatasetForFile(path)
+      var p = path.substring(dataset.MountPoint.length) // remove mount point
+      p = p.substring('/.zfs/snapshot/'.length) // remove /.zfs/snapshot/
+      var snapName = p.substring(0, p.indexOf('/')); // extract snapshot-name
       return snapName;
     },
 
 
     entriesToPath: function(entries){
       return entries.map(function(e){ return e.Path}).join('/');
-    },
-
-
-    entriesTargetsToFile: function(entries){
-      return entries[entries.length - 1].Type === 'F';
     },
 
 

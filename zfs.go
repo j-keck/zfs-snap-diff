@@ -2,14 +2,14 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"os/exec"
 	"strings"
 )
 
 type ZFS struct {
-	Name       string
-	MountPoint string
-	execZFS    execZFSFunc
+	Datasets ZFSDatasets
+	execZFS  execZFSFunc
 }
 
 func NewZFS(name string, useSudo bool) (*ZFS, error) {
@@ -44,16 +44,30 @@ func NewZFS(name string, useSudo bool) (*ZFS, error) {
 		return strings.TrimRight(stdoutBuf.String(), "\n"), nil
 	}
 
-	mountPoint, err := execZFS("get -H -o value mountpoint", name)
-	if err != nil {
-		return nil, err
-	}
-
+	datasets, err := NewZFSDatasets(name, execZFS)
 	return &ZFS{
-		name,
-		mountPoint,
+		datasets,
 		execZFS,
-	}, nil
+	}, err
+}
+
+func (zfs *ZFS) FindDatasetForFile(path string) ZFSDataset {
+	for i := len(zfs.Datasets) - 1; i >= 0; i-- {
+		dataset := zfs.Datasets[i]
+		if strings.HasPrefix(path, dataset.MountPoint) {
+			return dataset
+		}
+	}
+	panic("no dataset found")
+}
+
+func (zfs *ZFS) FindDatasetByName(name string) (ZFSDataset, error) {
+	for _, dataset := range zfs.Datasets {
+		if dataset.Name == name {
+			return dataset, nil
+		}
+	}
+	return ZFSDataset{}, fmt.Errorf("No dataset with name: '%s' found\n", name)
 }
 
 type execZFSFunc func(string, ...string) (string, error)

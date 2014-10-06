@@ -10,6 +10,7 @@ type DirEntries []DirEntry
 
 // ScanDirEntries scan a given directory
 func ScanDirEntries(path string) (DirEntries, error) {
+	logDebug.Printf("scan directory under: %s\n", path)
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		return nil, err
@@ -21,6 +22,7 @@ func ScanDirEntries(path string) (DirEntries, error) {
 		if fi.IsDir() {
 			_type = "D"
 		}
+
 		dirEntry := DirEntry{_type, fi.Name(), fi.Size(), fi.ModTime()}
 
 		dirEntries = append(dirEntries, dirEntry)

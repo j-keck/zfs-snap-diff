@@ -38,15 +38,19 @@ controller('MainCtrl', ['$location', '$rootScope', '$timeout', 'Config', functio
 controller('BrowseActualCtrl', ['Backend', 'PathUtils', 'Config', function(Backend, PathUtils, Config){
   var self = this;
 
+  // we start at the root dataset
+  self.dirBrowserStart = Config.get('datasets')[0].MountPoint;
+
   self.fileSelected = function(entries){
     delete self.curSnap;
     delete self.snapshots;
 
     var path = PathUtils.entriesToPath(entries);
     self.curPath = path;
+    self.curFileName = PathUtils.extractFileName(path);    
 
 
-    Backend.listSnapshots(
+    Backend.snapshotsForFile(
       path,
       Config.get('scanSnapLimit'),
       Config.get('compareFileMethod')
@@ -75,9 +79,17 @@ controller('BrowseActualCtrl', ['Backend', 'PathUtils', 'Config', function(Backe
 controller('BrowseSnapshotsCtrl', ['Backend', 'PathUtils', function(Backend, PathUtils){
   var self = this;
 
-  Backend.listSnapshots().then(function(snapshots){
-    self.snapshots = snapshots;
-  });
+
+  self.datasetSelected = function(dataset){
+    self.curDataset = dataset;
+    
+    delete self.curSnap;
+    delete self.curPath;
+    
+    Backend.snapshotsForDataset(dataset.Name).then(function(snapshots){
+      self.snapshots = snapshots;
+    });
+  }
 
 
   self.snapshotSelected = function(snap){
@@ -111,15 +123,20 @@ controller('BrowseSnapshotsCtrl', ['Backend', 'PathUtils', function(Backend, Pat
 controller('BrowseSnapshotDiffCtrl', ['Backend', function(Backend){
   var self = this;
 
-  Backend.listSnapshots().then(function(snapshots){
-    self.snapshots = snapshots;
-  });
+  self.datasetSelected = function(dataset){
+    self.curDataset = dataset;
+    delete self.snapshotDiff;
+    Backend.snapshotsForDataset(dataset.Name).then(function(snapshots){
+      self.snapshots = snapshots;
+    });
+  }
+  
 
   
   self.snapshotSelected = function(snap){
     self.curSnap = snap;
     delete self.snapshotDiff;
-    Backend.snapshotDiff(snap.Name).then(function(diff){
+    Backend.snapshotDiff(self.curDataset.Name, snap.Name).then(function(diff){
       self.snapshotDiff = diff;
     });
   };

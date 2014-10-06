@@ -5,12 +5,12 @@ import (
 	"strings"
 )
 
-// ZFSSnapshots represents snapshots from a zfs filesystem
+// ZFSSnapshots represents snapshots from a zfs dataset
 type ZFSSnapshots []ZFSSnapshot
 
-// ScanSnapshots scan snapshots for the given zfs filesystem
-func (zfs *ZFS) ScanSnapshots() (ZFSSnapshots, error) {
-	out, err := zfs.execZFS("list -t snapshot -r -o name,creation -H", zfs.Name)
+// ScanSnapshots scan snapshots for the given zfs dataset
+func (ds *ZFSDataset) ScanSnapshots() (ZFSSnapshots, error) {
+	out, err := ds.execZFS("list -t snapshot -r -d 1 -o name,creation -H", ds.Name)
 	if err != nil {
 		return nil, errors.New(out)
 	}
@@ -26,7 +26,7 @@ func (zfs *ZFS) ScanSnapshots() (ZFSSnapshots, error) {
 		creation := fields[1]
 
 		// path
-		path := zfs.MountPoint + "/.zfs/snapshot/" + snapName
+		path := ds.MountPoint + "/.zfs/snapshot/" + snapName
 
 		// append new snap to snapshots
 		snap := ZFSSnapshot{snapName, creation, path}

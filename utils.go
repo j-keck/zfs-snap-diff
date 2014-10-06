@@ -12,6 +12,10 @@ func lastElement(str, sep string) string {
 	return fields[len(fields)-1]
 }
 
+func firstElement(str, sep string) string {
+	return strings.Split(str, sep)[0]
+}
+
 // envHasSet returns true, if 'key' is in the environment
 func envHasSet(key string) bool {
 	return len(os.Getenv(key)) > 0
