@@ -8,7 +8,7 @@ module.exports = function(config){
       '../../webapp/lib/angular/angular-route.min.js',
       '../../webapp/lib/angular/angular-sanitize.min.js',
       '../../webapp/lib/angular/angular-animate.min.js',
-      '../../webapp/*.js',
+      '../../webapp/js/*.js',
       '*.js'
     ],
     exclude: [],
