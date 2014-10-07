@@ -1,5 +1,5 @@
 body{
-    padding-top: 80px;
+    padding-top: 60px;
 }
 
 [ng-click]{
@@ -64,6 +64,13 @@ body{
 /* loading spinner
    from: http://stackoverflow.com/a/20013732
    */
+.spinner-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    -webkit-transform: translate(-50%, -50%);
+}
 .spinner {
     height:60px;
     width:60px;
