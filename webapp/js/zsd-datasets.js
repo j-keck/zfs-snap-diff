@@ -17,6 +17,16 @@ angular.module('zsdDatasets', ['zsdServices']).
         scope.toggleHideDatasets = function(){
           scope.hideDatasets = ! scope.hideDatasets;
         };
+
+
+        //
+        // initializations        
+        //
+
+        // select dataset if only one dataset is available
+        if(scope.datasets.length == 1){
+          scope.datasetSelected(scope.datasets[0]);
+        }
       }
     }
 }]);
