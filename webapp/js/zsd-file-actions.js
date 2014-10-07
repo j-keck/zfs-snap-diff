@@ -113,14 +113,6 @@ angular.module('zsdFileActions', ['zsdServices', 'zsdUtils']).
           }
         };
 
-        // returns 'active' if a given name equals the current diffType
-        //   * for diff type tabs
-        $scope.activeClassIfDiffTypeIs = function(name){
-          if($scope.diffType === name){
-            return "active";
-          }
-        };
-
 
         //
         // initializations

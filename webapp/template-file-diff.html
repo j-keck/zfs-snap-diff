@@ -17,14 +17,13 @@
             <button type="button"
                     class="btn btn-primary btn-small"
                     ng-click="showRevertChangeConfirmation($index)"
-                    title="Revert change nr: {{$index + 1}}">
-              <span class="glyphicon glyphicon-share"></span>
+              <span class="glyphicon glyphicon-share">Revert {{$index + 1 | ordinal}} change</span>
             </button>
             <button type="button"
                     class="btn btn-warning"
                     ng-show="showRevertChangeConfirmationFor($index)"
                     title="Confirm to revert change nr: {{$index+1}}"
-                    ng-click="revertChange($index)">Click to revert change nr: {{$index+1}}
+                    ng-click="revertChange($index)">Click to revert {{$index + 1 | ordinal}} change
             </button>
           </div>
           <pre><code ng-bind-html="diffContext"></code></pre>
@@ -49,14 +48,13 @@
               <button type="button"
                       class="btn btn-primary btn-small"
                       ng-click="showRevertChangeConfirmation(zsdIndex)"
-                      title="Revert change nr: {{zsdIndex + 1}}">
-                <span class="glyphicon glyphicon-share"></span>
+                <span class="glyphicon glyphicon-share">Revert {{zsdIndex + 1 | ordinal}} change</span>
               </button>
               <button type="button"
                       class="btn btn-warning"
                       ng-show="showRevertChangeConfirmationFor(zsdIndex)"
                       title="Confirm to revert change nr: {{zsdIndex+1}}"                      
-                      ng-click="revertChange(zsdIndex)">Click to revert change nr: {{zsdIndex+1}}
+                      ng-click="revertChange(zsdIndex)">Click to revert {{zsdIndex + 1 | ordinal}} change
               </button>              
             </td>
           </tr>
