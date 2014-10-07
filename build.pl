@@ -8,6 +8,12 @@ use warnings;
 use diagnostics;
 use IO::Compress::Zip qw(zip $ZipError);
 
+# supported platforms
+my %os_arch = (
+  freebsd => ["i386", "amd64"],
+  linux   => ["amd64"],
+);
+
 # get version from git
 my $version = `git describe`;
 chomp($version);
@@ -25,8 +31,8 @@ say `go-bindata -ignore=.git -ignore=config.json -ignore=README -ignore=angular-
 mkdir("build-output");
 
 # build
-for my $os(<freebsd linux>){
-    for my $arch(<i386 amd64>){
+for my $os(keys(%os_arch)){
+    for my $arch(@{$os_arch{$os}}){
         # set build env
         $ENV{"GOOS"} = $os;
         $ENV{"GOARCH"} = ($arch eq "i386" ? "386" : $arch);
