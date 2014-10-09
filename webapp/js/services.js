@@ -47,7 +47,7 @@ factory('HTTPErrorInterceptor', ['$q', '$rootScope', function($q, $rootScope){
 }]).
 
 
-factory('Config', ["$http", function($http){
+factory('Config', ['$http', function($http){
   var config;
   var promise = $http.get('config').then(function(res){
     config = res.data;
@@ -65,7 +65,7 @@ factory('Config', ["$http", function($http){
   };
 }]).
   
-factory('Backend', ["$http", "Config", function($http, Config){
+factory('Backend', ['$http', 'Config', function($http, Config){
   return {
     snapshotsForFile: function(path, scanSnapLimit, compareFileMethod){
       var params = {path: path};
@@ -73,46 +73,46 @@ factory('Backend', ["$http", "Config", function($http, Config){
       if(angular.isDefined(scanSnapLimit)) params['scan-snap-limit'] = scanSnapLimit;
       if(angular.isDefined(compareFileMethod)) params['compare-file-method'] = compareFileMethod;
       
-      return $http.get("snapshots-for-file", {"params": params}).then(function(res){
+      return $http.get('snapshots-for-file', {'params': params}).then(function(res){
         return res.data
       });
     },
     snapshotsForDataset: function(name){
-      return $http.get("snapshots-for-dataset", {"params": {"dataset-name": name}}).then(function(res){
+      return $http.get('snapshots-for-dataset', {'params': {'dataset-name': name}}).then(function(res){
         return res.data;
       });
     },
     listDir: function(path){
-      return $http.get("list-dir", {"params": {"path": path}}).then(function(res){
+      return $http.get('list-dir', {'params': {'path': path}}).then(function(res){
         return res.data
       });
     },
     snapshotDiff: function(datasetName, snapName){
-      return $http.get("snapshot-diff", {"params": {"dataset-name": datasetName, "snapshot-name": snapName}}).then(function(res){
+      return $http.get('snapshot-diff', {'params': {'dataset-name': datasetName, 'snapshot-name': snapName}}).then(function(res){
         return res.data
       })
     },
     readTextFile: function(path){
-      return this.readFile(path, "text")
+      return this.readFile(path, 'text')
     },
     readBinaryFile: function(path){
-      return this.readFile(path, "blob")
+      return this.readFile(path, 'blob')
     },
     readFile: function(path, responseType){
       var params = {path: path};
     
-      return $http.get("read-file", {"params": params, "responseType": responseType}).then(function(res){
+      return $http.get('read-file', {'params': params, 'responseType': responseType}).then(function(res){
         return res.data;
       });
     },
     fileInfo: function(path){
       // fileInfo with caching
-      return $http.get("file-info", {"params": {"path": path}, "cache": true}).then(function(res){
+      return $http.get('file-info', {'params': {'path': path}, 'cache': true}).then(function(res){
         return res.data;
       })
     },
     restoreFile: function(path, snapName){
-      return $http.put("restore-file", {'path': path, 'snapshot-name': snapName}).then(function(res){
+      return $http.put('restore-file', {'path': path, 'snapshot-name': snapName}).then(function(res){
         return res.data;
       });
     },
