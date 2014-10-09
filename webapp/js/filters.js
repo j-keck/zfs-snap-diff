@@ -6,4 +6,11 @@ angular.module('zsdFilters', []).
       v = n % 100;
       return n + (s[(v-20)%10]||s[v]||s[0]);
     }
+  }).
+  // map 'error' text to 'danger' for bootstrap labels / alerts
+  filter('mapErrorToDanger', function(){
+    return function(text){
+      if(text === 'error') return 'danger';
+      return text;
+    }
   });

@@ -130,4 +130,52 @@ factory('Backend', ["$http", "Config", function($http, Config){
     }
 
   }
+}]).
+
+factory('Notifications', ['$rootScope', function($rootScope){
+  var messages = [];
+  var listeners = [];
+  
+  $rootScope.$on('zsd:error', function(event, msg){
+    addMessage('error', msg);
+  });
+
+  $rootScope.$on('zsd:warning', function(event, msg){
+    addMessage('warning', msg);
+  });
+
+  $rootScope.$on('zsd:success', function(event, msg){
+    addMessage('success', msg);
+  });
+
+
+  // save a new message and notify listeners
+  function addMessage(type, text){
+    var id = messages.length + 1;
+    var message = {id: id, ts: new Date(), type: type, text: text};
+
+    messages.push(message);
+
+    // notify listeners
+    for(var i in listeners){
+      listeners[i](message);
+    }
+  };
+
+  return {
+    registerListener: function(listener){
+      listeners.push(listener);
+    },
+
+    deleteMessages: function(){
+      messages = [];
+    },
+
+    messages: function(){
+      return messages;
+    }
+
+    
+  }
+  
 }]);

@@ -33,17 +33,18 @@
 
 
 
-    <!-- notificatons - success, warnings or errors -->
-    <notifications timeout="10000" class="container"></notifications>
-
     
     <!-- loading spinner -->
     <div class="spinner-container">
       <div class="spinner" ng-show="mainCtrl.loading"></div>
     </div>
 
+    
     <!-- content -->
-    <div ng-view/>
+    <div ng-view></div>
+
+    <!-- notificatons - success, warnings or errors -->
+    <zsd-notifications timeout="10000" class="container"></zsd-notifications>
     
   </body>
 

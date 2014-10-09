@@ -222,9 +222,8 @@ directive('zsdModal', [function(){
 
 
 
-// notifications from $rootScope
-//   * react on 'zsd:error', 'zsd:warning' and 'zsd.success'
-directive('notifications', ['$rootScope', '$timeout', function($rootScope, $timeout){
+// show notifications 
+directive('zsdNotifications', ['$rootScope', '$timeout', 'Notifications', function($rootScope, $timeout, Notifications){
   return {
     restrict: 'E',
     scope: {
@@ -232,36 +231,24 @@ directive('notifications', ['$rootScope', '$timeout', function($rootScope, $time
       timeout: '@'
     },
     link: function(scope, element, attrs){
-      scope.notifications = [];
-      scope.idCounter = 0;
+      scope.messages = [];
       
-      $rootScope.$on('zsd:error', function(event, msg){
-        addMessage('error', msg);
-      });
-
-      $rootScope.$on('zsd:warning', function(event, msg){
-        addMessage('warning', msg);
-      });
-
-      $rootScope.$on('zsd:success', function(event, msg){
-        addMessage('success', msg);
-      });
-
+      // remove message with the given id
       scope.removeMessage = function(id){
-        scope.notifications = scope.notifications.filter(function(n){return n.id !== id});
+        scope.messages = scope.messages.filter(function(n){return n.id !== id});
       }
 
-      function addMessage(type, msg){
-        var id = scope.idCounter++;
-        scope.notifications.push({id: id, type: type, msg: msg})
-
-        // auto-remove old messages only when 'timeout' are given
+      // register a handler with receives new messages
+      // from the Notification service
+      Notifications.registerListener(function(msg){
+        scope.messages.push(msg);
+        // auto-remove old messages only when a timeout are given
         if(angular.isDefined(scope.timeout)){
           $timeout(function(){
-            scope.removeMessage(id);
+            scope.removeMessage(msg.id);
           }, scope.timeout);
         }
-      }
+      });      
     },
     templateUrl: "template-notifications.html"
   }

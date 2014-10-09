@@ -138,3 +138,17 @@ body{
     padding:10px;
 }
 /* end modal */
+
+
+/* notifications */
+.notifications {
+    bottom: -10px;
+    overflow: hidden;
+    position: fixed;
+    opacity: 0.9;
+    z-index: 1000;
+    left: 50%;    
+    -webkit-transform: translate(-50%, 0);
+    transform: translate(-50%, 0); 
+}
+/* end notifications */
