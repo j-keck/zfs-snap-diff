@@ -141,4 +141,9 @@ controller('BrowseSnapshotDiffCtrl', ['Backend', function(Backend){
     });
   };
   
+}]).
+
+controller('BrowseMessagesCtrl', ['Notifications', function(Notifications){
+  var self = this;
+  self.messages = Notifications.messages();
 }]);

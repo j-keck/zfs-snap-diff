@@ -17,6 +17,10 @@ zsd.config(['$routeProvider', function($routeProvider){
       controller: 'BrowseSnapshotDiffCtrl as ctrl',
       templateUrl: 'browse-snapshot-diff.html'
     }).
+    when('/browse-messages', {
+      controller: 'BrowseMessagesCtrl as ctrl',
+      templateUrl: 'browse-messages.html'
+    }).
     otherwise({redirectTo: '/browse-actual'});
 }]);
 

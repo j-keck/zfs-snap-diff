@@ -1,0 +1,9 @@
+<div class="container-fluid">
+  <table class="table">
+    <tr ng-repeat="msg in ctrl.messages">
+      <td><span class="label label-{{msg.type | mapErrorToDanger}}" style="text-transform: capitalize">{{msg.type}}</span></td>
+      <td>{{msg.ts | date:'short'}}</td>
+      <td>{{msg.text}}</td>
+    </tr>
+  </table>
+</div>
