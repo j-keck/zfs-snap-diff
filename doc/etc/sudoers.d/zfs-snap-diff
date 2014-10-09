@@ -1,11 +1,7 @@
-# user under which zfs-snap-diff run
+### !! ADJUST ZSD_USER NAME !! ###
+  
+# user under which zfs-snap-diff run 
 User_Alias ZSD_USER = j
 
 # allow read only zfs commands
 ZSD_USER ALL = NOPASSWD: /sbin/zfs get *, /sbin/zfs list *
-
-# allow mount snapshots
-ZSD_USER ALL = NOPASSWD: /bin/mount -t zfs *
-
-# allow umount snapshots
-ZSD_USER ALL = NOPASSWD: /bin/umount 

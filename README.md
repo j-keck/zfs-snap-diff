@@ -9,7 +9,7 @@ If i messed up a file, i need to search a clean state from the file in the snaps
 # Description
 
 With `zfs-snap-diff` you can explore file differences and restore changes from older file versions in different zfs snapshots.
-You can restore the whole file from a older version, or select changes to revert in the 'Diff' view.
+You can restore the whole file from a older version, or select single changes to revert in the 'Diff' view.
 
   
 `zfs-snap-diff` has a web frontend, so it can run on your local work machine or on your remote file / backup server (no Xserver necesarry).
@@ -46,6 +46,9 @@ The backend is implemented in golang, the frontend with [angularjs](https://angu
         * size+modTime: compares per size and modification time (very cheap)
         * size: compares per size (very cheap)
         * md5: compares per md5 (VERY EXPENSIVE! combine it with '-scan-snap-limit' and use it only for text files!)
+    * -use-sudo: use sudo when executing os commands
+      * necessary under linux when running as non root
+      * adjust sudo rules (see [doc/etc/sudoers.d/zfs-snap-diff](https://github.com/j-keck/zfs-snap-diff/blob/master/doc/etc/sudoers.d/zfs-snap-diff)  
 
 
   
@@ -83,7 +86,7 @@ View the file content from an older file version.
 ![File View](doc/zsd-snap-selected-view-file.png)
 
 #### Diff
-Explore file differences and pick changes to revert.
+Explore file differences and pick single changes to revert.
   
 ![intext diff](doc/zsd-snap-selected-diff-file-intext.png)
   
@@ -92,9 +95,15 @@ Explore file differences and pick changes to revert.
 
 ## Browse snapshot state
 
+### Select a dataset
+
+Select a dataset (sub zfs filesystem).
+  
+![Dataset Browser](zsd-snapshots-datasets.png)
+  
 ### Search a snaphot
 
-Search a snapshot in the snapshot browser. All snapshots are displayed in this view.
+Search a snapshot in the snapshot browser. All snapshots from the selected dataset are displayed in this view.
   
 ![Snapshot Browser](doc/zsd-snapshots.png)
 
@@ -166,6 +175,14 @@ From here you can easy restore / view a deleted file.
 
 ###0.0.X###
 
+0.0.7:
+  * support sub zfs filesystems (datasets)
+  * optional use sudo when execute zfs commands
+    * necessary under linux when running as non root
+    * needs sudo rules (see [doc/etc/sudoers.d/zfs-snap-diff](https://github.com/j-keck/zfs-snap-diff/blob/master/doc/etc/sudoers.d/zfs-snap-diff)  
+    * start `zfs-snap-diff` with '-use-sudo'
+  * new view for server messages
+  
 0.0.6:
   * check if file in snapshot has changed filetype depend:
     * text files: md5
