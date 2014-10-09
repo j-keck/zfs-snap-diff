@@ -48,7 +48,7 @@ The backend is implemented in golang, the frontend with [angularjs](https://angu
         * md5: compares per md5 (VERY EXPENSIVE! combine it with '-scan-snap-limit' and use it only for text files!)
     * -use-sudo: use sudo when executing os commands
       * necessary under linux when running as non root
-      * adjust sudo rules (see [doc/etc/sudoers.d/zfs-snap-diff](https://github.com/j-keck/zfs-snap-diff/blob/master/doc/etc/sudoers.d/zfs-snap-diff)  
+      * adjust sudo rules (see [doc/etc/sudoers.d/zfs-snap-diff](https://github.com/j-keck/zfs-snap-diff/blob/master/doc/etc/sudoers.d/zfs-snap-diff))
 
 
   
@@ -99,7 +99,7 @@ Explore file differences and pick single changes to revert.
 
 Select a dataset (sub zfs filesystem).
   
-![Dataset Browser](zsd-snapshots-datasets.png)
+![Dataset Browser](doc/zsd-snapshots-datasets.png)
   
 ### Search a snaphot
 
@@ -179,7 +179,7 @@ From here you can easy restore / view a deleted file.
   * support sub zfs filesystems (datasets)
   * optional use sudo when execute zfs commands
     * necessary under linux when running as non root
-    * needs sudo rules (see [doc/etc/sudoers.d/zfs-snap-diff](https://github.com/j-keck/zfs-snap-diff/blob/master/doc/etc/sudoers.d/zfs-snap-diff)  
+    * needs sudo rules (see [doc/etc/sudoers.d/zfs-snap-diff](https://github.com/j-keck/zfs-snap-diff/blob/master/doc/etc/sudoers.d/zfs-snap-diff))
     * start `zfs-snap-diff` with '-use-sudo'
   * new view for server messages
   
