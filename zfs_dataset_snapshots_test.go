@@ -11,12 +11,15 @@ var snapshots = ZFSSnapshots{
 }
 
 func TestReverse(t *testing.T) {
+	initLogHandlersForTest()
 	if snapshots.Reverse()[0].Name != "SNAP3" {
 		t.Error("SNAP3 expected")
 	}
 }
 
 func TestFilter(t *testing.T) {
+	initLogHandlersForTest()
+
 	filtered := snapshots.Filter(func(snap ZFSSnapshot) bool {
 		return snap.Name == "snap2"
 	})
@@ -27,6 +30,8 @@ func TestFilter(t *testing.T) {
 }
 
 func TestScanSnapshots(t *testing.T) {
+	initLogHandlersForTest()
+
 	ds := ZFSDataset{"name", "mount", execZFSMock("zfs-name@snap-name\t20140101", nil)}
 	snaps, err := ds.ScanSnapshots()
 
@@ -44,6 +49,8 @@ func TestScanSnapshots(t *testing.T) {
 }
 
 func TestScanSnapshotsEmpty(t *testing.T) {
+	initLogHandlersForTest()
+
 	ds := ZFSDataset{"name", "mount", execZFSMock("", nil)}
 
 	snaps, err := ds.ScanSnapshots()
