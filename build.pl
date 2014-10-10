@@ -12,6 +12,7 @@ use IO::Compress::Zip qw(zip $ZipError);
 my %os_arch = (
   freebsd => ["i386", "amd64"],
   linux   => ["amd64"],
+  solaris => ["amd64"],
 );
 
 # get version from git
