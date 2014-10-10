@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -61,124 +60,96 @@ func configHndl(config FrontendConfig) http.HandlerFunc {
 }
 
 func snapshotsForDatasetHndl(w http.ResponseWriter, r *http.Request) {
-	var snapshots ZFSSnapshots
-	var err error
-
-	params, _ := extractParams(r)
-
-	if datasetName, ok := params["dataset-name"]; ok {
-		logDebug.Printf("scan snapshots for dataset: '%s'\n", datasetName)
-
-		var dataset ZFSDataset
-		if dataset, err = zfs.FindDatasetByName(datasetName); err == nil {
-			snapshots, err = dataset.ScanSnapshots()
-		}
-
-		if err != nil {
-			logError.Println(err.Error())
-			http.Error(w, err.Error(), 500)
-			return
-		}
-
-		// marshal
-		js, err := json.Marshal(snapshots)
-		if err != nil {
-			logError.Println(err.Error())
-			http.Error(w, err.Error(), 500)
-			return
-		}
-
-		// respond
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(js)
-
-	} else {
-		logWarn.Println("parameter 'dataset-name' missing")
-		respondWithParamMissing(w, "dataset-name")
+	// parse / validate request parameter
+	params, paramsValid := parseParams(w, r, "dataset-name:string")
+	if !paramsValid {
+		return
 	}
+
+	datasetName := params["dataset-name"]
+	logDebug.Printf("scan snapshots for dataset: '%s'\n", datasetName)
+
+	var snapshots ZFSSnapshots
+	if dataset, err := zfs.FindDatasetByName(datasetName.(string)); err == nil {
+		snapshots, err = dataset.ScanSnapshots()
+	} else {
+		logError.Println(err.Error())
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	// marshal
+	js, err := json.Marshal(snapshots)
+	if err != nil {
+		logError.Println(err.Error())
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	// respond
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
+
 }
 
 func snapshotsForFileHndl(w http.ResponseWriter, r *http.Request) {
-	var snapshots ZFSSnapshots
-	var err error
-
-	params, _ := extractParams(r)
-	if path, ok := params["path"]; ok {
-		logDebug.Printf("scan snapshots where file: '%s' was modified\n", path)
-		dataset := zfs.FindDatasetForFile(path)
-		snapshots, err = dataset.ScanSnapshots()
-
-		// if 'scan-snap-limit' is given, limit scan to the given value
-		if scanSnapLimit, ok := params["scan-snap-limit"]; ok {
-			limit, err := strconv.Atoi(scanSnapLimit)
-			if err != nil {
-				logWarn.Printf("Invalid value for 'scan-snap-limit'! - %s\n", err.Error())
-				http.Error(w, err.Error(), 400)
-				return
-			}
-
-			if len(snapshots) > limit {
-				logNotice.Printf("scan only %d snapshots for other file versions (%d snapshots available)\n", limit, len(snapshots))
-				snapshots = snapshots[:limit]
-			}
-		}
-
-		// when parameter 'compare-file-method' given, use the given method.
-		// if not, use auto as default
-		var fileHasChangedFuncGen FileHasChangedFuncGen
-		if compareFileMethod, ok := params["compare-file-method"]; ok {
-			if fileHasChangedFuncGen, err = NewFileHasChangedFuncGenByName(compareFileMethod); err != nil {
-				logWarn.Printf("Invalid value for 'compare-file-method'! - %s\n", err.Error())
-				http.Error(w, err.Error(), 400)
-				return
-			}
-		} else {
-			// no compare-file-method given, use auto as default
-			fileHasChangedFuncGen, _ = NewFileHasChangedFuncGenByName("auto")
-		}
-
-		// filter snapshots
-		snapshots = snapshots.FilterWhereFileWasModified(path, fileHasChangedFuncGen)
-
-		if err != nil {
-			logError.Println(err.Error())
-			http.Error(w, err.Error(), 500)
-			return
-		}
-
-		// marshal
-		js, err := json.Marshal(snapshots)
-		if err != nil {
-			logError.Println(err.Error())
-			http.Error(w, err.Error(), 500)
-			return
-		}
-
-		// respond
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(js)
-	} else {
-		logWarn.Println("parameter 'path' missing")
-		respondWithParamMissing(w, "path")
+	// parse / validate request parameter
+	params, paramsValid := parseParams(w, r, "path:string,compare-file-method:string,?scan-snap-limit:int")
+	if !paramsValid {
+		return
 	}
+
+	path := params["path"]
+	logDebug.Printf("scan snapshots where file: '%s' was modified\n", path)
+	dataset := zfs.FindDatasetForFile(path.(string))
+	snapshots, err := dataset.ScanSnapshots()
+	if err != nil {
+		logError.Println(err.Error())
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	// if 'scan-snap-limit' is given, limit scan to the given value
+	if limit, ok := params["scan-snap-limit"]; ok {
+		if len(snapshots) > limit.(int) {
+			logNotice.Printf("scan only %d snapshots for other file versions (%d snapshots available)\n", limit, len(snapshots))
+			snapshots = snapshots[:limit.(int)]
+		}
+	}
+
+	if fileHasChangedFuncGen, err := NewFileHasChangedFuncGenByName(params["compare-file-method"].(string)); err != nil {
+		logError.Printf("Invalid value for 'compare-file-method'! - %s\n", err.Error())
+		http.Error(w, err.Error(), 400)
+		return
+	} else {
+		// filter snapshots
+		snapshots = snapshots.FilterWhereFileWasModified(path.(string), fileHasChangedFuncGen)
+	}
+
+	// marshal
+	js, err := json.Marshal(snapshots)
+	if err != nil {
+		logError.Println(err.Error())
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	// respond
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
+
 }
 
 // diff from a given snapshot to the current filesystem state
 func snapshotDiffHndl(w http.ResponseWriter, r *http.Request) {
-	params, _ := extractParams(r)
-	datasetName, datasetNameFound := params["dataset-name"]
-	if !datasetNameFound {
-		logWarn.Println("parameter 'dataset-name' missing")
-		respondWithParamMissing(w, "dataset-name")
+	// parse / validate request parameter
+	params, paramsValid := parseParams(w, r, "dataset-name:string,snapshot-name:string")
+	if !paramsValid {
 		return
 	}
 
-	snapName, snapNameFound := params["snapshot-name"]
-	if !snapNameFound {
-		logWarn.Println("parameter 'snapshot-name' missing")
-		respondWithParamMissing(w, "snapshot-name")
-		return
-	}
+	datasetName := params["dataset-name"].(string)
+	snapName := params["snapshot-name"].(string)
 
 	dataset, _ := zfs.FindDatasetByName(datasetName)
 	diffs, err := dataset.ScanDiffs(snapName)
@@ -203,12 +174,13 @@ func snapshotDiffHndl(w http.ResponseWriter, r *http.Request) {
 
 // directory contents for directory given by 'path'
 func listDirHndl(w http.ResponseWriter, r *http.Request) {
-	params, _ := extractParams(r)
-	path, pathFound := params["path"]
-	if !pathFound {
-		logWarn.Println("parameter 'path' missing")
-		respondWithParamMissing(w, "path")
+	// parse / validate request parameter
+	params, paramsValid := parseParams(w, r, "path:string")
+	if !paramsValid {
+		return
 	}
+
+	path := params["path"].(string)
 
 	// verify path
 	verifyPathIsUnderZMP(path, w, r)
@@ -235,20 +207,20 @@ func listDirHndl(w http.ResponseWriter, r *http.Request) {
 
 // read the file given in the query param 'path'
 func readFileHndl(w http.ResponseWriter, r *http.Request) {
-	params, _ := extractParams(r)
-	path, pathFound := params["path"]
-	if !pathFound {
-		logWarn.Println("parameter 'path' missing")
-		respondWithParamMissing(w, "path")
+	// parse / validate request parameter
+	params, paramsValid := parseParams(w, r, "path:string,?snapshot-name:string")
+	if !paramsValid {
 		return
 	}
+
+	path := params["path"].(string)
 
 	// verify path
 	verifyPathIsUnderZMP(path, w, r)
 
 	var fh *FileHandle
 	var err error
-	if snapName, ok := params["snapshot-name"]; ok {
+	if snapName, ok := params["snapshot-name"].(string); ok {
 		fh, err = NewFileHandleInSnapshot(path, snapName)
 	} else {
 		fh, err = NewFileHandle(path)
@@ -279,13 +251,13 @@ func readFileHndl(w http.ResponseWriter, r *http.Request) {
 
 // file (meta) info
 func fileInfoHndl(w http.ResponseWriter, r *http.Request) {
-	params, _ := extractParams(r)
-	path, pathFound := params["path"]
-	if !pathFound {
-		logWarn.Println("parameter 'path' missing")
-		respondWithParamMissing(w, "path")
+	// parse / validate request parameter
+	params, paramsValid := parseParams(w, r, "path:string")
+	if !paramsValid {
 		return
 	}
+
+	path := params["path"].(string)
 
 	// verify path
 	verifyPathIsUnderZMP(path, w, r)
@@ -318,24 +290,19 @@ func fileInfoHndl(w http.ResponseWriter, r *http.Request) {
 }
 
 func restoreFileHndl(w http.ResponseWriter, r *http.Request) {
-	params, _ := extractParams(r)
-	path, pathFound := params["path"]
-	if !pathFound {
-		logWarn.Println("parameter 'path' missing")
-		respondWithParamMissing(w, "path")
+	// parse / validate request parameter
+	params, paramsValid := parseParams(w, r, "path:string,snapshot-name:string")
+	if !paramsValid {
 		return
 	}
+
+	path := params["path"].(string)
 
 	// verify path
 	verifyPathIsUnderZMP(path, w, r)
 
 	// get parameter snapshot-name
-	snapName, snapNameFound := params["snapshot-name"]
-	if !snapNameFound {
-		logWarn.Println("parameter 'snapshot-name' missing")
-		respondWithParamMissing(w, "snapshot-name")
-		return
-	}
+	snapName := params["snapshot-name"].(string)
 
 	// get file-handle for the actual file
 	actualFh, err := NewFileHandle(path)
@@ -370,30 +337,16 @@ func restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 }
 
 func diffFileHndl(w http.ResponseWriter, r *http.Request) {
-	params, _ := extractParams(r)
-	path, pathFound := params["path"]
-	if !pathFound {
-		logWarn.Println("parameter 'path' missing")
-		respondWithParamMissing(w, "path")
+	// parse / validate request parameter
+	params, paramsValid := parseParams(w, r, "path:string,snapshot-name:string,context-size:int")
+	if !paramsValid {
 		return
 	}
+
+	path := params["path"].(string)
 
 	// verify path
 	verifyPathIsUnderZMP(path, w, r)
-
-	// get parameter snapshot-name
-	snapName, snapNameFound := params["snapshot-name"]
-	if !snapNameFound {
-		logWarn.Println("parameter 'snapshot-name' missing")
-		respondWithParamMissing(w, "snapshot-name")
-		return
-	}
-
-	// get parameter context-size
-	contextSize := 5 // FIXME: from default value in main.go
-	if contextSizeStr, ok := params["context-size"]; ok {
-		contextSize, _ = strconv.Atoi(contextSizeStr)
-	}
 
 	// read actual file
 	var actualText string
@@ -411,7 +364,7 @@ func diffFileHndl(w http.ResponseWriter, r *http.Request) {
 
 	// read snap file
 	var snapText string
-	if snapFh, err := NewFileHandleInSnapshot(path, snapName); err != nil {
+	if snapFh, err := NewFileHandleInSnapshot(path, params["snapshot-name"].(string)); err != nil {
 		logError.Println(err.Error())
 		http.Error(w, "unable to get file-handle for snap file: "+err.Error(), 400)
 		return
@@ -424,7 +377,7 @@ func diffFileHndl(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// execute diff
-	diff := Diff(snapText, actualText, contextSize)
+	diff := Diff(snapText, actualText, params["context-size"].(int))
 
 	// marshal
 	js, err := json.Marshal(map[string]interface{}{
@@ -452,6 +405,7 @@ func revertChangeHndl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//FIXME: param parsing
 	var params map[string]interface{}
 	if err := json.Unmarshal(body, &params); err != nil {
 		logWarn.Printf("unable to unmarshal json: %s\n", err.Error())
@@ -460,7 +414,7 @@ func revertChangeHndl(w http.ResponseWriter, r *http.Request) {
 	path, pathFound := params["path"].(string)
 	if !pathFound {
 		logWarn.Println("parameter 'path' missing")
-		respondWithParamMissing(w, "path")
+		http.Error(w, "parameter 'path' missing", http.StatusBadRequest)
 		return
 	}
 
@@ -478,7 +432,7 @@ func revertChangeHndl(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		logWarn.Println("parameter 'deltas' missing")
-		respondWithParamMissing(w, "deltas")
+		http.Error(w, "parameter 'deltas' missing", http.StatusBadRequest)
 		return
 	}
 
@@ -508,51 +462,6 @@ func serveStaticContentFromBinaryHndl(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", mimeTypes[lastElement(path, ".")])
 	data, _ := Asset(path)
 	w.Write(data)
-}
-
-//
-func extractParams(r *http.Request) (map[string]string, error) {
-	params := make(map[string]string)
-
-	if r.Method == "GET" {
-		// extract query params
-		for key, values := range r.URL.Query() {
-			if len(values) > 0 {
-				params[key] = values[0]
-			}
-		}
-		return params, nil
-	}
-
-	if r.Method == "PUT" || r.Method == "POST" {
-		// extract from body if content-type is 'application/json'
-		contentType := r.Header.Get("Content-Type")
-		if strings.HasPrefix(contentType, "application/json") {
-			body, err := ioutil.ReadAll(r.Body)
-			if err != nil {
-				logWarn.Println("unable to read body:", err.Error())
-				return nil, err
-			}
-
-			// abort if body is empty
-			if len(body) == 0 {
-				return nil, errors.New("empty body")
-			}
-
-			if err := json.Unmarshal(body, &params); err != nil {
-				logWarn.Println("unable to parse json:", err.Error())
-				return nil, err
-			}
-			return params, nil
-		}
-	}
-
-	return params, nil
-}
-
-// respond parameter missing
-func respondWithParamMissing(w http.ResponseWriter, name string) {
-	http.Error(w, fmt.Sprintf("parameter '%s' missing", name), 400)
 }
 
 // verified that the given path is under zfs-mount-point
