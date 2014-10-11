@@ -2,11 +2,11 @@ describe('PathUtils', function(){
 
   var datasets = [
     {Name: 'zp', MountPoint: '/zp'},
-    {Name: 'zp/a', MountPoint: '/zp/a'},
-    {Nmae: 'zp/a/b', MountPoint: '/zp/a/b'},
+    {Name: 'zp/aa', MountPoint: '/'},
+    {Name: 'zp/a/b', MountPoint: '/zp/a/b'},
   ];
   
-  var zfsMountPoint = "/zp/a";
+  var zfsMountPoint = "/zp";
   var relativePath  = "/relative/path/to/file";
 
   var testSnapName = "20140001-1d";

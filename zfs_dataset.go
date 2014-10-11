@@ -56,3 +56,19 @@ func NewZFSDatasets(name string, execZFS execZFSFunc) (ZFSDatasets, error) {
 func (ds ZFSDatasets) Root() *ZFSDataset {
 	return &ds[0]
 }
+
+// Sort
+type SortByMountPointDesc ZFSDatasets
+
+func (s SortByMountPointDesc) Len() int {
+	return len(s)
+}
+
+func (s SortByMountPointDesc) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+
+}
+
+func (s SortByMountPointDesc) Less(i, j int) bool {
+	return len(s[i].MountPoint) > len(s[j].MountPoint)
+}

@@ -25,10 +25,18 @@ factory('FileUtils', [function(){
 
 // PathUtils
 factory('PathUtils', ['Config', function(Config){
+  // search the dataset which is the parent from the given path  
   findDatasetForFile = function(path){
     var datasets = Config.get('datasets');
-    for(var i = datasets.length - 1; i >= 0; i--){
-      if(path.indexOf(datasets[i].MountPoint) >= 0){
+
+    // sort the datasets - longest path at first
+    datasets = datasets.sort(function(a, b){
+      return b.MountPoint.length - a.MountPoint.length
+    });
+
+
+    for(var i in datasets){
+      if(path.indexOf(datasets[i].MountPoint+"/") >= 0){
         return datasets[i]
       }
     }

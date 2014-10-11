@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os/exec"
+	"sort"
 	"strings"
 )
 
@@ -52,10 +53,14 @@ func NewZFS(name string, useSudo bool) (*ZFS, error) {
 }
 
 func (zfs *ZFS) FindDatasetForFile(path string) ZFSDataset {
-	for i := len(zfs.Datasets) - 1; i >= 0; i-- {
-		dataset := zfs.Datasets[i]
-		if strings.HasPrefix(path, dataset.MountPoint) {
-			return dataset
+	datasets := zfs.Datasets
+
+	// sort the datasets - longest path at first
+	sort.Sort(SortByMountPointDesc(datasets))
+
+	for _, ds := range datasets {
+		if strings.HasPrefix(path, ds.MountPoint+"/") {
+			return ds
 		}
 	}
 	panic("no dataset found")
