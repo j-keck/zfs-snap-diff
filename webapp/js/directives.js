@@ -181,14 +181,16 @@ directive('zsdDirBrowser', ['Backend', 'PathUtils', function(Backend, PathUtils)
 
 
 
-      if(typeof scope.start !== 'undefined'){
+      scope.$watch(function(){ return scope.start}, function(start){
+        if(! angular.isDefined(start)) return;
+        
         scope.entries = [];
         scope.open({Type: 'D', Path: scope.start});
-      }
+      });
       
-      scope.$watch(function(){ return scope.startEntries}, function(){
-        if(typeof scope.startEntries === 'undefined') return;
-        scope.entries = scope.startEntries;
+      scope.$watch(function(){ return scope.startEntries}, function(startEntries){
+        if(! angular.isDefined(startEntries)) return;
+        scope.entries = startEntries;
 
         // start on last element
         scope.open(scope.entries[scope.entries.length - 1]);

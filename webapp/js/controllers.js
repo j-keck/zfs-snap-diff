@@ -38,8 +38,13 @@ controller('MainCtrl', ['$location', '$rootScope', '$timeout', 'Config', functio
 controller('BrowseActualCtrl', ['Backend', 'PathUtils', 'Config', function(Backend, PathUtils, Config){
   var self = this;
 
-  // we start at the root dataset
-  self.dirBrowserStart = Config.get('datasets')[0].MountPoint;
+  self.datasetSelected = function(dataset){
+    delete self.curSnap;
+    delete self.curPath;    
+    delete self.snapshots;
+    
+    self.curDataset = dataset;
+  }
 
   self.fileSelected = function(entries){
     delete self.curSnap;
