@@ -41,12 +41,9 @@ func ScanDatasets(name string, execZFS execZFSFunc) (ZFSDatasets, error) {
 		return nil, err
 	} else {
 		for _, line := range strings.Split(out, "\n") {
-			// extract fields
-			fields := strings.SplitN(line, "\t", 2)
-			if len(fields) != 2 {
-				break
+			if name, mountPoint, ok := split2(line, "\t"); ok {
+				datasets = append(datasets, ZFSDataset{name, mountPoint, execZFS})
 			}
-			datasets = append(datasets, ZFSDataset{fields[0], fields[1], execZFS})
 		}
 	}
 	logDebug.Printf("%d datasets found\n", len(datasets))

@@ -14,6 +14,27 @@ func TestLastElement(t *testing.T) {
 	}
 }
 
+func TestSplit2(t *testing.T) {
+	a, b, ok := split2("a/b", "/")
+	if !ok {
+		t.Fatal("expected true for flag")
+	}
+
+	if a != "a" {
+		t.Fatal("exepcted a as first element")
+	}
+
+	if b != "b" {
+		t.Fatal("expected b as second element")
+	}
+}
+
+func TestSplit2WithMissingElement(t *testing.T) {
+	if _, _, ok := split2("aaa", "/"); ok {
+		t.Fatal("expected false for flag")
+	}
+}
+
 func TestSplitText(t *testing.T) {
 	tests := []struct {
 		text        string

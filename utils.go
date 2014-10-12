@@ -16,6 +16,26 @@ func firstElement(str, sep string) string {
 	return strings.Split(str, sep)[0]
 }
 
+// split2 splits a given string by 'sep' into two elements
+// returns the elements and a bool flag if both elements are found
+func split2(str, sep string) (string, string, bool) {
+	e := strings.SplitN(str, sep, 2)
+	if len(e) != 2 {
+		return "", "", false
+	}
+	return e[0], e[1], true
+}
+
+// split3 splits a given string by 'sep' into three elements
+// returns the elements and a bool flag if all elements are found
+func split3(str, sep string) (string, string, string, bool) {
+	e := strings.SplitN(str, sep, 3)
+	if len(e) != 3 {
+		return "", "", "", false
+	}
+	return e[0], e[1], e[2], true
+}
+
 // envHasSet returns true, if 'key' is in the environment
 func envHasSet(key string) bool {
 	return len(os.Getenv(key)) > 0

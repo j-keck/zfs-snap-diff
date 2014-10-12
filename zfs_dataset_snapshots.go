@@ -17,20 +17,17 @@ func (ds *ZFSDataset) ScanSnapshots() (ZFSSnapshots, error) {
 
 	snapshots := ZFSSnapshots{}
 	for _, line := range strings.Split(out, "\n") {
-		// extract fields
-		fields := strings.SplitN(line, "\t", 2)
-		if len(fields) != 2 {
-			break
+		if snapName, creation, ok := split2(line, "\t"); ok {
+			// remove dataset name from snapshot
+			snapName := lastElement(snapName, "@")
+
+			// path
+			path := ds.MountPoint + "/.zfs/snapshot/" + snapName
+
+			// append new snap to snapshots
+			snapshots = append(snapshots, ZFSSnapshot{snapName, creation, path})
 		}
-		snapName := lastElement(fields[0], "@")
-		creation := fields[1]
 
-		// path
-		path := ds.MountPoint + "/.zfs/snapshot/" + snapName
-
-		// append new snap to snapshots
-		snap := ZFSSnapshot{snapName, creation, path}
-		snapshots = append(snapshots, snap)
 	}
 	return snapshots.Reverse(), nil
 }

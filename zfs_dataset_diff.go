@@ -18,21 +18,17 @@ func (ds *ZFSDataset) ScanDiffs(snapName string) (ZFSDiffs, error) {
 		return nil, errors.New(out)
 	}
 
-	// init replacer to replace '\040' with ' ' in 'zfs diff' output
-	//   see: https://www.illumos.org/issues/1912
-	replacer := strings.NewReplacer("\\040", " ")
-
 	diffs := ZFSDiffs{}
 	for _, line := range strings.Split(out, "\n") {
 		//FIXME: filter only files, directories?
 		//FIXME: type rename: '/' -> 'D' ...
-		fields := strings.SplitN(line, "\t", 3)
-		if len(fields) != 3 {
-			break
-		}
-		zfsDiff := ZFSDiff{fields[0], fields[1], replacer.Replace(fields[2])}
+		if change, changeType, path, ok := split3(line, "\t"); ok {
+			// replace '\040' with ' ' in 'zfs diff' output
+			//   see: https://www.illumos.org/issues/1912
+			path = strings.Replace(path, "\\040", " ", -1)
 
-		diffs = append(diffs, zfsDiff)
+			diffs = append(diffs, ZFSDiff{change, changeType, path})
+		}
 	}
 	return diffs, nil
 }
