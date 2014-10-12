@@ -7,6 +7,9 @@ import (
 
 type ZFSDataset struct {
 	Name       string
+	Used       string
+	Avail      string
+	Refer      string
 	MountPoint string
 	execZFS    execZFSFunc
 }
@@ -37,14 +40,14 @@ type ZFSDatasets []ZFSDataset
 func ScanDatasets(name string, execZFS execZFSFunc) (ZFSDatasets, error) {
 	logDebug.Printf("search datasets under zfs: %s\n", name)
 	var datasets ZFSDatasets
-	if out, err := execZFS("list -H -o name,mountpoint -r -t filesystem", name); err != nil {
+	if out, err := execZFS("list -H -o name,used,avail,refer,mountpoint -r -t filesystem", name); err != nil {
 		return nil, err
 	} else {
 		for _, line := range strings.Split(out, "\n") {
-			if name, mountPoint, ok := split2(line, "\t"); ok {
+			if name, used, avail, refer, mountPoint, ok := split5(line, "\t"); ok {
 				// don't add legacy datasets
 				if mountPoint != "legacy" {
-					datasets = append(datasets, ZFSDataset{name, mountPoint, execZFS})
+					datasets = append(datasets, ZFSDataset{name, used, avail, refer, mountPoint, execZFS})
 				}
 			}
 		}

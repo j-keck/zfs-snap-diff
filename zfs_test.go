@@ -6,9 +6,9 @@ import (
 
 func TestFindDatasetForFile(t *testing.T) {
 	datasets := ZFSDatasets{
-		ZFSDataset{"zp1", "/zp1", nil},
-		ZFSDataset{"zp1/a", "/zp1/a", nil},
-		ZFSDataset{"zp1/aa", "/", nil},
+		ZFSDataset{"zp1", "1k", "2k", "3k", "/zp1", nil},
+		ZFSDataset{"zp1/a", "1k", "2k", "3k", "/zp1/a", nil},
+		ZFSDataset{"zp1/aa", "1k", "2k", "3k", "/", nil},
 	}
 
 	zfs := ZFS{datasets, nil}

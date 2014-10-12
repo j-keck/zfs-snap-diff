@@ -14,10 +14,16 @@
       <table class="table">
         <tr>
           <th>Name</th>
+          <th>Used</th>
+          <th>Avail</th>
+          <th>Refer</th>
           <th>Mountpoint</th>
         </tr>
         <tr ng-repeat="dataset in datasets" ng-click="datasetSelected(dataset)">
           <td>{{dataset.Name}}</td>
+          <td>{{dataset.Used}}</td>
+          <td>{{dataset.Avail}}</td>
+          <td>{{dataset.Refer}}</td>
           <td>{{dataset.MountPoint}}</td>
         </tr>
       </table>

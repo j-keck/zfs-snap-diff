@@ -36,6 +36,26 @@ func split3(str, sep string) (string, string, string, bool) {
 	return e[0], e[1], e[2], true
 }
 
+// split4 splits a given string by 'sep' into for elements
+// returns the elements and a bool flag if all elements are found
+func split4(str, sep string) (string, string, string, string, bool) {
+	e := strings.SplitN(str, sep, 4)
+	if len(e) != 4 {
+		return "", "", "", "", false
+	}
+	return e[0], e[1], e[2], e[3], true
+}
+
+// split5 splits a given string by 'sep' into for elements
+// returns the elements and a bool flag if all elements are found
+func split5(str, sep string) (string, string, string, string, string, bool) {
+	e := strings.SplitN(str, sep, 5)
+	if len(e) != 5 {
+		return "", "", "", "", "", false
+	}
+	return e[0], e[1], e[2], e[3], e[4], true
+}
+
 // envHasSet returns true, if 'key' is in the environment
 func envHasSet(key string) bool {
 	return len(os.Getenv(key)) > 0
