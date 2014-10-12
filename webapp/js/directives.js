@@ -15,15 +15,6 @@ directive('zsdSnapshots', ['$location', '$anchorScroll', function($location, $an
         scope.hideSnapshots = true;
         scope.curSnap = snap;
         scope.onSnapshotSelected({snap: snap});
-
-        // scroll to top: FIXME:
-        /*
-        scope.$on('$locationChangeStart', function(ev) {
-          ev.preventDefault();
-        });
-        $location.hash('top');
-        $anchorScroll();
-        */
       };
       
       scope.toggleHideSnapshots = function(){
@@ -381,5 +372,13 @@ directive('zsdSideBySideDiffRows', ['$compile', function($compile){
         });
       }
     }
+  }
+}]).
+
+directive('zsdScrollToTop', ['$window', function($window){
+  return function(scope, element, attrs){
+    element.bind('click', function(event){
+      $window.scrollTo(0, 0);
+    });
   }
 }]);

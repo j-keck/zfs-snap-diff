@@ -19,7 +19,7 @@
           <th>Refer</th>
           <th>Mountpoint</th>
         </tr>
-        <tr ng-repeat="dataset in datasets" ng-click="datasetSelected(dataset)">
+        <tr ng-repeat="dataset in datasets" ng-click="datasetSelected(dataset)" zsd-scroll-to-top>
           <td>{{dataset.Name}}</td>
           <td>{{dataset.Used}}</td>
           <td>{{dataset.Avail}}</td>

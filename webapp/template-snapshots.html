@@ -28,7 +28,7 @@
         <tr zsd-show-if-empty="snapshots">
           <td colspan="2">No snapshots found</td>
         </tr>
-        <tr ng-repeat="snap in snapshots" ng-click="snapshotSelected(snap)">
+        <tr ng-repeat="snap in snapshots" ng-click="snapshotSelected(snap)" zsd-scroll-to-top>
           <td>{{snap.Name}}</td>
           <td>{{snap.Creation}}</td>
         </tr>
