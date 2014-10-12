@@ -45,7 +45,7 @@ func NewZFS(name string, useSudo bool) (*ZFS, error) {
 		return strings.TrimRight(stdoutBuf.String(), "\n"), nil
 	}
 
-	datasets, err := NewZFSDatasets(name, execZFS)
+	datasets, err := ScanDatasets(name, execZFS)
 	return &ZFS{
 		datasets,
 		execZFS,

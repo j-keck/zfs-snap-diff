@@ -34,7 +34,7 @@ func (d *ZFSDataset) ExtractSnapName(path string) string {
 
 type ZFSDatasets []ZFSDataset
 
-func NewZFSDatasets(name string, execZFS execZFSFunc) (ZFSDatasets, error) {
+func ScanDatasets(name string, execZFS execZFSFunc) (ZFSDatasets, error) {
 	logDebug.Printf("search datasets under zfs: %s\n", name)
 	var datasets ZFSDatasets
 	if out, err := execZFS("list -H -o name,mountpoint -r -t filesystem", name); err != nil {
