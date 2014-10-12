@@ -61,12 +61,15 @@ angular.module('zsdFileActions', ['zsdServices', 'zsdUtils']).
               $scope.textFileContent = hljsRes.value;
             });
           }else{
-            Backend.readBinaryFile($scope.pathInSnap).then(function(res){
-              clearOthersButKeep('binaryFileContent');
-              
-              var url = URL.createObjectURL(res);
-              $scope.binaryFileContent = $sce.trustAsResourceUrl(url);              
-            });
+            // show only if content is viewable
+            if(FileUtils.isViewable($scope.fileInfo)){
+              Backend.readBinaryFile($scope.pathInSnap).then(function(res){
+                clearOthersButKeep('binaryFileContent');
+                
+                var url = URL.createObjectURL(res);
+                $scope.binaryFileContent = $sce.trustAsResourceUrl(url);              
+              });
+            }
           }
         }
 
