@@ -53,7 +53,9 @@ func NewZFS(name string, useSudo bool) (*ZFS, error) {
 }
 
 func (zfs *ZFS) FindDatasetForFile(path string) ZFSDataset {
-	datasets := zfs.Datasets
+	// create a copy before sorting to keep the orginal dataset order intact
+	datasets := make(ZFSDatasets, len(zfs.Datasets))
+	copy(datasets, zfs.Datasets)
 
 	// sort the datasets - longest path at first
 	sort.Sort(SortByMountPointDesc(datasets))
