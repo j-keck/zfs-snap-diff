@@ -183,6 +183,8 @@ From here you can easy restore / view a deleted file.
     * start `zfs-snap-diff` with '-use-sudo'
   * new view for server messages
   
+[all commits from 0.0.6...0.0.7](https://github.com/j-keck/zfs-snap-diff/compare/0.0.6...0.0.7)
+  
 0.0.6:
   * check if file in snapshot has changed filetype depend:
     * text files: md5
@@ -190,7 +192,8 @@ From here you can easy restore / view a deleted file.
   * diffs created in the backend (per [go-diff](https://github.com/sergi/go-diff))
     * different presentation: intext / side by side
     * possibility to revert single changes
-  * bugfixes
+  
+[all commits from 0.0.5...0.0.6](https://github.com/j-keck/zfs-snap-diff/compare/0.0.5...0.0.6)  
    
   
 0.0.5:
@@ -198,6 +201,8 @@ From here you can easy restore / view a deleted file.
   * optional limit how many snapshots are scan to search older file version
   * autohide notifications in frontend
   * show message if no snapshots found
+  
+[all commits from 0.0.4...0.0.5](https://github.com/j-keck/zfs-snap-diff/compare/0.0.4...0.0.5)  
   
 0.0.4:
   * view, diff, download or restore file from a snapshot
@@ -207,13 +212,19 @@ From here you can easy restore / view a deleted file.
   * cleanup frontend
   * refactor backend
   
+[all commits 0.0.3...0.0.4](https://github.com/j-keck/zfs-snap-diff/compare/0.0.3...0.0.4)    
+  
 0.0.3:
   * show server errors on frontend
   * show waiting spinner when loading
+
+[all commits 0.0.2...0.0.3](https://github.com/j-keck/zfs-snap-diff/compare/0.0.2...0.0.3)        
   
 0.0.2 :
   * partial frontend configuration from server
   * fix firefox ui
+
+[all commits 0.0.1...0.0.2](https://github.com/j-keck/zfs-snap-diff/compare/0.0.1...0.0.2)      
 
 0.0.1:
   * prototype  
