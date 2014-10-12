@@ -4,7 +4,8 @@ angular.module('zsdDatasets', ['zsdServices']).
       restrict: 'E',
       templateUrl: 'template-datasets.html',
       scope: {
-        onDatasetSelected: '&'
+        onDatasetSelected: '&',
+        collapse: '='
       },
       link: function(scope, element, attrs){
         scope.datasets = Config.get('datasets');
@@ -22,6 +23,11 @@ angular.module('zsdDatasets', ['zsdServices']).
         //
         // initializations        
         //
+
+        // auto-collapse if 'collapse' is defined
+        if(angular.isDefined(scope.collapse)){
+          scope.hideDatasets = true;
+        }
 
         // select dataset if only one dataset is available
         if(scope.datasets.length == 1){

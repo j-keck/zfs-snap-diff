@@ -178,4 +178,20 @@ factory('Notifications', ['$rootScope', function($rootScope){
     
   }
   
+}]).
+
+// session store
+factory('Session', [function(){
+  var store = {};
+  return {
+    set: function(key, value){
+      store[key] = value;
+    },
+    get: function(key){
+      return store[key];
+    },
+    has: function(key){
+      return angular.isDefined(this.get(key));
+    }
+  }
 }]);

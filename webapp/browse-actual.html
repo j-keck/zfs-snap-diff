@@ -1,6 +1,8 @@
 <div>
 
-  <zsd-datasets on-dataset-selected="ctrl.datasetSelected(dataset)"></zsd-datasets>
+  <zsd-datasets on-dataset-selected="ctrl.datasetSelected(dataset)"
+                collapse="ctrl.curDataset">
+  </zsd-datasets>
 
                  
   <zsd-dir-browser ng-if="ctrl.curDataset"

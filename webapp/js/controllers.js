@@ -35,7 +35,7 @@ controller('MainCtrl', ['$location', '$rootScope', '$timeout', 'Config', functio
 
 
 
-controller('BrowseActualCtrl', ['Backend', 'PathUtils', 'Config', function(Backend, PathUtils, Config){
+controller('BrowseActualCtrl', ['Backend', 'PathUtils', 'Config', 'Session', function(Backend, PathUtils, Config, Session){
   var self = this;
 
   self.datasetSelected = function(dataset){
@@ -44,6 +44,7 @@ controller('BrowseActualCtrl', ['Backend', 'PathUtils', 'Config', function(Backe
     delete self.snapshots;
     
     self.curDataset = dataset;
+    Session.set('curDataset', dataset);
   }
 
   self.fileSelected = function(entries){
@@ -76,17 +77,23 @@ controller('BrowseActualCtrl', ['Backend', 'PathUtils', 'Config', function(Backe
     self.curSnap = snap;
   };
 
+
+  // start on 'curDataset' if it's defined  
+  if(Session.has('curDataset')){
+    self.datasetSelected(Session.get('curDataset'))
+  }
+  
 }]).
 
 
 
 
-controller('BrowseSnapshotsCtrl', ['Backend', 'PathUtils', function(Backend, PathUtils){
+controller('BrowseSnapshotsCtrl', ['Backend', 'PathUtils', 'Session', function(Backend, PathUtils, Session){
   var self = this;
-
 
   self.datasetSelected = function(dataset){
     self.curDataset = dataset;
+    Session.set('curDataset', dataset);
     
     delete self.curSnap;
     delete self.curPath;
@@ -120,16 +127,22 @@ controller('BrowseSnapshotsCtrl', ['Backend', 'PathUtils', function(Backend, Pat
     delete self.curPath;
   };
 
+  // start on 'curDataset' if it's defined  
+  if(Session.has('curDataset')){
+    self.datasetSelected(Session.get('curDataset'))    
+  }  
 }]).
 
 
 
 
-controller('BrowseSnapshotDiffCtrl', ['Backend', function(Backend){
+controller('BrowseSnapshotDiffCtrl', ['Backend', 'Session', function(Backend, Session){
   var self = this;
-
+   
   self.datasetSelected = function(dataset){
     self.curDataset = dataset;
+    Session.set('curDataset', dataset);
+    
     delete self.snapshotDiff;
     Backend.snapshotsForDataset(dataset.Name).then(function(snapshots){
       self.snapshots = snapshots;
@@ -145,6 +158,11 @@ controller('BrowseSnapshotDiffCtrl', ['Backend', function(Backend){
       self.snapshotDiff = diff;
     });
   };
+
+  // start on 'curDataset' if it's defined
+  if(Session.has('curDataset')){
+    self.datasetSelected(Session.get('curDataset'))    
+  }
   
 }]).
 
