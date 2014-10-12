@@ -42,7 +42,10 @@ func ScanDatasets(name string, execZFS execZFSFunc) (ZFSDatasets, error) {
 	} else {
 		for _, line := range strings.Split(out, "\n") {
 			if name, mountPoint, ok := split2(line, "\t"); ok {
-				datasets = append(datasets, ZFSDataset{name, mountPoint, execZFS})
+				// don't add legacy datasets
+				if mountPoint != "legacy" {
+					datasets = append(datasets, ZFSDataset{name, mountPoint, execZFS})
+				}
 			}
 		}
 	}

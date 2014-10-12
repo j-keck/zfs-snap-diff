@@ -12,3 +12,12 @@ func TestScanDatasets(t *testing.T) {
 		t.Error("4 datasets expected - received:", len(datasets))
 	}
 }
+
+func TestScanDatasetsShouldFilterLegacy(t *testing.T) {
+	initLogHandlersForTest()
+
+	datasets, _ := ScanDatasets("zp", execZFSMock("zp\t/zp\nzp1/a\tlegacy\nzp1/b\tlegacy\n", nil))
+	if len(datasets) != 1 {
+		t.Error("1 datasets expected - received:", len(datasets))
+	}
+}
