@@ -116,23 +116,7 @@ From here you can easy restore / view a deleted file.
 ![File Browser](doc/zsd-snapshots-file-browser.png)
 
 
-  
-#Notes
-
-  * if you download a file from a snapshot, the generated file name has the snapshot name included:
-
-        <ORG_FILE_NAME>-<SNAPSHOT_NAME>.<FILE_SUFFIX>
-
-  * if you restore / patch a file, the orginal file will be saved under:
-
-        ./zsd/<ORG_FLILE_NAME>_<TIMESTAMP>
-
-  * for snapshot differences (Browse snapshot diff), you need to set the diff permission:
-
-        zfs allow -u <USER_NAME> diff <ZFS_NAME>
-
-
-  
+ 
 
 
 # Installation
@@ -155,22 +139,42 @@ From here you can easy restore / view a deleted file.
 
   * fetch dependencies ([go-diff](https://github.com/sergi/go-diff))
 
-          go get -u
-
-  * generate golang src from static web content (this generates bindata.go)
-    
-        go-bindata webapp/...
-
-    or start it later per `ZSD_SERVE_FROM_WEBAPP=YES ./zfs-snap-diff <ZFS_NAME>`
-    to serve the static content from the `webapp` folder.
-   
+          go get -u  
 
   * build it
-  
-        go build -ldflags "-X main.VERSION $(git describe)"
+
+          go build -ldflags "-X main.VERSION $(git describe)"
 
 
   
+#Notes
+
+  * if you download a file from a snapshot, the generated file name has the snapshot name included:
+
+        <ORG_FILE_NAME>-<SNAPSHOT_NAME>.<FILE_SUFFIX>
+
+  * if you restore / patch a file, the orginal file will be saved under:
+
+        ./zsd/<ORG_FLILE_NAME>_<TIMESTAMP>
+
+  * for snapshot differences (Browse snapshot diff), you need to set the diff permission:
+
+        zfs allow -u <USER_NAME> diff <ZFS_NAME>
+
+   
+
+# Coding Notes
+
+  * if you change something under 'webapp/' 
+
+    * start `zfs-snap-diff` per `ZSD_SERVE_FROM_WEBAPP=YES ./zfs-snap-diff <ZFS_NAME>`
+      to serve the static content from the `webapp` folder
+
+    * re-generate bindata.go and recompile `zfs-snap-diff`
+      * sh ./gen-bindata.sh
+      * go build -ldflags "-X main.VERSION $(git describe)"
+
+
 # Changelog
 
 ###0.0.X###
