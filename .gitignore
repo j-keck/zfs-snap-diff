@@ -1,5 +1,4 @@
 /zfs-snap-diff
-bindata.go
 build-output/
 emacs-24.3.core
 node_modules

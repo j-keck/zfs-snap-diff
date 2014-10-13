@@ -25,7 +25,7 @@ say `go get -v`;
 
 # bindata.go
 say "generate bindata.go ...";
-say `go-bindata -ignore=.git -ignore=config.json -ignore=README -ignore=angular-mocks.js -ignore='emacs.*core' webapp/...`;
+say `sh ./gen-bindata.sh`;
 
 
 # create build-output
