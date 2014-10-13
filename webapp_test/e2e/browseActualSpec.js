@@ -3,6 +3,7 @@ describe('browse-actual', function(){
 
   
   it('should have the file: file1 listed', function(){
+    clickOnDataset('stuff/zsd-e2e-tests');
     var entries = element.all(by.repeater('entry in dirListing'));
     filterByText(entries, "file1").then(function(filtered){
       expect(filtered.length).toEqual(1);
@@ -15,7 +16,8 @@ describe('browse-actual', function(){
     var snapshots = function(){
       return element.all(by.repeater('snap in snapshots'))
     }
-
+    
+    clickOnDataset('stuff/zsd-e2e-tests');
     expect(snapshots().count()).toMatch(0);
     clickOnEntry('file1');
     expect(snapshots().count()).toBeGreaterThan(0);
@@ -28,7 +30,8 @@ describe('browse-actual', function(){
     }
 
     textFileContentIsPresentShouldBe(false);
-    
+
+    clickOnDataset('stuff/zsd-e2e-tests');        
     clickOnEntry('file1');
     textFileContentIsPresentShouldBe(false);
 
@@ -44,6 +47,7 @@ describe('browse-actual', function(){
 
     diffIsPresentShouldBe(false);
 
+    clickOnDataset('stuff/zsd-e2e-tests');        
     clickOnEntry('file1');
     diffIsPresentShouldBe(false);
 
@@ -57,6 +61,7 @@ describe('browse-actual', function(){
 
 
   it('should show the diff from the child2 dataset when click on "Diff" button in the child2 dataset', function(){
+    clickOnDataset('stuff/zsd-e2e-tests');        
     clickOnEntry('child2');
     clickOnEntry('file1');
     clickOnSnapshot('snap1');
@@ -75,6 +80,12 @@ describe('browse-actual', function(){
   };
 
 
+  function clickOnDataset(name){
+    filterByText(element.all(by.repeater('dataset in datasets')), name).then(function(filtered){
+      filtered[0].click();
+    });
+  }
+  
   function clickOnEntry(name){
     filterByText(element.all(by.repeater('entry in dirListing')), name).then(function(filtered){
       filtered[0].click();
