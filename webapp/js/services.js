@@ -28,7 +28,12 @@ factory('HTTPActivityInterceptor', ['$q', '$rootScope', '$timeout', function($q,
 factory('HTTPErrorInterceptor', ['$q', '$rootScope', function($q, $rootScope){
   return {
     'responseError': function(rejection){
-
+      // chancel if server is unavailable
+      if(rejection.status === 0){
+        $rootScope.$broadcast('zsd:error', 'Server unavailable');
+        return $q.reject(rejection);
+      }
+      
 
       if(rejection.config.responseType === 'blob'){
         // convert message to string if result type is a blob and broadcast the error
