@@ -61,59 +61,67 @@ The backend is implemented in golang, the frontend with [angularjs](https://angu
   
 ## Browse actual filesystem state 
 
+### Select a dataset
+
+Select a dataset which you would explore. If you start `zfs-snap-diff` on a dataset with no childrens, the current dataset are selected.
+
+![Datasets](doc/zsd-ba-datasets.png)
+
+  
 ### Search a file
   
-Search a file in the file browser.
+Search a file to compare in the file browser.
     
-![File browser](doc/zsd-file-browser.png)
+![File browser](doc/zsd-ba-file-browser.png)
 
 
-  
+   
 ### Select a file
 
-When a file is selected, `zsd-snap-diff` search all snapshots where the selected file was modified (text files per md5, others per size+modTime).
+When a file is selected, `zsd-snap-diff` search all snapshots where the selected file was modified (it compares text files per md5, others per size+modTime).
     
-![File selected](doc/zsd-file-selected.png)
+![File selected](doc/zsd-ba-snapshots.png)
   
-
 
 ### Select a snapshot
 
 When you select a snapshot, you can view, diff, download or restore the file from the selected snapshot.
 
-#### View
+##### View
 View the file content from an older file version.
-![File View](doc/zsd-snap-selected-view-file.png)
+![File View](doc/zsd-ba-view-file.png)
 
-#### Diff
+##### Diff
 Explore file differences and pick single changes to revert.
+
+intext diff:  
+![intext diff](doc/zsd-ba-diff-intext.png)
+
   
-![intext diff](doc/zsd-snap-selected-diff-file-intext.png)
-  
-![side by side diff](doc/zsd-snap-selected-diff-file-side-by-side.png)
+side by side diff:
+![side by side diff](doc/zsd-ba-diff-side-by-side.png)
+
 
 
 ## Browse snapshot state
 
-### Select a dataset
-
-Select a dataset (sub zfs filesystem).
-  
-![Dataset Browser](doc/zsd-snapshots-datasets.png)
-  
 ### Search a snaphot
 
 Search a snapshot in the snapshot browser. All snapshots from the selected dataset are displayed in this view.
   
-![Snapshot Browser](doc/zsd-snapshots.png)
+![Snapshot Browser](doc/zsd-bs-snapshots.png)
 
 
 ### Select a snapshot
 
 When a snapshot is selected, the file-browser shows the content from this snapshot.
-From here you can easy restore / view a deleted file.
+
+![File Browser](doc/zsd-bs-file-browser.png)
+
   
-![File Browser](doc/zsd-snapshots-file-browser.png)
+From here you can easy view / restore a deleted file.
+  
+![File View](doc/zsd-bs-file-selected.png)
 
 
  
@@ -179,6 +187,14 @@ From here you can easy restore / view a deleted file.
 
 ###0.0.X###
 
+0.0.8:
+  * dataset selectable in 'browse-actual' view
+  * add size informations to dataset (to match 'zfs list' output)
+  * small fixes
+  * code cleanup
+  
+[all commits from 0.0.7...0.0.8](https://github.com/j-keck/zfs-snap-diff/compare/0.0.7...0.0.8)
+  
 0.0.7:
   * support sub zfs filesystems (datasets)
   * optional use sudo when execute zfs commands
