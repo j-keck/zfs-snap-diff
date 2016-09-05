@@ -13,7 +13,7 @@
   <div class="list-group" ng-hide="fileSelected">
     <input type="checkbox" ng-model="showHiddenEntries">show hidden entries</input>  
     <a href="" class="list-group-item" ng-repeat="entry in dirListing | filter:filterHiddenEntries" ng-click="open(entry)" zsd-scroll-to-top>
-      <span class="glyphicon" ng-class="{'glyphicon-file': isFile(entry), 'glyphicon-folder-open': isDirectory(entry)}">
+      <span class="glyphicon" ng-class="iconClassForEntry(entry)">
         {{entry.Path}}
       </span>
     </a>

@@ -20,12 +20,25 @@ angular.module('zsdDirBrowser', ['zsdServices']).
         };
 
         scope.isDirectory = function(entry){
-          return entry.Type === "D"
+          return entry.Type === "DIR"
         };
         
         scope.isFile = function(entry){
-          return entry.Type === "F"
+          return entry.Type === "FILE"
         };
+
+        // returns the bootstrap icon class for the given entry
+        scope.iconClassForEntry = function(entry) {
+          switch(entry.Type) {
+          case "FILE": return "glyphicon-file";
+          case "DIR": return "glyphicon-folder-open";
+          case "LINK": return "glyphicon-link";
+          case "PIPE": return "glyphicon-transfer";
+          case "SOCKET": return "glyphicon-transfer";
+          case "DEV": return "glyphicon-hdd";
+          };
+        };
+
         
         scope.open = function(entry){
           var idx = scope.entries.indexOf(entry);
@@ -59,7 +72,7 @@ angular.module('zsdDirBrowser', ['zsdServices']).
           if(! angular.isDefined(start)) return;
           
           scope.entries = [];
-          scope.open({Type: 'D', Path: scope.start});
+          scope.open({Type: 'DIR', Path: scope.start});
         });
         
         scope.$watch(function(){ return scope.startEntries}, function(startEntries){

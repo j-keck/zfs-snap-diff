@@ -2,6 +2,7 @@ package main
 
 import (
 	"io/ioutil"
+	"os"
 	"time"
 )
 
@@ -17,14 +18,25 @@ func ScanDirEntries(path string) (DirEntries, error) {
 	}
 
 	dirEntries := DirEntries{}
-	for _, fi := range files {
-		_type := "F"
-		if fi.IsDir() {
-			_type = "D"
+	for _, fileInfo := range files {
+		var fileType string
+
+		// determine the file-type
+		if fileInfo.IsDir() {
+			fileType = "DIR"
+		} else if fileInfo.Mode()&os.ModeSymlink == os.ModeSymlink {
+			fileType = "LINK"
+		} else if fileInfo.Mode()&os.ModeNamedPipe == os.ModeNamedPipe {
+			fileType = "PIPE"
+		} else if fileInfo.Mode()&os.ModeSocket == os.ModeSocket {
+			fileType = "SOCKET"
+		} else if fileInfo.Mode()&os.ModeDevice == os.ModeDevice {
+			fileType = "DEV"
+		} else {
+			fileType = "FILE"
 		}
 
-		dirEntry := DirEntry{_type, fi.Name(), fi.Size(), fi.ModTime()}
-
+		dirEntry := DirEntry{fileType, fileInfo.Name(), fileInfo.Size(), fileInfo.ModTime()}
 		dirEntries = append(dirEntries, dirEntry)
 	}
 	return dirEntries, nil
