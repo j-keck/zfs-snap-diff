@@ -13,4 +13,21 @@ angular.module('zsdFilters', []).
       if(text === 'error') return 'danger';
       return text;
     }
+  }).
+  // filesize in b, kb, mb, gb from bytes
+  filter('filesize', function(){
+    var units = ['B', 'K', 'M', 'G', 'T', 'P'];
+    return function(bytes){
+      if(isFinite(bytes)){
+        var i = 0;
+        while(bytes >= 1024){
+          bytes /= 1024;
+          i++;
+        }
+
+        return bytes.toFixed(i >= 1 ? 1 : 0) + units[i];
+      }else{
+        return bytes;
+      }
+    }
   });

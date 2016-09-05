@@ -6,8 +6,9 @@ body{
     cursor: pointer;
 }
 
-a.disabled {
+.disabled {
     pointer-events: none;
+    color: gray;
 }
 
 .panel-heading-narrow {

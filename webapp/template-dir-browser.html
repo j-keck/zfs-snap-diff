@@ -9,14 +9,22 @@
     </li>
   </ol>
 
-
-  <div class="list-group" ng-hide="fileSelected">
-    <input type="checkbox" ng-model="showHiddenEntries">show hidden entries</input>  
-    <a href="" class="list-group-item" ng-class="{'disabled': isSpecialEntry(entry)}"
-       ng-repeat="entry in dirListing | filter:filterHiddenEntries" ng-click="open(entry)" zsd-scroll-to-top>
-      <span class="glyphicon" ng-class="iconClassForEntry(entry)">
-        {{entry.Path}}
-      </span>
-    </a>
-  </div>
+  <table class="table table-bordered table-hover table-condensed" ng-hide="fileSelected">
+    <caption class="text-left"><input type="checkbox" ng-model="showHiddenEntries">show hidden entries</input></caption>
+    <tr>
+      <th>Name</th>
+      <th class="text-right">Size</th>
+      <th class="text-right">Modify time</th>
+    </tr>
+    <tr ng-class="{'disabled': isSpecialEntry(entry)}"
+        ng-repeat="entry in dirListing | filter:filterHiddenEntries" ng-click="open(entry)" zsd-scroll-to-top>
+      <td class="col-md-6">
+        <span class="glyphicon" ng-class="iconClassForEntry(entry)" aria-hidden="true">
+          {{entry.Path}}
+        </span>
+      </td>
+      <td class="col-md-1 text-right">{{entry.Size | filesize}}</td>
+      <td class="col-md-2 text-right">{{entry.ModTime | date: 'medium'}}</td>
+    </tr>
+  </table>
 </div>
