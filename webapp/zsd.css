@@ -6,6 +6,9 @@ body{
     cursor: pointer;
 }
 
+a.disabled {
+    pointer-events: none;
+}
 
 .panel-heading-narrow {
     padding-top: 5px !important; /* default is 10px */

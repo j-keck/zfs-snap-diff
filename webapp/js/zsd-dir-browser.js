@@ -22,9 +22,14 @@ angular.module('zsdDirBrowser', ['zsdServices']).
         scope.isDirectory = function(entry){
           return entry.Type === "DIR"
         };
-        
+
         scope.isFile = function(entry){
           return entry.Type === "FILE"
+        };
+
+        // returns 'true' if the given entry is not a regular file / directory
+        scope.isSpecialEntry = function(entry){
+          return ! (scope.isFile(entry) || scope.isDirectory(entry));
         };
 
         // returns the bootstrap icon class for the given entry
