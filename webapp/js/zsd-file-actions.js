@@ -14,7 +14,7 @@ angular.module('zsdFileActions', ['zsdServices', 'zsdUtils']).
   directive('zsdFileActions', ['$window', '$sce', '$rootScope', 'FileUtils', 'Backend', 'PathUtils', 'Config', function($window, $sce, $rootScope, FileUtils, Backend, PathUtils, Config){
     return {
       restrict: 'E',
-      scope: true,
+      scope: false,
       templateUrl: 'template-file-actions.html',      
       controller: function($scope){
 
