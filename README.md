@@ -145,14 +145,9 @@ From here you can easy view / restore a deleted file.
 
         cd zfs-snap-diff
 
-  * fetch dependencies ([go-diff](https://github.com/sergi/go-diff))
+  * build
 
-          go get -u  
-
-  * build it
-
-          go build -ldflags "-X main.VERSION $(git describe)"
-
+        ./build.pl build
 
   
 #Notes
@@ -175,12 +170,11 @@ From here you can easy view / restore a deleted file.
 
   * if you change something under 'webapp/' 
 
-    * start `zfs-snap-diff` per `ZSD_SERVE_FROM_WEBAPP=YES ./zfs-snap-diff <ZFS_NAME>`
+    * start `zfs-snap-diff` per `./build.pl webdev <ZFS_NAME>`
       to serve the static content from the `webapp` folder
 
     * re-generate bindata.go and recompile `zfs-snap-diff`
-      * sh ./gen-bindata.sh
-      * go build -ldflags "-X main.VERSION $(git describe)"
+      * ./build.pl build
 
 
 # Changelog
