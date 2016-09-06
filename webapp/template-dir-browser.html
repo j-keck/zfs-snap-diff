@@ -12,9 +12,9 @@
   <table class="table table-bordered table-hover table-condensed" ng-hide="fileSelected">
     <caption class="text-left"><input type="checkbox" ng-model="showHiddenEntries">show hidden entries</input></caption>
     <tr>
-      <th>Name</th>
-      <th class="text-right">Size</th>
-      <th class="text-right">Modify time</th>
+      <th ng-click="orderBy('name')"><span ng-class="cssClassForCol('name')"></span> Name</th>
+      <th ng-click="orderBy('size')" class="text-right"><span ng-class="cssClassForCol('size')"></span> Size</th>
+      <th ng-click="orderBy('mtime')" class="text-right"><span ng-class="cssClassForCol('mtime')"></span> Modify time</th>
     </tr>
     <tr ng-class="{'disabled': isSpecialEntry(entry)}"
         ng-repeat="entry in dirListing | filter:filterHiddenEntries" ng-click="open(entry)" zsd-scroll-to-top>
