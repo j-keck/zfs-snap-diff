@@ -63,7 +63,7 @@ sub build {
     &gen_bindata();
 
     # build it
-    my $cmd = qq{go build -ldflags "-X main.VERSION=$version" -o zfs-snap-diff};
+    my $cmd = qq{CGO_ENABLED=0 go build -ldflags "-X main.VERSION=$version" -o zfs-snap-diff};
     say "build 'zfs-snap-diff' ($cmd)";
     system($cmd) == 0 or die "build error";
 }
