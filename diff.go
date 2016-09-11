@@ -3,17 +3,23 @@ package main
 import (
 	"bytes"
 	"fmt"
+
 	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
+// DeltaType classifies a patch action like 'delete', 'equal' or 'insert'
 type DeltaType int
 
 const (
+	// Del represents a deleted patch chunk
 	Del DeltaType = (iota - 1)
+	// Eq represents a not changed patch chunk
 	Eq
+	// Ins represents a added patch chunk
 	Ins
 )
 
+// Delta represents a patch chunk
 type Delta struct {
 	Type           DeltaType
 	LineNrFrom     int
@@ -38,6 +44,7 @@ func (d *Delta) String() string {
 	return fmt.Sprintf("{%s:%d,%d:%d,%d:%s}", t, d.LineNrFrom, d.LineNrTarget, d.StartPosFrom, d.StartPosTarget, d.Text)
 }
 
+// Deltas represents all patch chunks of a file
 type Deltas []Delta
 
 func (deltas Deltas) String() string {
@@ -51,6 +58,7 @@ func (deltas Deltas) String() string {
 	return buffer.String()
 }
 
+// Diff compares two strings and returns the DiffResult
 func Diff(from, target string, contextSize int) DiffResult {
 
 	// init diff-match-patch and create the (diff-match-patch) diff
@@ -92,7 +100,7 @@ func createDeltasFromDiffs(diffs []diffmatchpatch.Diff, contextSize int) Deltas 
 	nextDiffIfTypeIs := func(diffType diffmatchpatch.Operation) (diffmatchpatch.Diff, bool) {
 		if idx < len(diffs) && diffs[idx].Type == diffType {
 			next := diffs[idx]
-			idx += 1
+			idx++
 			return next, true
 		}
 		return diffmatchpatch.Diff{}, false

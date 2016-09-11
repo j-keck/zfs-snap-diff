@@ -117,14 +117,15 @@ func snapshotsForFileHndl(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if fileHasChangedFuncGen, err := NewFileHasChangedFuncGenByName(params["compare-file-method"].(string)); err != nil {
+	var fileHasChangedFuncGen FileHasChangedFuncGen
+	if fileHasChangedFuncGen, err = NewFileHasChangedFuncGenByName(params["compare-file-method"].(string)); err != nil {
 		logError.Printf("Invalid value for 'compare-file-method'! - %s\n", err.Error())
 		http.Error(w, err.Error(), 400)
 		return
-	} else {
-		// filter snapshots
-		snapshots = snapshots.FilterWhereFileWasModified(path.(string), fileHasChangedFuncGen)
 	}
+
+	// filter snapshots
+	snapshots = snapshots.FilterWhereFileWasModified(path.(string), fileHasChangedFuncGen)
 
 	// marshal
 	js, err := json.Marshal(snapshots)
@@ -337,6 +338,7 @@ func restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 }
 
 func diffFileHndl(w http.ResponseWriter, r *http.Request) {
+
 	// parse / validate request parameter
 	params, paramsValid := parseParams(w, r, "path:string,snapshot-name:string,context-size:int")
 	if !paramsValid {
@@ -348,32 +350,19 @@ func diffFileHndl(w http.ResponseWriter, r *http.Request) {
 	// verify path
 	verifyPathIsUnderZMP(path, w, r)
 
-	// read actual file
-	var actualText string
-	if actualFh, err := NewFileHandle(path); err != nil {
-		logError.Println(err.Error())
-		http.Error(w, "unable to get file-handle for actual file: "+err.Error(), 400)
+	// get the actual file content
+	actualText, err := readTextFrom(NewFileHandle, path)
+	if err != nil {
+		http.Error(w, "unable to read the actual file: "+err.Error(), 400)
 		return
-	} else {
-		if actualText, err = actualFh.ReadText(); err != nil {
-			logError.Println(err.Error())
-			http.Error(w, "unable to read actual file: "+err.Error(), 400)
-			return
-		}
 	}
 
-	// read snap file
-	var snapText string
-	if snapFh, err := NewFileHandleInSnapshot(path, params["snapshot-name"].(string)); err != nil {
+	// get the snap file content
+	snapText, err := readTextFrom(NewFileHandleInSnapshotPart(params["snapshot-name"].(string)), path)
+	if err != nil {
 		logError.Println(err.Error())
-		http.Error(w, "unable to get file-handle for snap file: "+err.Error(), 400)
+		http.Error(w, "unable to read snap file: "+err.Error(), 400)
 		return
-	} else {
-		if snapText, err = snapFh.ReadText(); err != nil {
-			logError.Println(err.Error())
-			http.Error(w, "unable to read snap file: "+err.Error(), 400)
-			return
-		}
 	}
 
 	// execute diff

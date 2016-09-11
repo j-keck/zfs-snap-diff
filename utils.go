@@ -6,6 +6,26 @@ import (
 	"strings"
 )
 
+// read the file content from the file handle
+func readTextFrom(getFh func(string) (*FileHandle, error), name string) (string, error) {
+
+	// get the file handle
+	fh, err := getFh(name)
+	if err != nil {
+		logError.Println("unable to get file-handle: ", err.Error())
+		return "", err
+	}
+
+	// read the file content
+	content, err := fh.ReadText()
+	if err != nil {
+		logError.Println("unable to read the file: ", err.Error())
+		return "", err
+	}
+
+	return content, err
+}
+
 // lastElement splits a string by sep and returns the last element
 func lastElement(str, sep string) string {
 	fields := strings.Split(str, sep)
@@ -81,7 +101,7 @@ func countNewLines(text string) int {
 	count := 0
 	for _, char := range text {
 		if char == '\n' {
-			count += 1
+			count++
 		}
 	}
 	return count

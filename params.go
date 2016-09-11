@@ -16,7 +16,7 @@ type params map[string]interface{}
 
 // parse and validate request parameters
 //   * rules format: [?]<NAME>:<TYPE>
-//     - seperated per ,
+//     - separated per ,
 //     - starting with a question mark means optional parameter
 //     - currently supported types: 'string' and 'int'
 //     - example: 'path:string,?limit:int'
@@ -47,15 +47,15 @@ func parseParams(w http.ResponseWriter, r *http.Request, rules string) (p params
 			if valueFound {
 				switch pType {
 				case "int":
-					if i, err := strconv.Atoi(value.(string)); err != nil {
+					i, err := strconv.Atoi(value.(string))
+					if err != nil {
 						msg := fmt.Sprintf("unable to convert parameter '%s' to int: %s", pName, err.Error())
 						logError.Println(msg)
 						http.Error(w, msg, http.StatusBadRequest)
 						paramsValid = false
 						return
-					} else {
-						p[pName] = i
 					}
+					p[pName] = i
 				case "string":
 					// nothing to do
 				default:

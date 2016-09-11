@@ -8,11 +8,13 @@ import (
 	"strings"
 )
 
+// ZFS represents a zfs filesystem
 type ZFS struct {
 	Datasets ZFSDatasets
 	execZFS  execZFSFunc
 }
 
+// NewZFS returns a handler for a zfs filesystem
 func NewZFS(name string, useSudo bool) (*ZFS, error) {
 	// zfs executes the 'zfs' command with the provided arguments.
 	// if the 'zfs' command return code is 0, it returns stdout
@@ -52,8 +54,9 @@ func NewZFS(name string, useSudo bool) (*ZFS, error) {
 	}, err
 }
 
+// FindDatasetForFile searches and returns the dataset where the given file lives
 func (zfs *ZFS) FindDatasetForFile(path string) ZFSDataset {
-	// create a copy before sorting to keep the orginal dataset order intact
+	// create a copy before sorting to keep the original dataset order intact
 	datasets := make(ZFSDatasets, len(zfs.Datasets))
 	copy(datasets, zfs.Datasets)
 
@@ -68,6 +71,7 @@ func (zfs *ZFS) FindDatasetForFile(path string) ZFSDataset {
 	panic("no dataset found")
 }
 
+// FindDatasetByName searches and returns the dataset with the given name
 func (zfs *ZFS) FindDatasetByName(name string) (ZFSDataset, error) {
 	for _, dataset := range zfs.Datasets {
 		if dataset.Name == name {

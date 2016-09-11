@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// DiffResult represents the result from a diff
 type DiffResult struct {
 	LineBasedDeltas Deltas
 	CharBasedDeltas Deltas
@@ -35,10 +36,12 @@ func splitDeltasByContext(deltas Deltas) []Deltas {
 	return splitted
 }
 
+// DeltasByContext splits the Delta at their context bounds
 func (dr *DiffResult) DeltasByContext() []Deltas {
 	return splitDeltasByContext(dr.LineBasedDeltas)
 }
 
+// AsSideBySideHTML creates a SideBySide Diff
 func (dr *DiffResult) AsSideBySideHTML() []string {
 	var htmlBlocks []string
 
@@ -63,7 +66,7 @@ func (dr *DiffResult) AsSideBySideHTML() []string {
 		nextDeltaIfTypeIs := func(deltaType DeltaType) (Delta, bool) {
 			if deltaIdx < len(deltas) && deltas[deltaIdx].Type == deltaType {
 				next := deltas[deltaIdx]
-				deltaIdx += 1
+				deltaIdx++
 				return next, true
 			}
 			return Delta{}, false
@@ -125,6 +128,7 @@ func (dr *DiffResult) AsSideBySideHTML() []string {
 	return htmlBlocks
 }
 
+// AsIntextHTML creates an Inline Diff
 func (dr *DiffResult) AsIntextHTML() []string {
 	var htmlBlocks []string
 

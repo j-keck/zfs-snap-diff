@@ -94,9 +94,9 @@ func TestParseParamsInvalidParams(t *testing.T) {
 }
 
 func newDummyReq(queryParam string) *http.Request {
-	testUrl, _ := url.Parse(fmt.Sprintf("http://example.com?%s", queryParam))
+	testURL, _ := url.Parse(fmt.Sprintf("http://example.com?%s", queryParam))
 	return &http.Request{
 		Method: "GET",
-		URL:    testUrl,
+		URL:    testURL,
 	}
 }

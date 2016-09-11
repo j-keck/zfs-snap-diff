@@ -68,7 +68,8 @@ func main() {
 
 	// abort if zfs name is missing
 	if len(zfsName) == 0 {
-		fmt.Println("parameter <ZFS_NAME> missing\n")
+		fmt.Println("parameter <ZFS_NAME> missing")
+		fmt.Println()
 		flag.Usage()
 		os.Exit(1)
 	}

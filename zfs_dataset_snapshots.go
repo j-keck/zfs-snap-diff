@@ -52,6 +52,7 @@ func (s *ZFSSnapshots) Filter(f func(ZFSSnapshot) bool) ZFSSnapshots {
 	return newS
 }
 
+// FilterWhereFileWasModified finds all snapshots where the file was modified
 func (s *ZFSSnapshots) FilterWhereFileWasModified(path string, fileHasChangedFuncGen FileHasChangedFuncGen) ZFSSnapshots {
 	fh, _ := NewFileHandle(path)
 	fileHasChangedFunc := fileHasChangedFuncGen(fh)

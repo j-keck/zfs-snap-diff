@@ -33,6 +33,13 @@ func NewFileHandleInSnapshot(path, snapName string) (*FileHandle, error) {
 	return newFileHandle(ds.ConvertToSnapPath(path, snapName))
 }
 
+// NewFileHandleInSnapshotPart is the flipped, partially applied version of 'NewFileHandleInSnapshot'
+func NewFileHandleInSnapshotPart(snapName string) func(string) (*FileHandle, error) {
+	return func(path string) (*FileHandle, error) {
+		return NewFileHandleInSnapshot(path, snapName)
+	}
+}
+
 func newFileHandle(path string) (*FileHandle, error) {
 	fi, err := os.Stat(path)
 	if err != nil {
@@ -161,13 +168,12 @@ func (fh *FileHandle) CopyAs(path string) (err error) {
 //   * deleted entries are inserted
 //   * inserted entries are removed
 func (fh *FileHandle) Patch(deltas Deltas) error {
-	var err error
 
 	// verify the equal parts from the deltas are the same as in the given file
 	// returns a error if not
 	verifyDeltasAreApplicable := func() error {
-		var f *os.File
-		if f, err = os.Open(fh.Path); err != nil {
+		f, err := os.Open(fh.Path)
+		if err != nil {
 			return fmt.Errorf("open file: '%s' - %s", fh.Name, err.Error())
 		}
 		defer f.Close()
@@ -190,14 +196,15 @@ func (fh *FileHandle) Patch(deltas Deltas) error {
 
 	// apply the deltas to a given file
 	applyDeltasTo := func(dstPath string) error {
-		var src, dst *os.File
 		// open src / dst
-		if src, err = os.Open(fh.Path); err != nil {
+		src, err := os.Open(fh.Path)
+		if err != nil {
 			return fmt.Errorf("unable to open src-file: '%s' - %s", fh.Path, err.Error())
 		}
 		defer src.Close()
 
-		if dst, err = os.Create(dstPath); err != nil {
+		dst, err := os.Create(dstPath)
+		if err != nil {
 			return fmt.Errorf("unable to open dst-file: '%s' - %s", dstPath, err.Error())
 		}
 		defer func() {
@@ -267,12 +274,13 @@ func (fh *FileHandle) Patch(deltas Deltas) error {
 	}
 
 	if err := os.Rename(patchWorkFilePath, fh.Path); err != nil {
-		return fmt.Errorf("unable to rename patch file to orginal file - %s", err.Error())
+		return fmt.Errorf("unable to rename patch file to original file - %s", err.Error())
 	}
 
 	return nil
 }
 
+// MoveToBackup moves the file in the backup location
 func (fh *FileHandle) MoveToBackup() error {
 	backupDir := fmt.Sprintf("%s/.zsd", filepath.Dir(fh.Path))
 
@@ -296,7 +304,7 @@ func (fh *FileHandle) MoveToBackup() error {
 	return os.Rename(fh.Path, backupFilePath)
 }
 
-// FileHasChangedFunGen to create a FileHasChangedFunc
+// FileHasChangedFuncGen to create a FileHasChangedFunc
 type FileHasChangedFuncGen func(*FileHandle) FileHasChangedFunc
 
 // FileHasChangedFunc to detect if a file has changed
@@ -329,7 +337,7 @@ func NewFileHasChangedFuncGenByName(method string) (FileHasChangedFuncGen, error
 			return CompareFileBySizeAndModTime(actual)
 		}, nil
 	default:
-		return nil, fmt.Errorf("no such compare method: '%s' - avaliable: 'size+modTime', 'size', 'md5'", method)
+		return nil, fmt.Errorf("no such compare method: '%s' - available: 'size+modTime', 'size', 'md5'", method)
 	}
 }
 

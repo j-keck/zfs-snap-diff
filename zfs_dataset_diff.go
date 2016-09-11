@@ -9,7 +9,7 @@ import (
 // ZFSDiffs a diffs from a zfs snapshot
 type ZFSDiffs []ZFSDiff
 
-// ScanZFSDiffs scan zfs differences from the given snapshot to the current filesystem state
+// ScanDiffs scan zfs differences from the given snapshot to the current filesystem state
 func (ds *ZFSDataset) ScanDiffs(snapName string) (ZFSDiffs, error) {
 	// HINT: process uid needs 'zfs allow -u <USER> diff <ZFS_NAME>'
 	fullSnapName := fmt.Sprintf("%s@%s", ds.Name, snapName)
