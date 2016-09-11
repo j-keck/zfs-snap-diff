@@ -1,3 +1,5 @@
+Next features of `zfs-snap-diff`: [feature poll](https://github.com/j-keck/zfs-snap-diff/issues?q=is%3Aissue+is%3Aopen+label%3Afeature-poll). Please comment / vote.
+
 # Background
   
 I make every 5 minutes a snapshot (keep it for 1 day) and once a day for long term (keep it for one month) from my home partition on a ZFS filesystem.
