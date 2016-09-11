@@ -27,6 +27,7 @@ for($mode) {
     &build when "build";
     &webdev when "webdev";
     &release when "release";
+    &check when "check";
     &help when ["-h", "help"];
     default {
         say "invalid mode: '$mode'";
@@ -46,6 +47,7 @@ where <MODE> can be:
   build:   build the binary for the actual platform
   webdev:  start 'zfs-snap-diff' with the option to serve the frontend code from the 'webapp' directory
   release: build and create a zip for each supported platform under 'build-output/'
+  check:   run 'golint' and 'go vet' on the project
   help:    show this help
 EOF
 }
@@ -74,6 +76,9 @@ sub build {
 #
 sub release {
 
+    # check source
+    &check();
+
     # get the version from git
     my $version = &git_describe();
 
@@ -96,6 +101,32 @@ sub release {
             # delete the binary
             unlink "zfs-snap-diff" || die $!;
         }
+    }
+}
+
+
+#
+# check the project with 'golint' and 'go vet'
+#
+sub check {
+
+    #
+    # run go vet - 
+    say "running go vet ...";
+    system("go vet .") == 0 or exit 1;
+
+    if(system("type golint >/dev/null 2>&1") == 0){
+        #
+        # run golint and filter out warnings about 'bindata.go'
+        say "running golint ...";
+        my @golint = grep(!/^bindata.go/, qx{golint .});
+        if($#golint != -1){
+            say "ABORT!! golint warnings found: ";
+            say @golint;
+            exit 1;
+        }
+    } else {
+        say "golint not found!";
     }
 }
 
