@@ -159,13 +159,19 @@ sub git_describe {
 # generate 'bindata.go' per 'go-bindata' cmd
 #
 sub gen_bindata {
-    # validate that 'go-bindata' is installed
-    system("go-bindata -version 2>&1 > /dev/null") == 0 or
-        die "'go-bindata' missing! - please install per: 'go get -u github.com/jteeuwen/go-bindata/...'";
 
-    my @ignore = qw{go-bindata .git config.json README angular-mocks.js 'emacs.*core'};
-    my $cmd = "go-bindata " . join(" ", map("-ignore=$_", @ignore)) . " webapp/...";
+    # only regenerate 'bindata.go' if something under 'webapp/' has changed
+    if((! -e "bindata.go") || qx{git diff webapp} ne ""){
+        # validate that 'go-bindata' is installed
+        system("go-bindata -version > /dev/null 2>&1") == 0 or (sub {
+            say "'go-bindata' missing! - please install per: 'go get -u github.com/jteeuwen/go-bindata/...'";
+            exit 1;
+        })->();
 
-    say "generate 'bindata.go': ($cmd)";
-    system($cmd) == 0 or die "unable to build 'bindata.go'";
+        my @ignore = qw{go-bindata .git config.json README angular-mocks.js 'emacs.*core'};
+        my $cmd = "go-bindata " . join(" ", map("-ignore=$_", @ignore)) . " webapp/...";
+
+        say "generate 'bindata.go': ($cmd)";
+        system($cmd) == 0 or die "unable to build 'bindata.go'";
+    }
 }
