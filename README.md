@@ -1,5 +1,8 @@
-# `zfs-snap-diff`: compare / restore files from zfs snapshots
-Next features of `zfs-snap-diff`: [feature poll](https://github.com/j-keck/zfs-snap-diff/issues?q=is%3Aissue+is%3Aopen+label%3Afeature-poll). Please comment / vote.
+# `zfs-snap-diff`
+
+**compare / restore files from zfs snapshots**
+
+_Next features of `zfs-snap-diff`: [feature poll](https://github.com/j-keck/zfs-snap-diff/issues?q=is%3Aissue+is%3Aopen+label%3Afeature-poll). Please comment / vote_
 
 ## Description
 
