@@ -24,6 +24,7 @@ angular.module('zsdFileActions', ['zsdServices', 'zsdUtils']).
                
         // trigger actions if a file is selected
         this.fileSelected = function(pathInActual, pathInSnap, curSnap){
+          $scope.fileName = PathUtils.extractFileName(pathInActual);
           $scope.pathInActual = pathInActual;
           $scope.pathInSnap = pathInSnap;
           $scope.curSnap = curSnap;

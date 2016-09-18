@@ -5,6 +5,7 @@ angular.module('zsdFileDiff', ['zsdServices']).
       scope: {
         diffResult: '=',
         path: '=',
+        fileName: '=',
         curSnap: '='
       },
       templateUrl: 'template-file-diff.html',
