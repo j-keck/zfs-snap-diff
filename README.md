@@ -1,14 +1,7 @@
+# `zfs-snap-diff`: compare / restore files from zfs snapshots
 Next features of `zfs-snap-diff`: [feature poll](https://github.com/j-keck/zfs-snap-diff/issues?q=is%3Aissue+is%3Aopen+label%3Afeature-poll). Please comment / vote.
 
-# Background
-  
-I make every 5 minutes a snapshot (keep it for 1 day) and once a day for long term (keep it for one month) from my home partition on a ZFS filesystem.
-If i messed up a file, i need to search a clean state from the file in the snapshots - not always easy if i don't realize it directly.
-
-`zfs-snap-diff` is a little tool to help me for such cases.
-
-
-# Description
+## Description
 
 With `zfs-snap-diff` you can explore file differences and restore changes from older file versions in different zfs snapshots.
 You can restore the whole file from a older version, or select single changes to revert in the 'Diff' view.
@@ -21,10 +14,10 @@ The backend is implemented in golang, the frontend with [angularjs](https://angu
 
 
   
-#Usage
+##Usage
+_under linux, you need the '-use-sudo' flag if you don't run it as root - see the options below_
 
-
-## Startup a server instance
+### Startup a server instance
 
       ./zfs-snap-diff [OPT_ARGS] <ZFS_NAME>
   
@@ -55,22 +48,24 @@ The backend is implemented in golang, the frontend with [angularjs](https://angu
 
   
 
-## Connect with your web browser
+### Connect with your web browser
 
       http://localhost:12345
 
 
-  
-## Browse actual filesystem state 
 
-### Select a dataset
+## User guide
+
+### Browse actual filesystem state 
+
+#### Select a dataset
 
 Select a dataset which you would explore. If you start `zfs-snap-diff` on a dataset with no childrens, the current dataset are selected.
 
 ![Datasets](doc/zsd-ba-datasets.png)
 
   
-### Search a file
+#### Search a file
   
 Search a file to compare in the file browser.
     
@@ -78,22 +73,22 @@ Search a file to compare in the file browser.
 
 
    
-### Select a file
+#### Select a file
 
 When a file is selected, `zsd-snap-diff` search all snapshots where the selected file was modified (it compares text files per md5, others per size+modTime).
     
 ![File selected](doc/zsd-ba-snapshots.png)
   
 
-### Select a snapshot
+#### Select a snapshot
 
 When you select a snapshot, you can view, diff, download or restore the file from the selected snapshot.
 
-##### View
+###### View
 View the file content from an older file version.
 ![File View](doc/zsd-ba-view-file.png)
 
-##### Diff
+###### Diff
 Explore file differences and pick single changes to revert.
 
 intext diff:  
@@ -105,16 +100,16 @@ side by side diff:
 
 
 
-## Browse snapshot state
+### Browse snapshot state
 
-### Search a snaphot
+#### Search a snaphot
 
 Search a snapshot in the snapshot browser. All snapshots from the selected dataset are displayed in this view.
   
 ![Snapshot Browser](doc/zsd-bs-snapshots.png)
 
 
-### Select a snapshot
+#### Select a snapshot
 
 When a snapshot is selected, the file-browser shows the content from this snapshot.
 
@@ -129,15 +124,15 @@ From here you can easy view / restore a deleted file.
  
 
 
-# Installation
+## Installation
   
-## Prebuild
+### Prebuild
 
   Get a package for your platform from: https://github.com/j-keck/zfs-snap-diff/releases/latest
 
  *ping me if your platform is missing*
     
-## Manual build
+### Manual build
 
   * clone the repository
 
@@ -151,8 +146,12 @@ From here you can easy view / restore a deleted file.
 
         ./build.pl build
 
-  
-#Notes
+  * run it
+
+        ./zfs-snap-diff <ZFS_NAME>
+
+
+##Notes
 
   * if you download a file from a snapshot, the generated file name has the snapshot name included:
 
@@ -160,7 +159,7 @@ From here you can easy view / restore a deleted file.
 
   * if you restore / patch a file, the orginal file will be saved under:
 
-        ./zsd/<ORG_FLILE_NAME>_<TIMESTAMP>
+        <ORG_FILE_PATH>/.zsd/<ORG_FLILE_NAME>_<TIMESTAMP>
 
   * for snapshot differences (Browse snapshot diff), you need to set the diff permission:
 
@@ -168,7 +167,7 @@ From here you can easy view / restore a deleted file.
 
    
 
-# Coding Notes
+## Coding Notes
 
   * if you change something under 'webapp/' 
 
@@ -179,9 +178,17 @@ From here you can easy view / restore a deleted file.
       * ./build.pl build
 
 
-# Changelog
+## Changelog
 
 ###0.0.X###
+
+0.0.9:
+  * show file size and modify timestamp in the file-browser
+  * list directories at first in the file-browser
+  * sortable columns in the file-browser
+  * only regular files / directories are clickable
+
+[all commits from 0.0.8...0.0.9](https://github.com/j-keck/zfs-snap-diff/compare/0.0.8...0.0.9)
 
 0.0.8:
   * dataset selectable in 'browse-actual' view
