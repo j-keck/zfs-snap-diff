@@ -161,7 +161,7 @@ sub git_describe {
 sub gen_bindata {
 
     # only regenerate 'bindata.go' if something under 'webapp/' has changed
-    if((! -e "bindata.go") || qx{git diff webapp} ne ""){
+    if((! -e "bindata.go") || qx{git status -s webapp} && qx{find webapp/ -newer bindata.go}){
         # validate that 'go-bindata' is installed
         system("go-bindata -version > /dev/null 2>&1") == 0 or (sub {
             say "'go-bindata' missing! - please install per: 'go get -u github.com/jteeuwen/go-bindata/...'";
