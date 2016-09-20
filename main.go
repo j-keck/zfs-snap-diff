@@ -24,8 +24,12 @@ var (
 	logError  *log.Logger
 )
 
-// FrontendConfig hold the configuration for the ui
-type FrontendConfig map[string]interface{}
+type webServerConfig struct {
+	useTLS   bool
+	certFile string
+	keyFile  string
+}
+type frontendConfig map[string]interface{}
 
 func main() {
 	// formate help
@@ -37,6 +41,9 @@ func main() {
 
 	// define flags / parse flags
 	portFlag := flag.Int("p", 12345, "web server port")
+	useTLSFlag := flag.Bool("tls", false, "use TLS - NOTE: -cert <CERT_FILE> -key <KEY_FILE> are mandatory")
+	certFileFlag := flag.String("cert", "", "certificate file for TLS")
+	keyFileFlag := flag.String("key", "", "private key file for TLS")
 	listenOnAllInterfacesFlag := flag.Bool("a", false, "listen on all interfaces")
 	printVersionFlag := flag.Bool("V", false, "print version and exit")
 	verboseLoggingFlag := flag.Bool("v", false, "verbose logging")
@@ -68,11 +75,30 @@ func main() {
 
 	// abort if zfs name is missing
 	if len(zfsName) == 0 {
-		fmt.Println("parameter <ZFS_NAME> missing")
+		fmt.Println("ABORT: parameter <ZFS_NAME> missing")
 		fmt.Println()
 		flag.Usage()
 		os.Exit(1)
 	}
+
+	// validate args for tls
+	if *useTLSFlag {
+		if len(*certFileFlag) == 0 || len(*keyFileFlag) == 0 {
+			fmt.Println("ABORT: parameter -cert <CERT_FILE> -key <KEY_FILE> are mandatory")
+			os.Exit(1)
+		}
+
+		if _, err := os.Stat(*certFileFlag); os.IsNotExist(err) {
+			fmt.Printf("ABORT: cert file '%s' not found\n", *certFileFlag)
+			os.Exit(1)
+		}
+
+		if _, err := os.Stat(*keyFileFlag); os.IsNotExist(err) {
+			fmt.Printf("ABORT: key file '%s' not found\n", *keyFileFlag)
+			os.Exit(1)
+		}
+	}
+	webServerCfg := webServerConfig{*useTLSFlag, *certFileFlag, *keyFileFlag}
 
 	// initialize zfs handler
 	var err error
@@ -87,9 +113,12 @@ func main() {
 	var addr string
 	if *listenOnAllInterfacesFlag {
 		fmt.Println("")
-		fmt.Println("!! ** WARNING **                            !!")
-		fmt.Println("!! LISTEN ON ALL INTERFACES                 !!")
-		fmt.Println("!! CURRENTLY NO ENCRYPTION / AUTHENTICATION !!")
+		fmt.Println("!! ** WARNING **                !!")
+		fmt.Println("!! LISTEN ON ALL INTERFACES     !!")
+		fmt.Println("!! CURRENTLY NO AUTHENTICATION  !!")
+		if !*useTLSFlag {
+			fmt.Println("\nHINT: USE -tls -cert <CERT_FILE> -key <KEY_FILE> to enable encryption!")
+		}
 		fmt.Println("")
 		addr = fmt.Sprintf(":%d", *portFlag)
 	} else {
@@ -106,7 +135,7 @@ func main() {
 	}
 
 	// frontend-config
-	frontendConfig := FrontendConfig{
+	frontendCfg := frontendConfig{
 		"diffContextSize":   *diffContextSizeFlag,
 		"defaultFileAction": *defaultFileActionFlag,
 		"compareFileMethod": *compareFileMethodFlag,
@@ -114,12 +143,11 @@ func main() {
 	}
 	if *scanSnapLimitFlag >= 0 {
 		// only add positive values - negative values: scan all snapshots
-		frontendConfig["scanSnapLimit"] = *scanSnapLimitFlag
+		frontendCfg["scanSnapLimit"] = *scanSnapLimitFlag
 	}
 
 	// startup web server
-	logInfo.Printf("start server and listen on: '%s'\n", addr)
-	listenAndServe(addr, frontendConfig)
+	listenAndServe(addr, webServerCfg, frontendCfg)
 }
 
 func initLogHandlers(debugHndl, infoHndl, noticeHndl, warnHndl, errorHndl io.Writer) {

@@ -19,8 +19,8 @@ var mimeTypes = map[string]string{
 }
 
 // registers response handlers and starts the web server
-func listenAndServe(addr string, frontendConfig FrontendConfig) {
-	http.HandleFunc("/config", configHndl(frontendConfig))
+func listenAndServe(addr string, webServerCfg webServerConfig, frontendCfg frontendConfig) {
+	http.HandleFunc("/config", configHndl(frontendCfg))
 	http.HandleFunc("/snapshots-for-dataset", snapshotsForDatasetHndl)
 	http.HandleFunc("/snapshots-for-file", snapshotsForFileHndl)
 	http.HandleFunc("/snapshot-diff", snapshotDiffHndl)
@@ -38,11 +38,18 @@ func listenAndServe(addr string, frontendConfig FrontendConfig) {
 	} else {
 		http.HandleFunc("/", serveStaticContentFromBinaryHndl)
 	}
-	logError.Println(http.ListenAndServe(addr, nil))
+
+	if webServerCfg.useTLS {
+		logInfo.Printf("start server and listen on: 'https://%s'\n", addr)
+		logError.Println(http.ListenAndServeTLS(addr, webServerCfg.certFile, webServerCfg.keyFile, nil))
+	} else {
+		logInfo.Printf("start server and listen on: 'http://%s'\n", addr)
+		logError.Println(http.ListenAndServe(addr, nil))
+	}
 }
 
 // frontend-config
-func configHndl(config FrontendConfig) http.HandlerFunc {
+func configHndl(config frontendConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		// marshal
