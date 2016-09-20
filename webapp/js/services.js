@@ -123,13 +123,13 @@ factory('Backend', ['$http', 'Config', function($http, Config){
     },
 
     diffFile: function(path,snapName){
-      return $http.get('/diff-file', {params: {path: path, 'snapshot-name': snapName, 'context-size': Config.get('diffContextSize')}}).then(function(res){
+      return $http.get('diff-file', {params: {path: path, 'snapshot-name': snapName, 'context-size': Config.get('diffContextSize')}}).then(function(res){
         return res.data;
       });
     },
 
     revertChange: function(path, deltas){
-      return $http.put('/revert-change', {path: path, deltas: deltas}).then(function(res){
+      return $http.put('revert-change', {path: path, deltas: deltas}).then(function(res){
         return res.data;
       });
     }

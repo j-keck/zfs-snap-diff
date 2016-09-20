@@ -85,7 +85,7 @@ angular.module('zsdFileActions', ['zsdServices', 'zsdUtils']).
 
         // download the file from the selected snapshot
         $scope.downloadFile = function downloadFile(){
-          $window.location = "/read-file?path=" + $scope.pathInSnap;
+          $window.location = "read-file?path=" + $scope.pathInSnap;
         };
 
 
