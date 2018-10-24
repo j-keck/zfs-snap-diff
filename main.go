@@ -25,6 +25,7 @@ var (
 )
 
 type webServerConfig struct {
+	addr     string
 	useTLS   bool
 	certFile string
 	keyFile  string
@@ -40,6 +41,7 @@ func main() {
 	}
 
 	// define flags / parse flags
+	addrFlag := flag.String("l", "127.0.0.1", "web server listen address")
 	portFlag := flag.Int("p", 12345, "web server port")
 	useTLSFlag := flag.Bool("tls", false, "use TLS - NOTE: -cert <CERT_FILE> -key <KEY_FILE> are mandatory")
 	certFileFlag := flag.String("cert", "", "certificate file for TLS")
@@ -69,6 +71,7 @@ func main() {
 	} else {
 		initLogHandlers(ioutil.Discard, os.Stdout, os.Stdout, os.Stdout, os.Stderr)
 	}
+	logDebug.Printf("zfs-snap-diff version: %s\n", VERSION)
 
 	// last argument is the zfs name
 	zfsName := flag.Arg(0)
@@ -98,7 +101,6 @@ func main() {
 			os.Exit(1)
 		}
 	}
-	webServerCfg := webServerConfig{*useTLSFlag, *certFileFlag, *keyFileFlag}
 
 	// initialize zfs handler
 	var err error
@@ -109,7 +111,7 @@ func main() {
 	}
 	logInfo.Printf("work on zfs: %s which is mounted under: %s\n", zfs.Datasets.Root().Name, zfs.Datasets.Root().MountPoint)
 
-	// listen on localhost - if flag '-a' is given, listen on all interfaces
+	// listen on the given address - or if flag '-a' is given, listen on all interfaces
 	var addr string
 	if *listenOnAllInterfacesFlag {
 		fmt.Println("")
@@ -120,9 +122,9 @@ func main() {
 			fmt.Println("\nHINT: USE -tls -cert <CERT_FILE> -key <KEY_FILE> to enable encryption!")
 		}
 		fmt.Println("")
-		addr = fmt.Sprintf(":%d", *portFlag)
+		addr = fmt.Sprintf("0.0.0.0:%d", *portFlag)
 	} else {
-		addr = fmt.Sprintf("127.0.0.1:%d", *portFlag)
+		addr = fmt.Sprintf("%s:%d", *addrFlag, *portFlag)
 	}
 
 	// print warning if file-compare method md5 is used
@@ -132,6 +134,14 @@ func main() {
 		} else {
 			logNotice.Println("no 'scan-snap-limit' was given and compare all files only with md5 - expect VERY HIGH cpu usage / VERY LONG runtime!!!!")
 		}
+	}
+
+	// webserver config
+	webServerCfg := webServerConfig{
+		addr:     addr,
+		useTLS:   *useTLSFlag,
+		certFile: *certFileFlag,
+		keyFile:  *keyFileFlag,
 	}
 
 	// frontend-config
@@ -147,7 +157,7 @@ func main() {
 	}
 
 	// startup web server
-	listenAndServe(addr, webServerCfg, frontendCfg)
+	listenAndServe(webServerCfg, frontendCfg)
 }
 
 func initLogHandlers(debugHndl, infoHndl, noticeHndl, warnHndl, errorHndl io.Writer) {

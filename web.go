@@ -19,7 +19,7 @@ var mimeTypes = map[string]string{
 }
 
 // registers response handlers and starts the web server
-func listenAndServe(addr string, webServerCfg webServerConfig, frontendCfg frontendConfig) {
+func listenAndServe(webServerCfg webServerConfig, frontendCfg frontendConfig) {
 	http.HandleFunc("/config", configHndl(frontendCfg))
 	http.HandleFunc("/snapshots-for-dataset", snapshotsForDatasetHndl)
 	http.HandleFunc("/snapshots-for-file", snapshotsForFileHndl)
@@ -39,12 +39,13 @@ func listenAndServe(addr string, webServerCfg webServerConfig, frontendCfg front
 		http.HandleFunc("/", serveStaticContentFromBinaryHndl)
 	}
 
+	logInfo.Printf("start server and listen on: '%s'\n", webServerCfg.addr)
 	if webServerCfg.useTLS {
-		logInfo.Printf("start server and listen on: 'https://%s'\n", addr)
-		logError.Println(http.ListenAndServeTLS(addr, webServerCfg.certFile, webServerCfg.keyFile, nil))
+		logInfo.Printf("open 'https://%s' in your browser\n", webServerCfg.addr)
+		logError.Println(http.ListenAndServeTLS(webServerCfg.addr, webServerCfg.certFile, webServerCfg.keyFile, nil))
 	} else {
-		logInfo.Printf("start server and listen on: 'http://%s'\n", addr)
-		logError.Println(http.ListenAndServe(addr, nil))
+		logInfo.Printf("open 'http://%s' in your browser\n", webServerCfg.addr)
+		logError.Println(http.ListenAndServe(webServerCfg.addr, nil))
 	}
 }
 
