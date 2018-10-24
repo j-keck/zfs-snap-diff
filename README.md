@@ -2,7 +2,6 @@
 
 **compare / restore files from zfs snapshots**
 
-_Next features of `zfs-snap-diff`: [feature poll](https://github.com/j-keck/zfs-snap-diff/issues?q=is%3Aissue+is%3Aopen+label%3Afeature-poll). Please comment / vote_
 
 ## Description
 
@@ -48,6 +47,16 @@ _under linux, you need the '-use-sudo' flag if you don't run it as root - see th
     * -use-sudo: use sudo when executing os commands
       * necessary under linux when running as non root
       * adjust sudo rules (see [doc/etc/sudoers.d/zfs-snap-diff](https://github.com/j-keck/zfs-snap-diff/blob/master/doc/etc/sudoers.d/zfs-snap-diff))
+    * -tls: use tls encryption
+       * use the additional parameters '-cert' and '-key' to provide the certificate and private key
+       * to create a self signed key / certificate use:
+
+             openssl genrsa -out server.key 2048
+             openssl req -new -x509 -sha256 -key server.key -out server.pem -days 3650
+
+       * and start `zfs-snap-diff` per
+
+             zfs-snap-diff -tls -cert server.pem -key server-key <ZFS_NAME>
 
 
 
@@ -185,6 +194,20 @@ From here you can easy view / restore a deleted file.
 ## Changelog
 
 ###0.0.X###
+
+0.0.10:
+  * use relative url for service endpoints
+    * to use zfs-snap-diff behind a reverse proxy
+    * minimal example config snipped for nginx:
+
+          location /zfs-snap-diff/ {
+              proxy_pass http://localhost:12345/;
+          }
+
+  * optional tls encryption
+  * listen address per '-l' flag configurable
+
+[all commits from 0.0.9...0.0.10](https://github.com/j-keck/zfs-snap-diff/compare/0.0.9...0.0.10)
 
 0.0.9:
   * show file size and modify timestamp in the file-browser
