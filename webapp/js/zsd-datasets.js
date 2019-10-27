@@ -9,10 +9,12 @@ angular.module('zsdDatasets', ['zsdServices']).
       },
       link: function(scope, element, attrs){
         scope.datasets = Config.get('datasets');
-        
-        scope.datasetSelected = function(dataset){
-          scope.hideDatasets = true;
-          scope.onDatasetSelected({dataset: dataset});
+
+          scope.datasetSelected = function(dataset){
+              console.log("dataset selected");
+              console.log(dataset);
+              scope.hideDatasets = true;
+              scope.onDatasetSelected({dataset: dataset});
         };
 
         scope.toggleHideDatasets = function(){
@@ -21,7 +23,7 @@ angular.module('zsdDatasets', ['zsdServices']).
 
 
         //
-        // initializations        
+        // initializations
         //
 
         // auto-collapse if 'collapse' is defined

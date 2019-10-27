@@ -25,7 +25,7 @@ factory('FileUtils', [function(){
 
 // PathUtils
 factory('PathUtils', ['Config', function(Config){
-  // search the dataset which is the parent from the given path  
+  // search the dataset which is the parent from the given path
   findDatasetForFile = function(path){
     var datasets = Config.get('datasets');
 
@@ -34,11 +34,11 @@ factory('PathUtils', ['Config', function(Config){
 
     // sort the datasets - longest path at first
     datasets = datasets.sort(function(a, b){
-      return b.MountPoint.length - a.MountPoint.length
+      return b.Path.length - a.Path.length
     });
 
     for(var i in datasets){
-      if(path.indexOf(datasets[i].MountPoint+"/") >= 0){
+      if(path.indexOf(datasets[i].Path+"/") >= 0){
         return datasets[i]
       }
     }
@@ -46,13 +46,13 @@ factory('PathUtils', ['Config', function(Config){
   return {
     convertToSnapPath: function(path, snapName){
       var dataset = findDatasetForFile(path);
-      var relativePath = path.substring(dataset.MountPoint.length)
-      return dataset.MountPoint + "/.zfs/snapshot/" + snapName + relativePath;
+      var relativePath = path.substring(dataset.Path.length)
+      return dataset.Path + "/.zfs/snapshot/" + snapName + relativePath;
     },
-    
+
     convertToActualPath: function(path){
-      var dataset = findDatasetForFile(path)      
-      var mountPoint = dataset.MountPoint;
+      var dataset = findDatasetForFile(path)
+      var mountPoint = dataset.Path;
       var snapName = this.extractSnapName(path);
 
       var prefix = mountPoint + "/.zfs/snapshot/" + snapName;
@@ -63,15 +63,16 @@ factory('PathUtils', ['Config', function(Config){
 
     extractSnapName: function(path){
       var dataset = findDatasetForFile(path)
-      var p = path.substring(dataset.MountPoint.length) // remove mount point
+      var p = path.substring(dataset.Path.length) // remove mount point
       p = p.substring('/.zfs/snapshot/'.length) // remove /.zfs/snapshot/
       var snapName = p.substring(0, p.indexOf('/')); // extract snapshot-name
       return snapName;
     },
 
 
-    entriesToPath: function(entries){
-      return entries.map(function(e){ return e.Path}).join('/');
+      entriesToPath: function(entries){
+          //return entries.map(function(e){ return e.Name}).join('/');
+          return entries[entries.length - 1].Path;
     },
 
 
@@ -87,7 +88,7 @@ factory('PathUtils', ['Config', function(Config){
       return pathElements[pathElements.length - 1];
     },
 
-    
+
   }
 }]).
 

@@ -4,7 +4,7 @@
       <h3 class="panel-title">
         <a href="" ng-click="toggleHideDatasets()" style="text-decoration: none;">
           <span ng-show="hideDatasets" class="glyphicon glyphicon-chevron-down"></span>
-          <span ng-hide="hideDatasets" class="glyphicon glyphicon-chevron-up"></span>                  
+          <span ng-hide="hideDatasets" class="glyphicon glyphicon-chevron-up"></span>
           Datasets
         </a>
       </h3>
@@ -17,14 +17,14 @@
           <th>Used</th>
           <th>Avail</th>
           <th>Refer</th>
-          <th>Mountpoint</th>
+          <th>Path</th>
         </tr>
         <tr ng-repeat="dataset in datasets" ng-click="datasetSelected(dataset)" zsd-scroll-to-top>
           <td>{{dataset.Name}}</td>
-          <td>{{dataset.Used}}</td>
-          <td>{{dataset.Avail}}</td>
-          <td>{{dataset.Refer}}</td>
-          <td>{{dataset.MountPoint}}</td>
+          <td>{{dataset.Used | filesize}}</td>
+          <td>{{dataset.Avail | filesize}}</td>
+          <td>{{dataset.Refer | filesize}}</td>
+          <td>{{dataset.Path}}</td>
         </tr>
       </table>
     </div>

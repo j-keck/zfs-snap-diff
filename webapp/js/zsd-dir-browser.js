@@ -16,7 +16,7 @@ angular.module('zsdDirBrowser', ['zsdServices']).
 
         scope.filterHiddenEntries = function(entry){
           if(! scope.showHiddenEntries){
-            if(entry.Path) return entry.Path.charAt(0) != '.';
+            if(entry.Name) return entry.Name.charAt(0) != '.';
           }
           return true;
         };
@@ -94,8 +94,8 @@ angular.module('zsdDirBrowser', ['zsdServices']).
         };
 
 
-        scope.open = function(entry){
-          var idx = scope.entries.indexOf(entry);
+          scope.open = function(entry){
+           var idx = scope.entries.indexOf(entry);
           if(idx === -1){
             // user go deeper
             scope.entries = scope.entries.concat([entry]);
