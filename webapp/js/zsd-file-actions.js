@@ -1,4 +1,4 @@
-// 
+//
 // zsd-file-actions directive
 //
 // Usage:
@@ -15,20 +15,20 @@ angular.module('zsdFileActions', ['zsdServices', 'zsdUtils']).
     return {
       restrict: 'E',
       scope: false,
-      templateUrl: 'template-file-actions.html',      
+      templateUrl: 'template-file-actions.html',
       controller: function($scope){
 
-        // 
-        // controller actions 
-        // 
-               
+        //
+        // controller actions
+        //
+
         // trigger actions if a file is selected
         this.fileSelected = function(pathInActual, pathInSnap, curSnap){
           $scope.fileName = PathUtils.extractFileName(pathInActual);
           $scope.pathInActual = pathInActual;
           $scope.pathInSnap = pathInSnap;
           $scope.curSnap = curSnap;
-          
+
           // fetch file-info
           Backend.fileInfo(pathInSnap).then(function(fi){
             $scope.fileInfo = fi;
@@ -43,20 +43,20 @@ angular.module('zsdFileActions', ['zsdServices', 'zsdUtils']).
         };
 
 
-        
 
-        // 
+
+        //
         // scope (ui) actions
-        // 
-        
+        //
+
         // view the file content from the selected snapshot
         $scope.viewFile = function viewFile(){
           $scope.lastAction = $scope.viewFile;
-          
+
           if(FileUtils.isText($scope.fileInfo)){
             Backend.readTextFile($scope.pathInSnap).then(function(res){
               clearOthersButKeep('textFileContent');
-              
+
               // apply syntax highlight
               var hljsRes = hljs.highlightAuto(res);
               $scope.textFileContent = hljsRes.value;
@@ -66,9 +66,9 @@ angular.module('zsdFileActions', ['zsdServices', 'zsdUtils']).
             if(FileUtils.isViewable($scope.fileInfo)){
               Backend.readBinaryFile($scope.pathInSnap).then(function(res){
                 clearOthersButKeep('binaryFileContent');
-                
+
                 var url = URL.createObjectURL(res);
-                $scope.binaryFileContent = $sce.trustAsResourceUrl(url);              
+                $scope.binaryFileContent = $sce.trustAsResourceUrl(url);
               });
             }
           }
@@ -77,9 +77,9 @@ angular.module('zsdFileActions', ['zsdServices', 'zsdUtils']).
         // compare the file content from the selected snapshot with the actual state
         $scope.compareFile = function compareFile(){
           $scope.lastAction = $scope.compareFile;
-          Backend.diffFile($scope.pathInActual, $scope.curSnap.Name).then(function(res){
-            clearOthersButKeep('diffResult');      
-            $scope.diffResult = res;          
+          Backend.diffFile($scope.pathInActual, $scope.curSnap.name).then(function(res){
+            clearOthersButKeep('diffResult');
+            $scope.diffResult = res;
           })
         };
 
@@ -98,7 +98,7 @@ angular.module('zsdFileActions', ['zsdServices', 'zsdUtils']).
         $scope.restoreFileAcked = function(){
           $scope.hideRestoreFileConfirmation();
 
-          Backend.restoreFile($scope.pathInActual, $scope.curSnap.Name).then(function(res){
+          Backend.restoreFile($scope.pathInActual, $scope.curSnap.name).then(function(res){
             $rootScope.$broadcast('zsd:success', res);
             $scope.lastAction()
           });
@@ -108,7 +108,7 @@ angular.module('zsdFileActions', ['zsdServices', 'zsdUtils']).
         $scope.hideRestoreFileConfirmation = function(){
           delete $scope.showRestoreFileConfirmation;
         };
-        
+
         // returns 'active' if a given name equals the function name from the lastAction
         //   * for action buttons 'toggle'
         $scope.activeClassIfLastActionIs = function(name){
@@ -122,7 +122,7 @@ angular.module('zsdFileActions', ['zsdServices', 'zsdUtils']).
         // initializations
         //   * initialize lastAction
         //     - needs be after function declarations
-        // 
+        //
 
         // initialize lastAction to a default value from the config
         var actions = {'off': function(){},
@@ -130,7 +130,7 @@ angular.module('zsdFileActions', ['zsdServices', 'zsdUtils']).
                        'diff': $scope.compareFile,
                        'download': $scope.downloadFile,
                        'restore': $scope.restoreFile};
-        
+
         var defaultFileAction = Config.get('defaultFileAction');
         if(defaultFileAction in actions){
           $scope.lastAction = actions[defaultFileAction];
@@ -138,12 +138,12 @@ angular.module('zsdFileActions', ['zsdServices', 'zsdUtils']).
           $root$Scope.$broadcast('zsd:warning', 'Invalid "default-file-action": "'+ defaultFileAction +'"');
           $scope.lastAction = actions['off'];
         }
-        
 
-        
-        // 
+
+
+        //
         // private / helper actions
-        // 
+        //
 
         // clear other content, but keep the content with the given name
         function clearOthersButKeep(keep){
@@ -168,9 +168,9 @@ directive('zsdFromActual', ['PathUtils', function(PathUtils){
     scope:{
       path: "=",
       curSnap: "="
-    },    
+    },
     link: function(scope, element, attrs, ctrl){
-      // 
+      //
       // initializations
       //   * register observers for:
       //     - path changes (user change the current file)
@@ -180,8 +180,8 @@ directive('zsdFromActual', ['PathUtils', function(PathUtils){
       // watch for path changes
       scope.$watch('path', function(path){
         scope.pathInActual = path;
-        scope.pathInSnap = PathUtils.convertToSnapPath(path, scope.curSnap.Name);
-        
+        scope.pathInSnap = PathUtils.convertToSnapPath(path, scope.curSnap.name);
+
         // trigger fileSelected
         ctrl.fileSelected(scope.pathInActual, scope.pathInSnap, scope.curSnap);
       });
@@ -189,7 +189,7 @@ directive('zsdFromActual', ['PathUtils', function(PathUtils){
       // watch for new snapshot selected
       scope.$watch('curSnap', function(snap){
         // update path vars (pathInActual doesn't change when browsing in the history)
-        scope.pathInSnap = PathUtils.convertToSnapPath(scope.pathInActual, snap.Name)
+        scope.pathInSnap = PathUtils.convertToSnapPath(scope.pathInActual, snap.name)
 
         // trigger fileSelected
         ctrl.fileSelected(scope.pathInActual, scope.pathInSnap, snap);
@@ -207,7 +207,7 @@ directive('zsdFromSnapshot', ['PathUtils', function(PathUtils){
       curSnap: "=",
     },
     link: function(scope, element, attrs, ctrl){
-      // 
+      //
       // initializations
       //   * register observers for:
       //     - path changes (user change the current file / switch between file versions)
@@ -219,7 +219,7 @@ directive('zsdFromSnapshot', ['PathUtils', function(PathUtils){
         // update path vars
         scope.pathInActual = PathUtils.convertToActualPath(path);
         scope.pathInSnap = path;
-        
+
         // trigger fileSelected
         ctrl.fileSelected(scope.pathInActual, scope.pathInSnap, scope.curSnap);
       });

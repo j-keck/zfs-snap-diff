@@ -6,7 +6,7 @@
 
 
   <zsd-dir-browser ng-if="ctrl.curDataset"
-                   start="ctrl.curDataset.Path"
+                   start="ctrl.curDataset.mountPoint.path"
                    on-file-selected="ctrl.fileSelected(entries)"
                    on-dir-selected="ctrl.dirSelected(entries)"></zsd-dir-browser>
 

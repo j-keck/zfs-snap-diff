@@ -2,7 +2,7 @@ package oldweb
 
 import (
 	"fmt"
-	"github.com/j-keck/zfs-snap-diff/pkg/file"
+	"github.com/j-keck/zfs-snap-diff/pkg/fs"
 	"github.com/j-keck/zfs-snap-diff/pkg/zfs"
 	"sort"
 	"strings"
@@ -17,8 +17,7 @@ func findDatasetForFile(path string) (zfs.Dataset, error) {
 	sort.Sort(SortByMountPointDesc(datasets))
 
 	for _, ds := range datasets {
-		log.Debugf("path: %s, ds.Path: %s", path, ds.Path)
-		if strings.HasPrefix(path, ds.Path) {
+		if strings.HasPrefix(path, ds.MountPoint.Path) {
 			return ds, nil
 		}
 	}
@@ -40,10 +39,10 @@ func ExtractSnapName(dsPath, filePath string) string {
 // UniqueName returns the unique file name
 //   * the file name if the file is in the actual filesystem
 //   * <FILE-NAME>-<SNAP-NAME>.<SUFFIX> if the file is from a snapshot
-func UniqueName(fh file.FileHandle) string {
+func UniqueName(fh fs.FileHandle) string {
 	ds, _ := findDatasetForFile(fh.Path)
-	if PathIsInSnapshot(ds.Path, fh.Path) {
-		snapName := ExtractSnapName(ds.Path, fh.Path)
+	if PathIsInSnapshot(ds.MountPoint.Path, fh.Path) {
+		snapName := ExtractSnapName(ds.MountPoint.Path, fh.Path)
 
 		// build unique-name
 		if strings.Contains(fh.Name, ".") {
@@ -56,11 +55,11 @@ func UniqueName(fh file.FileHandle) string {
 	return fh.Name
 }
 
-func NewFileHandleInSnapshot(path, snapName string) (file.FileHandle, error) {
+func NewFileHandleInSnapshot(path, snapName string) (fs.FileHandle, error) {
 	ds, _ := findDatasetForFile(path)
-	relativePath := strings.TrimPrefix(path, ds.Path)
-	pathInSnap := fmt.Sprintf("%s/.zfs/snapshot/%s%s", ds.Path, snapName, relativePath)
-	return file.NewFileHandle(pathInSnap)
+	relativePath := strings.TrimPrefix(path, ds.MountPoint.Path)
+	pathInSnap := fmt.Sprintf("%s/.zfs/snapshot/%s%s", ds.MountPoint.Path, snapName, relativePath)
+	return fs.NewFileHandle(pathInSnap)
 }
 
 // SortByMountPointDesc implments sort.Interface for Datasets based on the mount point
@@ -76,5 +75,5 @@ func (s SortByMountPointDesc) Swap(i, j int) {
 }
 
 func (s SortByMountPointDesc) Less(i, j int) bool {
-	return len(s[i].Path) > len(s[j].Path)
+	return len(s[i].MountPoint.Path) > len(s[j].MountPoint.Path)
 }

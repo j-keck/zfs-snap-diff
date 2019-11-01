@@ -9,7 +9,7 @@
   <!-- intext -->
   <div class="container" ng-show="diffResult && diffType === 'intext'">
     <div class="panel panel-default center-block">
-      <div class="panel-heading">difference of: <strong>{{fileName}}</strong> between the actual version and the version from the snapshot: <strong>{{curSnap.Name}}</strong></div>      
+      <div class="panel-heading">difference of: <strong>{{fileName}}</strong> between the actual version and the version from the snapshot: <strong>{{curSnap.name}}</strong></div>
       <div class="pandel-body">
         <div ng-repeat="diffContext in diffResult.intext">
           <div style="margin-bottom: 5px;">
@@ -35,11 +35,11 @@
   <!-- side by side -->
   <div class="container-fluid" ng-show="diffResult && diffType ==='sideBySide'">
     <div class="panel panel-default center-block">
-      <div class="panel-heading">difference of: <strong>{{fileName}}</strong> between the actual version and the version from the snapshot: <strong>{{curSnap.Name}}</strong></div>
-      <div class="pandel-body">  
+      <div class="panel-heading">difference of: <strong>{{fileName}}</strong> between the actual version and the version from the snapshot: <strong>{{curSnap.name}}</strong></div>
+      <div class="pandel-body">
         <table class="side-by-side-diff">
           <tr>
-            <th colspan="2"><h4 class="text-center" style="margin-bottom: -20px;">Snapshot (<small>{{curSnap.Name}}</small>)</h4></td>
+            <th colspan="2"><h4 class="text-center" style="margin-bottom: -20px;">Snapshot (<small>{{curSnap.name}}</small>)</h4></td>
             <th colspan="2"><h4 class="text-center" style="margin-bottom: -20px;">Actual</h4></td>
           </tr>
           <tr zsd-side-by-side-diff-rows blocks="diffResult.sideBySide">
@@ -53,9 +53,9 @@
               <button type="button"
                       class="btn btn-warning"
                       ng-show="showRevertChangeConfirmationFor(zsdIndex)"
-                      title="Confirm to revert change nr: {{zsdIndex+1}}"                      
+                      title="Confirm to revert change nr: {{zsdIndex+1}}"
                       ng-click="revertChange(zsdIndex)">Click to revert {{zsdIndex + 1 | ordinal}} change
-              </button>              
+              </button>
             </td>
           </tr>
         </table>

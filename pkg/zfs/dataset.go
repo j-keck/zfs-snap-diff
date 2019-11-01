@@ -2,7 +2,8 @@ package zfs
 
 import (
 	"errors"
-	"github.com/j-keck/zfs-snap-diff/pkg/file"
+	"github.com/j-keck/zfs-snap-diff/pkg/comparator"
+	"github.com/j-keck/zfs-snap-diff/pkg/fs"
 	"path"
 	"strconv"
 	"strings"
@@ -11,19 +12,19 @@ import (
 
 // Dataset represents a zfs dataset (aka. zfs filesystem)
 type Dataset struct {
-	Name  string
-	Used  uint64
-	Avail uint64
-	Refer uint64
-	file.DirEntry
-	cmd ZFSCmd
+	Name       string       `json:"name"`
+	Used       uint64       `json:"used"`
+	Avail      uint64       `json:"avail"`
+	Refer      uint64       `json:"refer"`
+	MountPoint fs.DirHandle `json:"mountPoint"`
+	cmd        ZFSCmd
 }
 
 // ScanSnapshots returns a list of all snapshots for this dataset
 func (self *Dataset) ScanSnapshots() (Snapshots, error) {
-	out, err := self.cmd.exec("list -t snapshot -s creation -r -d 1 -o name,creation -Hp", self.Name)
+	stdout, stderr, err := self.cmd.Exec("list -t snapshot -s creation -r -d 1 -o name,creation -Hp", self.Name)
 	if err != nil {
-		return nil, errors.New(out)
+		return nil, errors.New(stderr)
 	}
 
 	parse := func(s string) (string, time.Time, bool) {
@@ -42,14 +43,14 @@ func (self *Dataset) ScanSnapshots() (Snapshots, error) {
 	}
 
 	snapshots := Snapshots{}
-	for _, line := range strings.Split(out, "\n") {
+	for _, line := range strings.Split(stdout, "\n") {
 		if snapName, creation, ok := parse(line); ok {
 			// remove dataset name from snapshot
 			fields := strings.Split(snapName, "@")
 			snapName := fields[len(fields)-1]
 
 			// path
-			path := self.Path + "/.zfs/snapshot/" + snapName
+			path := self.MountPoint.Path + "/.zfs/snapshot/" + snapName
 
 			// append new snap to snapshots
 			snapshots = append(snapshots, Snapshot{snapName, creation, path})
@@ -59,21 +60,26 @@ func (self *Dataset) ScanSnapshots() (Snapshots, error) {
 	return snapshots.Reverse(), nil
 }
 
+// func (self *Dataset) OpenFile(path string) (file.FileHandle, error) {
+//	// FIXME: validate path is under the given mountpoint
+//	return file.NewFileHandle(path)
+// }
+
 type FileVersion struct {
-	File     file.FileHandle
+	File     fs.FileHandle
 	Snapshot Snapshot
 }
 
-func (self *Dataset) FindFileVersions(comparator file.Comparator, fh file.FileHandle) ([]FileVersion, error) {
+func (self *Dataset) FindFileVersions(comparator comparator.Comparator, fh fs.FileHandle) ([]FileVersion, error) {
 	snaps, err := self.ScanSnapshots()
 	if err != nil {
 		return nil, err
 	}
 
-	var versions []FileVersion
+	var versions = make([]FileVersion, 0)
 	for _, snap := range snaps {
-		relPath := strings.TrimPrefix(fh.Path, self.Path)
-		fhInSnap, err := file.NewFileHandle(path.Join(snap.Path, relPath))
+		relPath := strings.TrimPrefix(fh.Path, self.MountPoint.Path)
+		fhInSnap, err := fs.NewFileHandle(path.Join(snap.Path, relPath))
 		// not ever snapshot has a version of the file - ignore errors
 		if err != nil {
 			continue
@@ -81,10 +87,11 @@ func (self *Dataset) FindFileVersions(comparator file.Comparator, fh file.FileHa
 
 		log.Tracef("check if file was changed under path: %s", fhInSnap.Path)
 		if comparator.HasChanged(fhInSnap) {
-			log.Tracef("file was changed")
+			log.Debugf("file was changed in snapshot: %s", fhInSnap.Path)
 			versions = append(versions, FileVersion{fhInSnap, snap})
 		}
 	}
+	log.Tracef("versions for file: %+v - %+v", fh, versions)
 	return versions, nil
 }
 

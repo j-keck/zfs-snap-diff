@@ -5,10 +5,10 @@
   </zsd-datasets>
 
   <zsd-snapshots ng-if="ctrl.curDataset"
-                 title="dataset {{ctrl.curDataset.Name}}"
+                 title="dataset {{ctrl.curDataset.name}}"
                  snapshots="ctrl.snapshots"
                  on-snapshot-selected="ctrl.snapshotSelected(snap)"></zsd-snapshots>
-   
+
 
   <zsd-dir-browser ng-if="ctrl.curSnap"
                    start-entries="ctrl.startEntries"

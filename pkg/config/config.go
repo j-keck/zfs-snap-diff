@@ -1,7 +1,6 @@
 package config
 
 import (
-
 	"github.com/j-keck/plog"
 )
 
@@ -17,4 +16,3 @@ func NewDefaultConfig() Config {
 		Webserver: NewDefaultWebserverConfig(),
 	}
 }
-

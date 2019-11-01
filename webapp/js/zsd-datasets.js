@@ -11,8 +11,6 @@ angular.module('zsdDatasets', ['zsdServices']).
         scope.datasets = Config.get('datasets');
 
           scope.datasetSelected = function(dataset){
-              console.log("dataset selected");
-              console.log(dataset);
               scope.hideDatasets = true;
               scope.onDatasetSelected({dataset: dataset});
         };

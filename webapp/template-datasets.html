@@ -20,11 +20,11 @@
           <th>Path</th>
         </tr>
         <tr ng-repeat="dataset in datasets" ng-click="datasetSelected(dataset)" zsd-scroll-to-top>
-          <td>{{dataset.Name}}</td>
-          <td>{{dataset.Used | filesize}}</td>
-          <td>{{dataset.Avail | filesize}}</td>
-          <td>{{dataset.Refer | filesize}}</td>
-          <td>{{dataset.Path}}</td>
+          <td>{{dataset.name}}</td>
+          <td>{{dataset.used | filesize}}</td>
+          <td>{{dataset.avail | filesize}}</td>
+          <td>{{dataset.refer | filesize}}</td>
+          <td>{{dataset.mountPoint.path}}</td>
         </tr>
       </table>
     </div>

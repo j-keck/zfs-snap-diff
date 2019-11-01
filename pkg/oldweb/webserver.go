@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/j-keck/plog"
-	"github.com/j-keck/zfs-snap-diff/pkg/diff"
-	"github.com/j-keck/zfs-snap-diff/pkg/file"
-	"github.com/j-keck/zfs-snap-diff/pkg/zfs"
+	"github.com/j-keck/zfs-snap-diff/pkg/comparator"
 	"github.com/j-keck/zfs-snap-diff/pkg/config"
+	"github.com/j-keck/zfs-snap-diff/pkg/diff"
+	"github.com/j-keck/zfs-snap-diff/pkg/fs"
+	"github.com/j-keck/zfs-snap-diff/pkg/zfs"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -29,7 +30,8 @@ var mimeTypes = map[string]string{
 var z zfs.ZFS
 
 // registers response handlers and starts the web server
-func ListenAndServe(z zfs.ZFS, cfg config.WebserverConfig, frontendCfg FrontendConfig) {
+func ListenAndServe(_z zfs.ZFS, cfg config.WebserverConfig, frontendCfg FrontendConfig) {
+	z = _z
 	http.HandleFunc("/config", configHndl(frontendCfg))
 	http.HandleFunc("/snapshots-for-dataset", snapshotsForDatasetHndl)
 	http.HandleFunc("/snapshots-for-file", snapshotsForFileHndl)
@@ -40,9 +42,9 @@ func ListenAndServe(z zfs.ZFS, cfg config.WebserverConfig, frontendCfg FrontendC
 	http.HandleFunc("/restore-file", restoreFileHndl)
 	http.HandleFunc("/revert-change", revertChangeHndl)
 
-	if envHasSet("ZSD_SERVE_FROM_WEBAPP") {
-		log.Info("serve from webapp")
-		http.Handle("/", http.FileServer(http.Dir("webapp")))
+	if envHasSet("ZSD_SERVE_FROM_WEBAPP") || len(cfg.WebappDir) > 0 {
+		log.Infof("serve from webapp from directory: '%s'", cfg.WebappDir)
+		http.Handle("/", http.FileServer(http.Dir(cfg.WebappDir)))
 	} else {
 		http.HandleFunc("/", serveStaticContentFromBinaryHndl)
 	}
@@ -116,25 +118,43 @@ func snapshotsForFileHndl(w http.ResponseWriter, r *http.Request) {
 	}
 
 	path := params["path"]
-	log.Debug("scan snapshots where file: '%s' was modified\n", path)
-	dataset, _ := findDatasetForFile(path.(string))
+	log.Debugf("scan snapshots where fs: '%s' was modified\n", path)
+	dataset, err := findDatasetForFile(path.(string))
+	if err != nil {
+		log.Error(err.Error())
+		return
+	}
 
 	// FIXME: handle snap limit
 
 	// if 'scan-snap-limit' is given, limit scan to the given value
 	// if limit, ok := params["scan-snap-limit"]; ok {
 	//	if len(snapshots) > limit.(int) {
-	//		log.Warnf("scan only %d snapshots for other file versions (%d snapshots available)\n", limit, len(snapshots))
+	//		log.Warnf("scan only %d snapshots for other fs versions (%d snapshots available)\n", limit, len(snapshots))
 	//		snapshots = snapshots[:limit.(int)]
 	//	}
 	// }
 
 	// FIXME: handle errors
-	fh, _ := file.NewFileHandle(path.(string))
-	cmp, _ := file.NewComparator(params["compare-file-method"].(string), fh)
-	versions, _ := dataset.FindFileVersions(cmp, fh)
+	fh, err := fs.NewFileHandle(path.(string))
+	if err != nil {
+		log.Error(err.Error())
+		return
+	}
 
-	var snapshots []zfs.Snapshot
+	cmp, err := comparator.NewComparator(params["compare-file-method"].(string), fh)
+	if err != nil {
+		log.Error(err.Error())
+		return
+	}
+
+	versions, err := dataset.FindFileVersions(cmp, fh)
+	if err != nil {
+		log.Error(err.Error())
+		return
+	}
+
+	var snapshots = make([]zfs.Snapshot, 0)
 	for _, v := range versions {
 		snapshots = append(snapshots, v.Snapshot)
 	}
@@ -158,7 +178,6 @@ func listDirHndl(w http.ResponseWriter, r *http.Request) {
 	// parse / validate request parameter
 	params, paramsValid := parseParams(w, r, "path:string")
 
-	log.Debug("listDirHndl")
 	if !paramsValid {
 		return
 	}
@@ -168,7 +187,7 @@ func listDirHndl(w http.ResponseWriter, r *http.Request) {
 	// FIXME verify path
 	// verifyPathIsUnderZMP(path, w, r)
 
-	dh, err := file.NewDirEntry(path)
+	dh, err := fs.NewDirHandle(path)
 	if err != nil {
 		log.Error(err)
 	}
@@ -204,16 +223,16 @@ func diffFileHndl(w http.ResponseWriter, r *http.Request) {
 	// verify path
 	// verifyPathIsUnderZMP(path, w, r)
 
-	fh, err := file.NewFileHandle(params["path"].(string))
+	fh, err := fs.NewFileHandle(params["path"].(string))
 	if err != nil {
-		http.Error(w, "unable to open the actual file: "+err.Error(), 400)
+		http.Error(w, "unable to open the actual fs: "+err.Error(), 400)
 		return
 	}
 
-	// get the actual file content
-	actualText, err := fh.ReadText()
+	// get the actual fs content
+	actualText, err := fh.ReadString()
 	if err != nil {
-		http.Error(w, "unable to read the actual file: "+err.Error(), 400)
+		http.Error(w, "unable to read the actual fs: "+err.Error(), 400)
 		return
 	}
 
@@ -238,13 +257,13 @@ func diffFileHndl(w http.ResponseWriter, r *http.Request) {
 			snapFh, err := NewFileHandleInSnapshot(fh.Path, snap.Name)
 			if err != nil {
 				log.Error(err.Error())
-				http.Error(w, "unable to get file in snapshot: "+err.Error(), 400)
+				http.Error(w, "unable to get fs in snapshot: "+err.Error(), 400)
 				return
 			}
-			snapText, err = snapFh.ReadText()
+			snapText, err = snapFh.ReadString()
 			if err != nil {
 				log.Error(err.Error())
-				http.Error(w, "unable to read file in snapshot: "+err.Error(), 400)
+				http.Error(w, "unable to read fs in snapshot: "+err.Error(), 400)
 				return
 			}
 
@@ -274,7 +293,7 @@ func diffFileHndl(w http.ResponseWriter, r *http.Request) {
 	w.Write(js)
 }
 
-// file (meta) info
+// fs (meta) info
 func fileInfoHndl(w http.ResponseWriter, r *http.Request) {
 	// parse / validate request parameter
 	params, paramsValid := parseParams(w, r, "path:string")
@@ -287,7 +306,7 @@ func fileInfoHndl(w http.ResponseWriter, r *http.Request) {
 	// verify path
 	//verifyPathIsUnderZMP(path, w, r)
 
-	fh, err := file.NewFileHandle(path)
+	fh, err := fs.NewFileHandle(path)
 	if err != nil {
 		log.Error(err.Error())
 		http.Error(w, err.Error(), 400)
@@ -295,8 +314,8 @@ func fileInfoHndl(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type FileInfo struct {
-		file.FileHandle
-		MimeType string
+		fs.FileHandle
+		MimeType string `json:"mimeType"`
 	}
 	mimeType, _ := fh.MimeType()
 	fi := FileInfo{fh, mimeType}
@@ -314,7 +333,7 @@ func fileInfoHndl(w http.ResponseWriter, r *http.Request) {
 	w.Write(js)
 }
 
-// read the file given in the query param 'path'
+// read the fs given in the query param 'path'
 func readFileHndl(w http.ResponseWriter, r *http.Request) {
 	// parse / validate request parameter
 	params, paramsValid := parseParams(w, r, "path:string,?snapshot-name:string")
@@ -327,12 +346,12 @@ func readFileHndl(w http.ResponseWriter, r *http.Request) {
 	// verify path
 	// verifyPathIsUnderZMP(path, w, r)
 
-	var fh file.FileHandle
+	var fh fs.FileHandle
 	var err error
 	if snapName, ok := params["snapshot-name"].(string); ok {
 		fh, err = NewFileHandleInSnapshot(path, snapName)
 	} else {
-		fh, err = file.NewFileHandle(path)
+		fh, err = fs.NewFileHandle(path)
 	}
 
 	if err != nil {
@@ -373,11 +392,11 @@ func restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 	// get parameter snapshot-name
 	snapName := params["snapshot-name"].(string)
 
-	// get file-handle for the actual file
-	actualFh, err := file.NewFileHandle(path)
+	// get fs-handle for the actual fs
+	actualFh, err := fs.NewFileHandle(path)
 	if err == nil {
-		// move the actual file to the backup location if the file was found
-		if err := actualFh.MoveToBackup(); err != nil {
+		// move the actual fs to the backup location if the fs was found
+		if err := fs.Backup(actualFh); err != nil {
 			log.Error(err.Error())
 			http.Error(w, "unable to restore: "+err.Error(), 500)
 			return
@@ -388,7 +407,7 @@ func restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get file-handle for the file from the snashot
+	// get fs-handle for the fs from the snashot
 	snapFh, err := NewFileHandleInSnapshot(actualFh.Path, snapName)
 	if err != nil {
 		log.Error(err.Error())
@@ -396,8 +415,8 @@ func restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// copy the file from the snapshot as the actual file
-	if err := snapFh.CopyAs(path); err != nil {
+	// copy the fs from the snapshot as the actual fs
+	if err := snapFh.Copy(path); err != nil {
 		log.Error(err.Error())
 		http.Error(w, "unable to restore: "+err.Error(), 500)
 	} else {
@@ -443,15 +462,15 @@ func revertChangeHndl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get file-handle
-	var fh file.FileHandle
-	if fh, err = file.NewFileHandle(path); err != nil {
+	// get fs-handle
+	var fh fs.FileHandle
+	if fh, err = fs.NewFileHandle(path); err != nil {
 		log.Warn(err.Error())
-		http.Error(w, "unable to revert change - file not found: "+err.Error(), 400)
+		http.Error(w, "unable to revert change - fs not found: "+err.Error(), 400)
 		return
 	}
 
-	if err := fh.Patch(deltas); err != nil {
+	if err := fs.Patch(fh, deltas); err != nil {
 		log.Warn(err.Error())
 		http.Error(w, "unable to revert change: "+err.Error(), 500)
 	}

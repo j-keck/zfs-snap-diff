@@ -6,9 +6,9 @@ import (
 
 // Snapshot - zfs snapshot
 type Snapshot struct {
-	Name     string
-	Creation time.Time
-	Path     string
+	Name     string    `json:"name"`
+	Creation time.Time `json:"creation"`
+	Path     string    `json:"path"`
 }
 
 // Snapshots represents snapshots from a zfs dataset

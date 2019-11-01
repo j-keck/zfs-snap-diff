@@ -2,10 +2,10 @@
   <ol class="breadcrumb">
     <li ng-repeat="entry in entries">
       <!-- link if entry is directory -->
-      <a href="" ng-show="isDirectory(entry)" ng-click="open(entry)">{{entry.Name}}</a>
+      <a href="" ng-show="isDirectory(entry)" ng-click="open(entry)">{{entry.name}}</a>
 
       <!-- text only, if entry is file (the last entry, if a file is selected)-->
-      <span ng-show="isFile(entry)">{{entry.Name}}</span>
+      <span ng-show="isFile(entry)">{{entry.name}}</span>
     </li>
   </ol>
 
@@ -20,11 +20,11 @@
         ng-repeat="entry in dirListing | filter:filterHiddenEntries" ng-click="open(entry)" zsd-scroll-to-top>
       <td class="col-md-6">
         <span class="glyphicon" ng-class="iconClassForEntry(entry)" aria-hidden="true">
-          {{entry.Name}}
+          {{entry.name}}
         </span>
       </td>
-      <td class="col-md-1 text-right">{{entry.Size | filesize}}</td>
-      <td class="col-md-2 text-right">{{entry.ModTime | date: 'EEE MMM dd HH:mm yyyy'}}</td>
+      <td class="col-md-1 text-right">{{entry.size | filesize}}</td>
+      <td class="col-md-2 text-right">{{entry.modTime | date: 'EEE MMM dd HH:mm yyyy'}}</td>
     </tr>
   </table>
 </div>

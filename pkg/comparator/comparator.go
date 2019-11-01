@@ -1,9 +1,11 @@
-package file
+package comparator
 
 import (
 	"bytes"
 	"crypto/md5"
 	"fmt"
+	"github.com/j-keck/plog"
+	"github.com/j-keck/zfs-snap-diff/pkg/fs"
 	"io"
 	"io/ioutil"
 	"os"
@@ -11,13 +13,15 @@ import (
 	"time"
 )
 
+var log = plog.GlobalLogger()
+
 // Comparator compares ...
 type Comparator interface {
-	init(actual FileHandle)
-	HasChanged(other FileHandle) bool
+	init(actual fs.FileHandle)
+	HasChanged(other fs.FileHandle) bool
 }
 
-func NewComparator(method string, actual FileHandle) (Comparator, error) {
+func NewComparator(method string, actual fs.FileHandle) (Comparator, error) {
 	var comparator Comparator
 
 	switch method {
@@ -50,14 +54,14 @@ func NewComparator(method string, actual FileHandle) (Comparator, error) {
 //
 // by size
 type CompareBySize struct {
-	actual    FileHandle
+	actual    fs.FileHandle
 	otherSize int64
 }
 
-func (self *CompareBySize) init(actual FileHandle) {
+func (self *CompareBySize) init(actual fs.FileHandle) {
 	self.actual = actual
 }
-func (self *CompareBySize) HasChanged(other FileHandle) bool {
+func (self *CompareBySize) HasChanged(other fs.FileHandle) bool {
 	// previous other size
 	prevSize := self.otherSize
 
@@ -70,14 +74,14 @@ func (self *CompareBySize) HasChanged(other FileHandle) bool {
 
 // by modification time
 type CompareByMTime struct {
-	actual     FileHandle
+	actual     fs.FileHandle
 	otherMTime time.Time
 }
 
-func (self *CompareByMTime) init(actual FileHandle) {
+func (self *CompareByMTime) init(actual fs.FileHandle) {
 	self.actual = actual
 }
-func (self *CompareByMTime) HasChanged(other FileHandle) bool {
+func (self *CompareByMTime) HasChanged(other fs.FileHandle) bool {
 	// previous other mtime
 	prevMTime := self.otherMTime
 
@@ -94,7 +98,7 @@ type CompareBySizeAndModTime struct {
 	byMTime Comparator
 }
 
-func (self *CompareBySizeAndModTime) init(actual FileHandle) {
+func (self *CompareBySizeAndModTime) init(actual fs.FileHandle) {
 	bySize := new(CompareBySize)
 	bySize.init(actual)
 	self.bySize = bySize
@@ -103,19 +107,19 @@ func (self *CompareBySizeAndModTime) init(actual FileHandle) {
 	byMTime.init(actual)
 	self.byMTime = byMTime
 }
-func (self *CompareBySizeAndModTime) HasChanged(other FileHandle) bool {
+func (self *CompareBySizeAndModTime) HasChanged(other fs.FileHandle) bool {
 	return self.bySize.HasChanged(other) || self.byMTime.HasChanged(other)
 }
 
 //
 // compare by content
 type CompareByContent struct {
-	actual        FileHandle
+	actual        fs.FileHandle
 	actualContent []byte
 	otherContent  []byte
 }
 
-func (self *CompareByContent) init(actual FileHandle) {
+func (self *CompareByContent) init(actual fs.FileHandle) {
 	self.actual = actual
 
 	buf, err := ioutil.ReadFile(self.actual.Path)
@@ -124,7 +128,7 @@ func (self *CompareByContent) init(actual FileHandle) {
 	}
 	self.actualContent = buf
 }
-func (self *CompareByContent) HasChanged(other FileHandle) bool {
+func (self *CompareByContent) HasChanged(other fs.FileHandle) bool {
 	buf, err := ioutil.ReadFile(other.Path)
 	if err != nil {
 		log.Warnf("unable to read the 'other' file: %s - err: %v", other.Path, err)
@@ -143,12 +147,12 @@ func (self *CompareByContent) HasChanged(other FileHandle) bool {
 //
 // compare by md5 hash
 type CompareByMD5 struct {
-	actual     FileHandle
+	actual     fs.FileHandle
 	actualHash []byte
 	otherHash  []byte
 }
 
-func (self *CompareByMD5) init(actual FileHandle) {
+func (self *CompareByMD5) init(actual fs.FileHandle) {
 	self.actual = actual
 
 	h, err := self.calculateMD5(actual.Path)
@@ -157,7 +161,7 @@ func (self *CompareByMD5) init(actual FileHandle) {
 	}
 	self.actualHash = h
 }
-func (self *CompareByMD5) HasChanged(other FileHandle) bool {
+func (self *CompareByMD5) HasChanged(other fs.FileHandle) bool {
 	h, err := self.calculateMD5(other.Path)
 	if err != nil {
 		log.Warnf("unable to hash the 'other' file: %s - err: %v", other.Path, err)

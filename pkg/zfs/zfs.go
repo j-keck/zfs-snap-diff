@@ -2,8 +2,8 @@ package zfs
 
 import (
 	"fmt"
-	"github.com/j-keck/zfs-snap-diff/pkg/file"
 	"github.com/j-keck/zfs-snap-diff/pkg/config"
+	"github.com/j-keck/zfs-snap-diff/pkg/fs"
 	"strconv"
 	"strings"
 )
@@ -47,9 +47,9 @@ func (self *ZFS) FindDatasetByName(name string) (Dataset, error) {
 func (self *ZFS) scanDatasets(name string) (Datasets, error) {
 	log.Debugf("search datasets under zfs: %s", name)
 
-	out, err := self.cmd.exec("list -Hp -o name,used,avail,refer,mountpoint -r -t filesystem", name)
+	stdout, stderr, err := self.cmd.Exec("list -Hp -o name,used,avail,refer,mountpoint -r -t filesystem", name)
 	if err != nil {
-		log.Errorf("unable to search datasets: %v", err)
+		log.Debugf("unable to search datasets: %s", stderr)
 		return nil, err
 	}
 
@@ -83,14 +83,14 @@ func (self *ZFS) scanDatasets(name string) (Datasets, error) {
 	// iterate over every line from the 'zfs list ...' output.
 	// each line describes a 'Dataset'.
 	var datasets Datasets
-	for _, line := range strings.Split(out, "\n") {
+	for _, line := range strings.Split(stdout, "\n") {
 		if name, used, avail, refer, mountPoint, ok := parse(line); ok {
 			if mountPoint != "legacy" {
 				log.Debugf("dataset found - name: '%s', mountpoint: '%s'", name, mountPoint)
-				if dirEntry, err := file.NewDirEntry(mountPoint); err != nil {
+				if dirHandle, err := fs.NewDirHandle(mountPoint); err != nil {
 					log.Warnf("unable to stat directory for dataset: %s - err: %s", name, err)
 				} else {
-					datasets = append(datasets, Dataset{name, used, avail, refer, *dirEntry, self.cmd})
+					datasets = append(datasets, Dataset{name, used, avail, refer, dirHandle, self.cmd})
 				}
 			} else {
 				// lookup real mount point
@@ -101,10 +101,10 @@ func (self *ZFS) scanDatasets(name string) (Datasets, error) {
 					log.Tracef("%s ist not mounted - ignore", name)
 				} else {
 					log.Debugf("mountpoint found for dataset: '%s', mountpoint: '%s'", name, legacyMountPoint)
-					if dirEntry, err := file.NewDirEntry(legacyMountPoint); err != nil {
+					if dirHandle, err := fs.NewDirHandle(legacyMountPoint); err != nil {
 						return nil, err
 					} else {
-						datasets = append(datasets, Dataset{name, used, avail, refer, *dirEntry, self.cmd})
+						datasets = append(datasets, Dataset{name, used, avail, refer, dirHandle, self.cmd})
 					}
 				}
 			}

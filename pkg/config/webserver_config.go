@@ -10,18 +10,18 @@ type WebserverConfig struct {
 	ListenPort            int
 	ListenOnAllInterfaces bool
 	// tls
-	UseTLS                bool
-	CertFile              string
-	KeyFile               string
+	UseTLS   bool
+	CertFile string
+	KeyFile  string
 	// webapp
-	WebappDir             string
+	WebappDir string
 }
 
 func (self *WebserverConfig) ListenAddress() string {
-	if(self.ListenOnAllInterfaces) {
-		if(self.ListenIp != "127.0.0.1") {
+	if self.ListenOnAllInterfaces {
+		if self.ListenIp != "127.0.0.1" {
 			log.Warnf("ignore 'ListenIp' value: '%s' because of 'ListenOnAllInterfaces' was set",
-			self.ListenIp)
+				self.ListenIp)
 		}
 		return fmt.Sprintf("0.0.0.0:%d", self.ListenPort)
 	}
@@ -30,10 +30,9 @@ func (self *WebserverConfig) ListenAddress() string {
 
 func NewDefaultWebserverConfig() WebserverConfig {
 	return WebserverConfig{
-		ListenIp:   "127.0.0.1",
-		ListenPort: 12345,
+		ListenIp:              "127.0.0.1",
+		ListenPort:            12345,
 		ListenOnAllInterfaces: false,
-		UseTLS: false,
+		UseTLS:                false,
 	}
 }
-

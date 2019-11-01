@@ -1,4 +1,4 @@
-<!-- restore file confirmation dialog --> 
+<!-- restore file confirmation dialog -->
 <zsd-modal show="showRestoreFileConfirmation">
   <div class="panel panel-heading">
     <span class="alert alert-warning" role="alert">
@@ -9,7 +9,7 @@
     Replace the actual file under <br/>
     {{pathInActual}} <br/>
     with an <strong>old</strong> version from the snapshot<br/>
-    {{curSnap.Name}}?</div>
+    {{curSnap.name}}?</div>
   <button type="button" class="btn btn-default" ng-click="hideRestoreFileConfirmation()"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
   <button type="button" class="btn btn-default btn-success" ng-click="restoreFileAcked()"><span class="glyphicon glyphicon-ok"></span> OK</button>
 </zsd-modal>
@@ -17,7 +17,7 @@
 
 
 <div class="container">
-  
+
   <!-- action buttons -->
   <div class="btn-group">
     <button type="button"
@@ -35,7 +35,7 @@
             ng-click="compareFile()"
             ng-disabled="! fileIsComparable">
       <span class="glyphicon glyphicon-random"></span> Diff
-    </button>  
+    </button>
     <button type="button"
             class="btn btn-primary"
             id="downloadFile"
@@ -50,10 +50,10 @@
     </button>
   </div>
 
-  
-  <!-- text file content -->  
+
+  <!-- text file content -->
   <div class="panel panel-default center-block" ng-if="textFileContent">
-    <div class="panel-heading">content of: <strong>{{fileName}}</strong> from snapshot: <strong>{{curSnap.Name}}</strong></div>
+    <div class="panel-heading">content of: <strong>{{fileName}}</strong> from snapshot: <strong>{{curSnap.name}}</strong></div>
     <div class="pandel-body"><pre><code ng-bind-html="textFileContent"></code></pre></div>
   </div>
 
@@ -61,7 +61,7 @@
   <!-- embedded binary content -->
   <!-- FIXME: remove / fix styles (grml frontend is not my world!) -->
   <div class="container panel panel-default center-block" ng-if="binaryFileContent">
-    <div class="panel-heading">{{curSnap.Name}}</div>
+    <div class="panel-heading">{{curSnap.name}}</div>
     <div class="pandel-body" style="width: 90%; height: 100%">
       <embed zsd-embed-src="{{binaryFileContent}}"
              ng-src="{{binaryFileContent}}"

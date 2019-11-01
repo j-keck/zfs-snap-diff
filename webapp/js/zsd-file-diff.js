@@ -10,10 +10,10 @@ angular.module('zsdFileDiff', ['zsdServices']).
       },
       templateUrl: 'template-file-diff.html',
       link: function(scope, element, attrs){
-        // 
+        //
         // scope actions
-        // 
-        
+        //
+
         scope.showRevertChangeConfirmation = function(idx){
           scope.revertChangeConfirmation = idx;
         };
@@ -24,7 +24,7 @@ angular.module('zsdFileDiff', ['zsdServices']).
         scope.downloadPatch = function(idx){
           var patch = unescape(scope.diffResult.patches[idx]);
           var patchName = PathUtils.extractFileName(scope.pathInActual) + ".patch";
-          
+
           var link = $window.document.createElement('a');
           link.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(patch));
           link.setAttribute('download', patchName);
@@ -33,9 +33,9 @@ angular.module('zsdFileDiff', ['zsdServices']).
 
         scope.revertChange = function(idx){
           delete scope.revertChangeConfirmation;
-          
+
           Backend.revertChange(scope.path, scope.diffResult.deltas[idx]).then(function(res){
-            Backend.diffFile(scope.path, scope.curSnap.Name).then(function(res){
+            Backend.diffFile(scope.path, scope.curSnap.name).then(function(res){
               scope.diffResult = res;
             })
           })
@@ -49,16 +49,16 @@ angular.module('zsdFileDiff', ['zsdServices']).
           }
         };
 
-        
+
 
 
         //
-        // initializations      
+        // initializations
         //
         scope.$watch('curSnap', function(){
           delete scope.revertChangeConfirmation;
         });
-        
+
       }
     }
   }]).
@@ -73,7 +73,7 @@ directive('zsdSideBySideDiffRows', ['$compile', function($compile){
     compile: function(element, attr, linker){
       return function($scope, $element, $attr) {
         var childScopes = [];
-        
+
         var parent = $element.parent();
         var header = parent.children();
         $scope.$watchCollection('blocks', function(blocks){
@@ -95,7 +95,7 @@ directive('zsdSideBySideDiffRows', ['$compile', function($compile){
             $scope.$parent.revertChange(idx);
           }
 
-          
+
           // add new
           for(i in blocks){
             // create a new scope

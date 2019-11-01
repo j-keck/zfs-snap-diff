@@ -4,7 +4,7 @@
       <h3 class="panel-title">
         <a href="" ng-click="toggleHideSnapshots()" style="text-decoration: none;">
           <span ng-show="hideSnapshots" class="glyphicon glyphicon-chevron-down"></span>
-          <span ng-hide="hideSnapshots" class="glyphicon glyphicon-chevron-up"></span>                  
+          <span ng-hide="hideSnapshots" class="glyphicon glyphicon-chevron-up"></span>
           Snapshots <small>for {{title}}</small>
         </a>
         <div class="btn-group pull-right">
@@ -18,7 +18,7 @@
         <div class="clearfix"></div>
       </h3>
     </div> <!-- end panel-heading -->
-    
+
     <div class="panel-body animate-show" ng-hide="hideSnapshots">
       <table class="table">
         <tr>
@@ -29,11 +29,11 @@
           <td colspan="2">No snapshots found</td>
         </tr>
         <tr ng-repeat="snap in snapshots" ng-click="snapshotSelected(snap)" zsd-scroll-to-top>
-          <td>{{snap.Name}}</td>
-          <td>{{snap.Creation}}</td>
+          <td>{{snap.name}}</td>
+          <td>{{snap.creation}}</td>
         </tr>
       </table>
     </div>
   </div>
-  
+
 </div>

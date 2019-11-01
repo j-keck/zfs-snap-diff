@@ -6,23 +6,26 @@ import (
 	"strings"
 )
 
+type Stdout = string
+type Stderr = string
+
 type ZFSCmd interface {
-	exec(string, ...string) (string, error)
+	Exec(string, ...string) (Stdout, Stderr, error)
 }
 
 func NewZFSCmd(useSudo bool) ZFSCmd {
 	return &zfsCmdImpl{useSudo}
 }
 
-func NewZFSCmdMock(out string, err error) ZFSCmd {
-	return &zfsCmdMock{out, err}
+func NewZFSCmdMock(stdout Stdout, stderr Stderr, err error) ZFSCmd {
+	return &zfsCmdMock{stdout, stderr, err}
 }
 
 type zfsCmdImpl struct {
 	useSudo bool
 }
 
-func (self *zfsCmdImpl) exec(first string, rest ...string) (string, error) {
+func (self *zfsCmdImpl) Exec(first string, rest ...string) (Stdout, Stderr, error) {
 	// build args
 	args := []string{"zfs"}
 	args = append(args, strings.Split(first, " ")...)
@@ -41,24 +44,27 @@ func (self *zfsCmdImpl) exec(first string, rest ...string) (string, error) {
 	var stderrBuf bytes.Buffer
 	cmd.Stderr = &stderrBuf
 
-	if cmdErr := cmd.Run(); cmdErr != nil {
-		log.Errorf("executing zfs cmd: %s: %s", cmdErr.Error(), stderrBuf.String())
-		return stderrBuf.String(), cmdErr
+	if err := cmd.Run(); err != nil {
+		stderr := strings.TrimRight(stderrBuf.String(), "\n")
+		log.Debugf("executing zfs cmd: %v: %s", err, stderr)
+		return "", stderr, err
 	}
 
-	return strings.TrimRight(stdoutBuf.String(), "\n"), nil
+	stdout := strings.TrimRight(stdoutBuf.String(), "\n")
+	return stdout, "", nil
 }
 
 type zfsCmdMock struct {
-	out string
-	err error
+	stdout Stderr
+	stderr Stderr
+	err    error
 }
 
-func (self *zfsCmdMock) exec(first string, rest ...string) (string, error) {
+func (self *zfsCmdMock) Exec(first string, rest ...string) (Stdout, Stderr, error) {
 	log.Tracef("would execute: %s %s", first, strings.Join(rest, " "))
-	log.Tracef("  return - out: '%s', err: '%v'", self.out, self.err)
+	log.Tracef("  return - stdout: '%s', stderr: '%s', err: '%v'", self.stdout, self.stderr, self.err)
 	if self.err != nil {
-		return "", self.err
+		return self.stdout, self.stderr, self.err
 	}
-	return self.out, nil
+	return self.stdout, self.stderr, self.err
 }

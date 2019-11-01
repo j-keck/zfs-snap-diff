@@ -1,8 +1,8 @@
 angular.module('zsdControllers', ['zsdServices', 'zsdUtils']).
-  
+
 controller('MainCtrl', ['$location', '$rootScope', '$timeout', 'Config', function($location, $rootScope, $timeout, Config){
   var self = this;
-  
+
   Config.promise.then(function(){
     self.config = Config.config();
   });
@@ -14,7 +14,7 @@ controller('MainCtrl', ['$location', '$rootScope', '$timeout', 'Config', functio
       var delay = 500;
       self.timeoutHndl = $timeout(function(){
         self.loading = true;
-      }, delay);      
+      }, delay);
     }
 
     // no more http request pending
@@ -24,8 +24,8 @@ controller('MainCtrl', ['$location', '$rootScope', '$timeout', 'Config', functio
       self.loading = false;
     }
   });
-  
-  
+
+
   self.activeClassIfAt = function(path){
     return {active: $location.path() === path};
   };
@@ -40,9 +40,9 @@ controller('BrowseActualCtrl', ['Backend', 'PathUtils', 'Config', 'Session', fun
 
   self.datasetSelected = function(dataset){
     delete self.curSnap;
-    delete self.curPath;    
+    delete self.curPath;
     delete self.snapshots;
-    
+
     self.curDataset = dataset;
     Session.set('curDataset', dataset);
   }
@@ -53,7 +53,7 @@ controller('BrowseActualCtrl', ['Backend', 'PathUtils', 'Config', 'Session', fun
 
     var path = PathUtils.entriesToPath(entries);
     self.curPath = path;
-    self.curFileName = PathUtils.extractFileName(path);    
+    self.curFileName = PathUtils.extractFileName(path);
 
 
     Backend.snapshotsForFile(
@@ -62,27 +62,27 @@ controller('BrowseActualCtrl', ['Backend', 'PathUtils', 'Config', 'Session', fun
       Config.get('compareFileMethod')
     ).then(function(snapshots){
       self.snapshots = snapshots;
-    });   
+    });
   }
 
-  
+
   self.dirSelected = function(entries){
     delete self.curSnap;
-    delete self.curPath;    
+    delete self.curPath;
     delete self.snapshots;
   }
 
-  
+
   self.snapshotSelected = function(snap){
     self.curSnap = snap;
   };
 
 
-  // start on 'curDataset' if it's defined  
+  // start on 'curDataset' if it's defined
   if(Session.has('curDataset')){
     self.datasetSelected(Session.get('curDataset'))
   }
-  
+
 }]).
 
 
@@ -94,11 +94,11 @@ controller('BrowseSnapshotsCtrl', ['Backend', 'PathUtils', 'Session', function(B
   self.datasetSelected = function(dataset){
     self.curDataset = dataset;
     Session.set('curDataset', dataset);
-    
+
     delete self.curSnap;
     delete self.curPath;
-    
-    Backend.snapshotsForDataset(dataset.Name).then(function(snapshots){
+
+    Backend.snapshotsForDataset(dataset.name).then(function(snapshots){
       self.snapshots = snapshots;
     });
   }
@@ -107,14 +107,14 @@ controller('BrowseSnapshotsCtrl', ['Backend', 'PathUtils', 'Session', function(B
   self.snapshotSelected = function(snap){
     if(typeof self.curSnap === 'undefined'){
       // first time
-      self.startEntries = [{Type: 'DIR', Path: snap.Path}];
+      self.startEntries = [{kind: 'DIR', path: snap.path}];
     }else{
       // use last path - update only root element
-      self.startEntries = PathUtils.replaceRoot(self.entries, {Type: 'DIR', Path: snap.Path});
+      self.startEntries = PathUtils.replaceRoot(self.entries, {kind: 'DIR', path: snap.path});
     }
     self.curSnap = snap;
   };
-  
+
 
   self.fileSelected = function(entries){
     self.entries = entries;
@@ -127,10 +127,10 @@ controller('BrowseSnapshotsCtrl', ['Backend', 'PathUtils', 'Session', function(B
     delete self.curPath;
   };
 
-  // start on 'curDataset' if it's defined  
+  // start on 'curDataset' if it's defined
   if(Session.has('curDataset')){
-    self.datasetSelected(Session.get('curDataset'))    
-  }  
+    self.datasetSelected(Session.get('curDataset'))
+  }
 }]).
 
 
@@ -138,32 +138,32 @@ controller('BrowseSnapshotsCtrl', ['Backend', 'PathUtils', 'Session', function(B
 
 controller('BrowseSnapshotDiffCtrl', ['Backend', 'Session', function(Backend, Session){
   var self = this;
-   
+
   self.datasetSelected = function(dataset){
     self.curDataset = dataset;
     Session.set('curDataset', dataset);
-    
+
     delete self.snapshotDiff;
-    Backend.snapshotsForDataset(dataset.Name).then(function(snapshots){
+    Backend.snapshotsForDataset(dataset.name).then(function(snapshots){
       self.snapshots = snapshots;
     });
   }
-  
 
-  
+
+
   self.snapshotSelected = function(snap){
     self.curSnap = snap;
     delete self.snapshotDiff;
-    Backend.snapshotDiff(self.curDataset.Name, snap.Name).then(function(diff){
+    Backend.snapshotDiff(self.curDataset.name, snap.name).then(function(diff){
       self.snapshotDiff = diff;
     });
   };
 
   // start on 'curDataset' if it's defined
   if(Session.has('curDataset')){
-    self.datasetSelected(Session.get('curDataset'))    
+    self.datasetSelected(Session.get('curDataset'))
   }
-  
+
 }]).
 
 controller('BrowseMessagesCtrl', ['Notifications', function(Notifications){

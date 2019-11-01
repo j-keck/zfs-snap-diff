@@ -16,17 +16,17 @@ angular.module('zsdDirBrowser', ['zsdServices']).
 
         scope.filterHiddenEntries = function(entry){
           if(! scope.showHiddenEntries){
-            if(entry.Name) return entry.Name.charAt(0) != '.';
+            if(entry.name) return entry.name.charAt(0) != '.';
           }
           return true;
         };
 
         scope.isDirectory = function(entry){
-          return entry.Type === "DIR"
+          return entry.kind === "DIR"
         };
 
         scope.isFile = function(entry){
-          return entry.Type === "FILE"
+          return entry.kind === "FILE"
         };
 
         // returns 'true' if the given entry is not a regular file / directory
@@ -36,7 +36,7 @@ angular.module('zsdDirBrowser', ['zsdServices']).
 
         // returns the bootstrap icon class for the given entry
         scope.iconClassForEntry = function(entry) {
-          switch(entry.Type) {
+          switch(entry.kind) {
           case "FILE": return "glyphicon-file";
           case "DIR": return "glyphicon-folder-open";
           case "LINK": return "glyphicon-link";
@@ -62,7 +62,7 @@ angular.module('zsdDirBrowser', ['zsdServices']).
             var [folders, files] = [Array(), Array()];
             var length = scope.dirListing.length;
             for(var i = 0; i < length; i++){
-              if(scope.dirListing[i].Type === "DIR"){
+              if(scope.dirListing[i].kind === "DIR"){
                 folders.push(scope.dirListing[i]);
               }else{
                 files.push(scope.dirListing[i]);
@@ -70,14 +70,14 @@ angular.module('zsdDirBrowser', ['zsdServices']).
             }
 
             // sort the folders and files
-            folders = orderBy(folders, "Path", scope.orderReversed);
-            files = orderBy(files, "Path", scope.orderReversed);
+            folders = orderBy(folders, "path", scope.orderReversed);
+            files = orderBy(files, "path", scope.orderReversed);
 
             // concat the folders and files
             scope.dirListing = folders.concat(files);
 
           }else{
-            var mapping = {"size": "Size", "mtime": "ModTime"};
+            var mapping = {"size": "size", "mtime": "modTime"};
             scope.dirListing = orderBy(scope.dirListing, mapping[propName], scope.orderReversed);
           }
         };
@@ -127,7 +127,7 @@ angular.module('zsdDirBrowser', ['zsdServices']).
           if(! angular.isDefined(start)) return;
 
           scope.entries = [];
-          scope.open({Type: 'DIR', Path: scope.start});
+          scope.open({kind: 'DIR', path: scope.start});
         });
 
         scope.$watch(function(){ return scope.startEntries}, function(startEntries){

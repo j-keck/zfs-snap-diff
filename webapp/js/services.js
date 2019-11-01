@@ -19,8 +19,8 @@ factory('HTTPActivityInterceptor', ['$q', '$rootScope', '$timeout', function($q,
     'responseError': function(rejection){
       activityCounter--;
       $rootScope.$broadcast('zsd:http-activity', activityCounter);
-      
-      return $q.reject(rejection);      
+
+      return $q.reject(rejection);
     }
   };
 }]).
@@ -33,7 +33,7 @@ factory('HTTPErrorInterceptor', ['$q', '$rootScope', function($q, $rootScope){
         $rootScope.$broadcast('zsd:error', 'Server unavailable');
         return $q.reject(rejection);
       }
-      
+
 
       if(rejection.config.responseType === 'blob'){
         // convert message to string if result type is a blob and broadcast the error
@@ -46,7 +46,7 @@ factory('HTTPErrorInterceptor', ['$q', '$rootScope', function($q, $rootScope){
         // already text - broadcast the error
         $rootScope.$broadcast('zsd:error', rejection.data);
       }
-      return $q.reject(rejection);                      
+      return $q.reject(rejection);
     }
   };
 }]).
@@ -69,7 +69,7 @@ factory('Config', ['$http', function($http){
     }
   };
 }]).
-  
+
 factory('Backend', ['$http', 'Config', function($http, Config){
   return {
     snapshotsForFile: function(path, scanSnapLimit, compareFileMethod){
@@ -77,7 +77,7 @@ factory('Backend', ['$http', 'Config', function($http, Config){
 
       if(angular.isDefined(scanSnapLimit)) params['scan-snap-limit'] = scanSnapLimit;
       if(angular.isDefined(compareFileMethod)) params['compare-file-method'] = compareFileMethod;
-      
+
       return $http.get('snapshots-for-file', {'params': params}).then(function(res){
         return res.data
       });
@@ -87,7 +87,7 @@ factory('Backend', ['$http', 'Config', function($http, Config){
         return res.data;
       });
     },
-    listDir: function(path){
+      listDir: function(path){
       return $http.get('list-dir', {'params': {'path': path}}).then(function(res){
         return res.data
       });
@@ -105,7 +105,7 @@ factory('Backend', ['$http', 'Config', function($http, Config){
     },
     readFile: function(path, responseType){
       var params = {path: path};
-    
+
       return $http.get('read-file', {'params': params, 'responseType': responseType}).then(function(res){
         return res.data;
       });
@@ -140,7 +140,7 @@ factory('Backend', ['$http', 'Config', function($http, Config){
 factory('Notifications', ['$rootScope', function($rootScope){
   var messages = [];
   var listeners = [];
-  
+
   $rootScope.$on('zsd:error', function(event, msg){
     addMessage('error', msg);
   });
@@ -180,9 +180,9 @@ factory('Notifications', ['$rootScope', function($rootScope){
       return messages;
     }
 
-    
+
   }
-  
+
 }]).
 
 // session store

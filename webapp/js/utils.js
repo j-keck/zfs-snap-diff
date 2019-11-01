@@ -8,16 +8,16 @@ factory('FileUtils', [function(){
   return {
     isViewable: function(fileInfo){
       return viewableMimeTypePrefixes.filter(function(prefix){
-        return fileInfo.MimeType.indexOf(prefix) >= 0;
+        return fileInfo.mimeType.indexOf(prefix) >= 0;
       }).length > 0
     },
     isComparable: function(fileInfo){
       return comparableMimeTypePrefixes.filter(function(prefix){
-        return fileInfo.MimeType.indexOf(prefix) >= 0;
+        return fileInfo.mimeType.indexOf(prefix) >= 0;
       }).length > 0
     },
     isText: function(fileInfo){
-      return fileInfo.MimeType.indexOf("text") >= 0;
+      return fileInfo.mimeType.indexOf("text") >= 0;
     }
   }
 }]).
@@ -34,11 +34,11 @@ factory('PathUtils', ['Config', function(Config){
 
     // sort the datasets - longest path at first
     datasets = datasets.sort(function(a, b){
-      return b.Path.length - a.Path.length
+      return b.mountPoint.path.length - a.mountPoint.path.length
     });
 
     for(var i in datasets){
-      if(path.indexOf(datasets[i].Path+"/") >= 0){
+      if(path.indexOf(datasets[i].mountPoint.path+"/") >= 0){
         return datasets[i]
       }
     }
@@ -46,13 +46,13 @@ factory('PathUtils', ['Config', function(Config){
   return {
     convertToSnapPath: function(path, snapName){
       var dataset = findDatasetForFile(path);
-      var relativePath = path.substring(dataset.Path.length)
-      return dataset.Path + "/.zfs/snapshot/" + snapName + relativePath;
+      var relativePath = path.substring(dataset.mountPoint.path.length)
+      return dataset.mountPoint.path + "/.zfs/snapshot/" + snapName + relativePath;
     },
 
     convertToActualPath: function(path){
       var dataset = findDatasetForFile(path)
-      var mountPoint = dataset.Path;
+      var mountPoint = dataset.mountPoint.path;
       var snapName = this.extractSnapName(path);
 
       var prefix = mountPoint + "/.zfs/snapshot/" + snapName;
@@ -63,7 +63,7 @@ factory('PathUtils', ['Config', function(Config){
 
     extractSnapName: function(path){
       var dataset = findDatasetForFile(path)
-      var p = path.substring(dataset.Path.length) // remove mount point
+      var p = path.substring(dataset.mountPoint.path.length) // remove mount point
       p = p.substring('/.zfs/snapshot/'.length) // remove /.zfs/snapshot/
       var snapName = p.substring(0, p.indexOf('/')); // extract snapshot-name
       return snapName;
@@ -72,7 +72,7 @@ factory('PathUtils', ['Config', function(Config){
 
       entriesToPath: function(entries){
           //return entries.map(function(e){ return e.Name}).join('/');
-          return entries[entries.length - 1].Path;
+          return entries[entries.length - 1].path;
     },
 
 

@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/j-keck/plog"
 	"github.com/j-keck/zfs-snap-diff/pkg/oldweb"
 	"github.com/j-keck/zfs-snap-diff/pkg/zfs"
-	"github.com/j-keck/plog"
 	"os"
 )
 
@@ -39,7 +39,6 @@ func main() {
 		fmt.Printf("zfs-snap-diff: %s\n", VERSION)
 		return
 	}
-
 
 	// last argument is the zfs name
 	zfsName := flag.Arg(0)
@@ -95,7 +94,6 @@ func main() {
 			log.Warn("no 'scan-snap-limit' was given and compare all files only with md5 - expect VERY HIGH cpu usage / VERY LONG runtime!!!!")
 		}
 	}
-
 
 	// frontend-config
 	frontendCfg := oldweb.FrontendConfig{
