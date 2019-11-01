@@ -3,6 +3,7 @@ package zfs
 import (
 	"fmt"
 	"github.com/j-keck/zfs-snap-diff/pkg/file"
+	"github.com/j-keck/zfs-snap-diff/pkg/config"
 	"strconv"
 	"strings"
 )
@@ -14,9 +15,9 @@ type ZFS struct {
 }
 
 // NewZFS returns a handler for a zfs filesystem
-func NewZFS(name string, useSudo bool) (ZFS, error) {
+func NewZFS(name string, cfg config.Config) (ZFS, error) {
 	self := ZFS{}
-	self.cmd = NewZFSCmd(useSudo)
+	self.cmd = NewZFSCmd(cfg.ZFS.UseSudo)
 
 	datasets, err := self.scanDatasets(name)
 	if err != nil {

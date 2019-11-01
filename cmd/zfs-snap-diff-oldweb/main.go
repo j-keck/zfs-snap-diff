@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/j-keck/plog"
 	"github.com/j-keck/zfs-snap-diff/pkg/oldweb"
 	"github.com/j-keck/zfs-snap-diff/pkg/zfs"
+	"github.com/j-keck/plog"
 	"os"
 )
 
@@ -13,8 +13,6 @@ import (
 var VERSION string
 
 func main() {
-	log := plog.GlobalLogger().Add(plog.NewDefaultConsoleLogger())
-
 	// formate help
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, " Usage\n=======\n%s [OPT_ARGS] <ZFS_NAME>\n", os.Args[0])
@@ -22,37 +20,26 @@ func main() {
 		flag.PrintDefaults()
 	}
 
-	// define flags / parse flags
-	addrFlag := flag.String("l", "127.0.0.1", "web server listen address")
-	portFlag := flag.Int("p", 12345, "web server port")
-	useTLSFlag := flag.Bool("tls", false, "use TLS - NOTE: -cert <CERT_FILE> -key <KEY_FILE> are mandatory")
-	certFileFlag := flag.String("cert", "", "certificate file for TLS")
-	keyFileFlag := flag.String("key", "", "private key file for TLS")
-	listenOnAllInterfacesFlag := flag.Bool("a", false, "listen on all interfaces")
-	printVersionFlag := flag.Bool("V", false, "print version and exit")
-	useSudoFlag := flag.Bool("use-sudo", false, "use sudo when executing os commands")
-
-	// default log level
-	logLevel := plog.Info
-	plog.FlagDebugVar(&logLevel, "v", "verbose logging")
-	plog.FlagTraceVar(&logLevel, "vv", "trace logging")
-
-	// frontend
+	// frontend config
 	diffContextSizeFlag := flag.Int("diff-context-size", 5, "context size in diff")
-	defaultFileActionFlag := flag.String("default-file-action", "view", "default file action in frontend when a file is selected: 'off', 'view', 'diff', 'download', 'restore'")
+	defaultFileActionFlag := flag.String("default-file-action", "view",
+		"default file action in frontend when a file is selected: 'off', 'view', 'diff', 'download', 'restore'")
 
-	scanSnapLimitFlag := flag.Int("scan-snap-limit", -1, "scan snapshots where file was modified limit (negative values: scan all snapshots)")
-	compareFileMethodFlag := flag.String("compare-file-method", "auto", "compare method when searching snapshots for other file versions: 'auto', 'size+modTime', 'size' or 'md5'")
+	scanSnapLimitFlag := flag.Int("scan-snap-limit", -1,
+		"scan snapshots where file was modified limit (negative values: scan all snapshots)")
+	compareFileMethodFlag := flag.String("compare-file-method", "auto",
+		"compare method when searching snapshots for other file versions: 'auto', 'size+modTime', 'size' or 'md5'")
 
-	flag.Parse()
+	// parse config
+	cliCfg, zsdCfg := parseFlags()
+	setupLogger(cliCfg)
+	log := plog.GlobalLogger()
 
-	if *printVersionFlag {
-		fmt.Printf("Version: %s\n", VERSION)
-		os.Exit(0)
+	if cliCfg.printVersion {
+		fmt.Printf("zfs-snap-diff: %s\n", VERSION)
+		return
 	}
 
-	log.SetLevel(logLevel)
-	log.Debugf("zfs-snap-diff version: %s", VERSION)
 
 	// last argument is the zfs name
 	zfsName := flag.Arg(0)
@@ -66,43 +53,38 @@ func main() {
 	}
 
 	// validate args for tls
-	if *useTLSFlag {
-		if len(*certFileFlag) == 0 || len(*keyFileFlag) == 0 {
+	if zsdCfg.Webserver.UseTLS {
+		if len(zsdCfg.Webserver.CertFile) == 0 || len(zsdCfg.Webserver.KeyFile) == 0 {
 			fmt.Println("ABORT: parameter -cert <CERT_FILE> -key <KEY_FILE> are mandatory")
 			os.Exit(1)
 		}
 
-		if _, err := os.Stat(*certFileFlag); os.IsNotExist(err) {
-			fmt.Printf("ABORT: cert file '%s' not found\n", *certFileFlag)
+		if _, err := os.Stat(zsdCfg.Webserver.CertFile); os.IsNotExist(err) {
+			fmt.Printf("ABORT: cert file '%s' not found\n", zsdCfg.Webserver.CertFile)
 			os.Exit(1)
 		}
 
-		if _, err := os.Stat(*keyFileFlag); os.IsNotExist(err) {
-			fmt.Printf("ABORT: key file '%s' not found\n", *keyFileFlag)
+		if _, err := os.Stat(zsdCfg.Webserver.KeyFile); os.IsNotExist(err) {
+			fmt.Printf("ABORT: key file '%s' not found\n", zsdCfg.Webserver.KeyFile)
 			os.Exit(1)
 		}
 	}
 
-	zfs, err := zfs.NewZFS(zfsName, *useSudoFlag)
+	zfs, err := zfs.NewZFS(zfsName, zsdCfg)
 	if err != nil {
 		log.Error(err.Error())
 		os.Exit(1)
 	}
 
-	// listen on the given address - or if flag '-a' is given, listen on all interfaces
-	var addr string
-	if *listenOnAllInterfacesFlag {
+	if zsdCfg.Webserver.ListenOnAllInterfaces {
 		fmt.Println("")
 		fmt.Println("!! ** WARNING **                !!")
 		fmt.Println("!! LISTEN ON ALL INTERFACES     !!")
 		fmt.Println("!! CURRENTLY NO AUTHENTICATION  !!")
-		if !*useTLSFlag {
+		if !zsdCfg.Webserver.UseTLS {
 			fmt.Println("\nHINT: USE -tls -cert <CERT_FILE> -key <KEY_FILE> to enable encryption!")
 		}
 		fmt.Println("")
-		addr = fmt.Sprintf("0.0.0.0:%d", *portFlag)
-	} else {
-		addr = fmt.Sprintf("%s:%d", *addrFlag, *portFlag)
 	}
 
 	// print warning if file-compare method md5 is used
@@ -114,13 +96,6 @@ func main() {
 		}
 	}
 
-	// webserver config
-	webServerCfg := oldweb.WebServerConfig{
-		addr,
-		*useTLSFlag,
-		*certFileFlag,
-		*keyFileFlag,
-	}
 
 	// frontend-config
 	frontendCfg := oldweb.FrontendConfig{
@@ -135,5 +110,5 @@ func main() {
 	}
 
 	// startup web server
-	oldweb.ListenAndServe(zfs, webServerCfg, frontendCfg)
+	oldweb.ListenAndServe(zfs, zsdCfg.Webserver, frontendCfg)
 }

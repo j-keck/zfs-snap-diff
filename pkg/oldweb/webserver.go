@@ -7,6 +7,7 @@ import (
 	"github.com/j-keck/zfs-snap-diff/pkg/diff"
 	"github.com/j-keck/zfs-snap-diff/pkg/file"
 	"github.com/j-keck/zfs-snap-diff/pkg/zfs"
+	"github.com/j-keck/zfs-snap-diff/pkg/config"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -14,12 +15,6 @@ import (
 	"strings"
 )
 
-type WebServerConfig struct {
-	Addr     string
-	UseTLS   bool
-	CertFile string
-	KeyFile  string
-}
 type FrontendConfig map[string]interface{}
 
 var log = plog.GlobalLogger()
@@ -34,8 +29,7 @@ var mimeTypes = map[string]string{
 var z zfs.ZFS
 
 // registers response handlers and starts the web server
-func ListenAndServe(_z zfs.ZFS, webServerCfg WebServerConfig, frontendCfg FrontendConfig) {
-	z = _z
+func ListenAndServe(z zfs.ZFS, cfg config.WebserverConfig, frontendCfg FrontendConfig) {
 	http.HandleFunc("/config", configHndl(frontendCfg))
 	http.HandleFunc("/snapshots-for-dataset", snapshotsForDatasetHndl)
 	http.HandleFunc("/snapshots-for-file", snapshotsForFileHndl)
@@ -53,13 +47,13 @@ func ListenAndServe(_z zfs.ZFS, webServerCfg WebServerConfig, frontendCfg Fronte
 		http.HandleFunc("/", serveStaticContentFromBinaryHndl)
 	}
 
-	log.Infof("start server and listen on: '%s'", webServerCfg.Addr)
-	if webServerCfg.UseTLS {
-		log.Infof("open 'https://%s' in your browser", webServerCfg.Addr)
-		log.Error(http.ListenAndServeTLS(webServerCfg.Addr, webServerCfg.CertFile, webServerCfg.KeyFile, nil))
+	log.Infof("start server and listen on: '%s'", cfg.ListenAddress())
+	if cfg.UseTLS {
+		log.Infof("open 'https://%s' in your browser", cfg.ListenAddress())
+		log.Error(http.ListenAndServeTLS(cfg.ListenAddress(), cfg.CertFile, cfg.KeyFile, nil))
 	} else {
-		log.Infof("open 'http://%s' in your browser", webServerCfg.Addr)
-		log.Error(http.ListenAndServe(webServerCfg.Addr, nil))
+		log.Infof("open 'http://%s' in your browser", cfg.ListenAddress())
+		log.Error(http.ListenAndServe(cfg.ListenAddress(), nil))
 	}
 }
 
