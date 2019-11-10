@@ -1,4 +1,3 @@
 /zfs-snap-diff
-build-output/
-emacs-24.3.core
-node_modules
+/webapp/.spago
+/webapp/.spago2nix

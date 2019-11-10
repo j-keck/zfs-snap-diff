@@ -7,7 +7,7 @@ import (
 // Snapshot - zfs snapshot
 type Snapshot struct {
 	Name     string    `json:"name"`
-	Creation time.Time `json:"creation"`
+	Created time.Time `json:"created"`
 	Path     string    `json:"path"`
 }
 

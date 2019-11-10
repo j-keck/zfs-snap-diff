@@ -73,7 +73,12 @@ func (dr *DiffResult) AsSideBySideHTML() []string {
 		}
 
 		addEqDelta := func(delta Delta) {
-			format := "<tr><td class='line-nr'>%d</td><td>%s</td><td class='line-nr'>%d</td><td>%s</td></tr>"
+			format := `<tr>
+                           <td class='diff-line-nr'>%d</td>
+                           <td>%s</td>
+                           <td class='diff-line-nr'>%d</td>
+                           <td>%s</td>
+                         </tr>`
 			for i, line := range splitText(cleanupText(delta.Text)) {
 				buf.WriteString(fmt.Sprintf(format, delta.LineNrFrom+i, line, delta.LineNrTarget+i, line))
 			}
@@ -103,14 +108,14 @@ func (dr *DiffResult) AsSideBySideHTML() []string {
 			for i := 0; i < linesLenMax; i++ {
 				buf.WriteString("<tr>")
 				if i < delLinesLen {
-					buf.WriteString(fmt.Sprintf("<td class='line-nr'>%d</td><td class='del'>%s</td>", delDelta.LineNrFrom+i, delLines[i]))
+					buf.WriteString(fmt.Sprintf("<td class='diff-line-nr'>%d</td><td class='diff-del'>%s</td>", delDelta.LineNrFrom+i, delLines[i]))
 				} else {
-					buf.WriteString("<td class='line-nr'></td><td></td>")
+					buf.WriteString("<td class='diff-line-nr'></td><td></td>")
 				}
 				if i < insLinesLen {
-					buf.WriteString(fmt.Sprintf("<td class='line-nr'>%d</td><td class='ins'>%s</td>", insDelta.LineNrTarget+i, insLines[i]))
+					buf.WriteString(fmt.Sprintf("<td class='diff-line-nr'>%d</td><td class='diff-ins'>%s</td>", insDelta.LineNrTarget+i, insLines[i]))
 				} else {
-					buf.WriteString("<td class='line-nr'></td><td></td>")
+					buf.WriteString("<td class='diff-line-nr'></td><td></td>")
 				}
 				buf.WriteString("</tr>")
 			}

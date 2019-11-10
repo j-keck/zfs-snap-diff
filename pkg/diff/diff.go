@@ -21,12 +21,12 @@ const (
 
 // Delta represents a patch chunk
 type Delta struct {
-	Type           DeltaType
-	LineNrFrom     int
-	LineNrTarget   int
-	StartPosFrom   int64
-	StartPosTarget int64
-	Text           string
+	Type           DeltaType `json:"kind"`
+	LineNrFrom     int       `json:"lineNrFrom"`
+	LineNrTarget   int       `json:"lineNrTarget"`
+	StartPosFrom   int64     `json:"startPosFrom"`
+	StartPosTarget int64     `json:"startPosTarget"`
+	Text           string    `json:"text"`
 }
 
 func (d *Delta) String() string {

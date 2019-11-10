@@ -1,10 +1,9 @@
-package comparator
+package scanner
 
 import (
 	"bytes"
 	"crypto/md5"
 	"fmt"
-	"github.com/j-keck/plog"
 	"github.com/j-keck/zfs-snap-diff/pkg/fs"
 	"io"
 	"io/ioutil"
@@ -13,7 +12,6 @@ import (
 	"time"
 )
 
-var log = plog.GlobalLogger()
 
 // Comparator compares ...
 type Comparator interface {

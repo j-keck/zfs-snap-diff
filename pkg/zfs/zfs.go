@@ -4,9 +4,14 @@ import (
 	"fmt"
 	"github.com/j-keck/zfs-snap-diff/pkg/config"
 	"github.com/j-keck/zfs-snap-diff/pkg/fs"
+	"github.com/j-keck/plog"
 	"strconv"
 	"strings"
+	"sort"
+	"path/filepath"
 )
+
+var log = plog.GlobalLogger()
 
 // ZFS represents a zfs filesystem
 type ZFS struct {
@@ -41,6 +46,21 @@ func (self *ZFS) FindDatasetByName(name string) (Dataset, error) {
 		}
 	}
 	return Dataset{}, fmt.Errorf("No dataset with name: '%s' found\n", name)
+}
+
+func (self *ZFS) FindDatasetForPath(path string) (Dataset, error) {
+	datasets := self.Datasets()
+    sort.Sort(SortByPathDesc(datasets))
+	for _, ds := range datasets {
+		// TODO: filepath.HasPrefix is buggy
+	    //  see: https://github.com/golang/go/issues/18358
+		if filepath.HasPrefix(path, ds.MountPoint.Path) {
+			log.Tracef("Dataset for path found - ds: %+v, for path: %s", ds, path)
+			return ds, nil
+		}
+	}
+
+	return Dataset{}, fmt.Errorf("No dataset for path: '%s' found\n", path)
 }
 
 // scanDatasets returns all datasets under a given pool name
@@ -114,4 +134,19 @@ func (self *ZFS) scanDatasets(name string) (Datasets, error) {
 	}
 	log.Debugf("%d datasets found", len(datasets))
 	return datasets, nil
+}
+
+
+type SortByPathDesc Datasets
+func (s SortByPathDesc) Len() int {
+	return len(s)
+}
+
+func (s SortByPathDesc) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+
+}
+
+func (s SortByPathDesc) Less(i, j int) bool {
+	return len(s[i].MountPoint.Path) > len(s[j].MountPoint.Path)
 }

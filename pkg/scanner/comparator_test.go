@@ -1,4 +1,4 @@
-package comparator
+package scanner
 
 import (
 	"github.com/j-keck/zfs-snap-diff/pkg/fs"
