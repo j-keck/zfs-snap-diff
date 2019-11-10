@@ -1,9 +1,0 @@
-<div class="notifications">
-  <div ng-repeat="message in messages">
-    <div class="container alert alert-{{message.type | mapErrorToDanger}}">
-      <span class="glyphicon glyphicon-remove" ng-click="removeMessage(message.id)"></span>
-        {{message.text}}
-    </div>
-  </div>
-</div>
-
