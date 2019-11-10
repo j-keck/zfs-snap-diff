@@ -2,12 +2,8 @@
 
 in this branch i rewrite the whole codebase.
 
-most of the backend rewrite is done. the ui is the old
-code. if the backend rewrite is done, i rewrite the ui.
-
-to run the new backend with the old frontend run:
-
-`go run ./cmd/zfs-snap-diff-oldweb <POOL>`
+to run the new buggy, unfinished code, checkout this branch and build it: `go build`
+and run it per `./zfs-snap-diff <POOL>`
 
 
 after the rewrite is done, i can add new features.

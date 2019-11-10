@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="theme-color" content="#000000">
+
+    <title>ZFS-Snap-Diff</title>
+
+    <!-- bootstrap -->
+    <link rel="stylesheet" href="assets/bootstrap.min.css">
+
+    <!-- highlight.js -->
+    <script src="assets/highlight.js/highlight.pack.js"></script>
+    <link rel="stylesheet" href="assets/highlight.js/styles/default.css">
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    <style>
+
+      .diff-line-nr {
+          padding-right: 10px;
+          text-align: right;
+          width: 40px;
+          background-color: #f6f6f6;
+      }
+
+      .diff-ins {
+          background-color: #e6ffe6;
+      }
+
+      .diff-del {
+          background-color: #ffb6c7;
+      }
+
+    </style>
+  </head>
+
+  <body>
+    <div id="webapp" class="container"></div>
+  </body>
+
+  <script src="webapp.js"></script>
+</html>

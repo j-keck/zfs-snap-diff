@@ -1,0 +1,10 @@
+{
+  "devDependencies": {
+    "cssnano": "^4.1.10"
+  },
+  "dependencies": {
+    "octicons": "^8.5.0",
+    "react": "^16.11.0",
+    "react-dom": "^16.11.0"
+  }
+}
