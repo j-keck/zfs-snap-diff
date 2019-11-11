@@ -1,6 +1,7 @@
 package fs
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -20,6 +21,10 @@ type FSHandle struct {
 }
 
 func NewFSHandle(path string) (FSHandle, error) {
+	if len(path) == 0 {
+		return FSHandle{}, errors.New("the given path was empty")
+	}
+
 	fileInfo, err := os.Stat(path)
 	if err != nil {
 		return FSHandle{}, err

@@ -1,7 +1,6 @@
 module ZSD.Components.FileAction.ViewDiff where
 
 import Prelude
-
 import React.Basic (Component, JSX, createComponent, fragment, make)
 import React.Basic.DOM as R
 import ZSD.Model.Diff (Diff)
@@ -19,7 +18,7 @@ viewDiff = make component { initialState, render }
 
     initialState = unit
 
-    render self = fragment $ flip map self.props.diff.sideBySide \html ->
+    render self = fragment $ flip map self.props.diff.sideBySideHTMLFragment \html ->
       R.table
       { className: "table table-borderless table-sm"
       , dangerouslySetInnerHTML: { __html: html }

@@ -21,3 +21,14 @@ import (
 )
 
 var log = plog.GlobalLogger()
+
+
+// shortcut to open and read a file
+func ReadTextFile(path string) (string, error) {
+	fh, err := NewFileHandle(path)
+	if err != nil {
+		return "", err
+	}
+
+	return fh.ReadString()
+}

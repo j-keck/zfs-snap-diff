@@ -32,6 +32,9 @@ type FileVersion struct {
 }
 
 func (self *Scanner) FindFileVersions(ds zfs.Dataset) ([]FileVersion, error) {
+	log.Debugf("search for file versions for file: %s, in the time-range: %s",
+		self.ActualFh.Path, self.TimeRange.String())
+
 	snaps, err := ds.ScanSnapshots()
 	if err != nil {
 		return nil, err

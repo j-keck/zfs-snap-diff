@@ -70,15 +70,15 @@ update self = case _ of
     res <- Diff.fetch self.props.file self.props.version
     liftEffect $ do
       logShow res
-      self.setState _ { view = viewDiff { diff: either (const mempty) identity res } }
+      self.setState _ { view = either mempty (\diff -> viewDiff { diff }) res }
 
 
   Download -> do
     let path = (FileVersion.unwrapFile self.props.version).path
-        name = FileVersion.uniqueName self.props.version
+        asName = FileVersion.uniqueName self.props.version
 
     location <- window >>= location
-    assign ("/api/download?path=" <> path <> "&name=" <> name) location
+    assign ("/api/download?path=" <> path <> "&as-name=" <> asName) location
 
   Restore -> throw "restore function missing"
 
@@ -101,7 +101,8 @@ fileAction = logLifecycles <<< make component { initialState, render, didMount, 
 
     render self =
       R.div
-      { children:
+      { className: "mt-3"
+      , children:
         [ R.div
           { className: "btn-group"
           , children:
@@ -120,9 +121,9 @@ fileAction = logLifecycles <<< make component { initialState, render, didMount, 
               { className: "card-header"
               , children: case self.props.version of
                              ActualVersion { name } -> [ R.text "Actual version from file: "
-                                                      , R.text name
+                                                      , R.b_ [ R.text name ]
                                                       ]
-                             BackupVersion { file, snapshot } -> [ R.text file.name
+                             BackupVersion { file, snapshot } -> [ R.b_ [ R.text file.name ]
                                                                 , R.text " from snapshot: "
                                                                 , R.text snapshot.name
                                                                 ]

@@ -1,40 +1,52 @@
 package scanner
 
 import (
+	"fmt"
 	"time"
-	"errors"
 )
 
 type TimeRange struct {
 	From time.Time `json:"from"`
-	Till time.Time `json:"till"`
+	To   time.Time `json:"to"`
 }
 
 func TimeRangeFromLastNDays(nDays int) TimeRange {
-	till := time.Now()
-	from := time.Unix(till.Unix() - int64(nDays * 24 * 60 * 60), 0)
-	return TimeRange { from, till }
+	self := TimeRange{To: time.Now()}
+	self.AdjustFromToNDaysBeforeTo(nDays)
+	return self
 }
 
-func ParseTimeRange(layout string, fromStr string, tillStr string) (TimeRange, error) {
+func ParseTimeRange(layout string, fromStr string, toStr string) (TimeRange, error) {
 	from, err := time.Parse(layout, fromStr)
 	if err != nil {
 		return TimeRange{}, err
 	}
 
-	till, err := time.Parse(layout, tillStr)
+	to, err := time.Parse(layout, toStr)
 	if err != nil {
 		return TimeRange{}, err
 	}
 
-	if from.After(till) {
-		return TimeRange{}, errors.New("invalid TimeRange - from is after till")
+	if from.After(to) {
+		return TimeRange{},
+			fmt.Errorf("invalid TimeRange - from (%s) is after to (%s)", from, to)
 	}
 
-	return TimeRange { from, till }, nil
+	return TimeRange{from, to}, nil
 }
 
-
 func (self *TimeRange) Contains(other time.Time) bool {
-	return other.After(self.From) && other.Before(self.Till)
+	return other.After(self.From) && other.Before(self.To)
+}
+
+func (self *TimeRange) AdjustFromToNDaysBeforeTo(nDays int) {
+	self.From = time.Unix(self.To.Unix()-int64(nDays*24*60*60), 0)
+}
+
+func (self *TimeRange) FromIsAfterTo() bool {
+	return self.From.After(self.To)
+}
+
+func (self *TimeRange) String() string {
+	return fmt.Sprintf("between %s and %s", self.From, self.To)
 }

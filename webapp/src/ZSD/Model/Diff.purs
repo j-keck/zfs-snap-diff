@@ -1,13 +1,16 @@
 module ZSD.Model.Diff where
 
 import Prelude
+
 import Data.Either (Either(..))
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
+import Data.Newtype (class Newtype)
 import Effect.Aff (Aff)
 import Foreign (ForeignError(..))
 import Foreign as Foreign
 import Simple.JSON (class ReadForeign)
+import Simple.JSON as F
 import ZSD.HTTP as HTTP
 import ZSD.Model.AppError (AppError(..))
 import ZSD.Model.FSEntry (FSEntry)
@@ -16,10 +19,11 @@ import ZSD.Model.FileVersion (FileVersion(..))
 
 type Diff =
   { deltas :: Array Deltas
-  , intext :: Array String
-  , sideBySide :: Array String
   , patches :: Array String
+  , sideBySideHTMLFragment :: Array String
+  , inlineDiffHTMLFragment :: Array String
   }
+
 
 data DeltaKind =
     Del
