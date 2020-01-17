@@ -64,7 +64,7 @@ func (self *FileHandle) CopyTo(w io.Writer) error {
 	return err
 }
 
-// CopyAs copies a file
+// Copy copies a file
 func (fh *FileHandle) Copy(path string) (err error) {
 	var src, dst *os.File
 

@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"strconv"
+	"time"
 )
 
 /// responds the configuration
@@ -72,10 +73,7 @@ func (self *WebApp) dirListingHndl(w http.ResponseWriter, r *http.Request) {
 ///
 /// expected payload: { path: "/path/to/file"
 ///                     [, compareMethod: [auto|size|mtime|size+mtime|content|md5] ]
-///                     [, timeRange: {"from": "2019-01-01T00:00:00+01:00" } ]
-///                     [, timeRange: {"to": "2019-01-01T00:00:00+01:00" } ]
-///                     [, timeRange: {"from": "2019-01-01T00:00:00+01:00"
-///                                   ,"till": "2019-02-01T00:00:00+01:00" } ]
+///                     [, dateRange: {from: "2019-01-01", to: "2019-02-01"} ]
 ///                   }
 ///
 func (self *WebApp) findFileVersionsHndl(w http.ResponseWriter, r *http.Request) {
@@ -83,23 +81,14 @@ func (self *WebApp) findFileVersionsHndl(w http.ResponseWriter, r *http.Request)
 	type Payload struct {
 		Path          string            `json:"path"`
 		CompareMethod string            `json:"compareMethod"`
-		TimeRange     scanner.TimeRange `json:"timeRange"`
+		DateRange     scanner.DateRange `json:"dateRange"`
 	}
 
 	// FIXME: remove hard coded default days
-	defaults := Payload{CompareMethod: "auto", TimeRange: scanner.TimeRangeFromLastNDays(7)}
+	defaults := Payload{CompareMethod: "auto", DateRange: scanner.NewDateRange(time.Now(), 1)}
 	payload, ok := decodeJsonPayload(w, r, &defaults).(*Payload)
 	if !ok {
 		return
-	}
-
-	// adjust the time-range if it's invalid, because
-	// the 'from' and 'to' parameters are optional
-	if payload.TimeRange.FromIsAfterTo() {
-		// FIXME: remove hard coded default days
-		payload.TimeRange.AdjustFromToNDaysBeforeTo(7)
-		log.Debugf("'From' was after 'To' in the TimeRange - adjusted time-range: %s",
-			payload.TimeRange.String())
 	}
 
 	// get the dataset
@@ -110,24 +99,9 @@ func (self *WebApp) findFileVersionsHndl(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// open the file handle
-	fh, err := fs.NewFileHandle(payload.Path)
-	if err != nil {
-		log.Errorf("Unable to open the file: %v", err)
-		http.Error(w, "Unable to open the requested file", 500)
-		return
-	}
-
-	// create a new scanner instance
-	sc, err := scanner.NewScanner(payload.TimeRange, payload.CompareMethod, fh)
-	if err != nil {
-		log.Errorf("Unable to create a scanner instance: %v", err)
-		http.Error(w, "Unable to create a scanner instance", 500)
-		return
-	}
-
 	// scan for other file versions
-	versions, err := sc.FindFileVersions(ds)
+	sc := scanner.NewScanner(payload.DateRange, payload.CompareMethod, ds)
+	versions, err := sc.FindFileVersions(payload.Path)
 	if err != nil {
 		log.Errorf("File versions search failed - %v", err)
 		http.Error(w, "File versions search failed", 500)
@@ -262,8 +236,8 @@ func (self *WebApp) downloadHndl(w http.ResponseWriter, r *http.Request) {
 
 /// responds with a diff
 ///
-/// expected payload: { actual-path: "/path/to/file"
-///                   , backup-path: "/snapshot/file"
+/// expected payload: { actualPath: "/path/to/file"
+///                   , backupPath: "/snapshot/file"
 ///                   [, diff-context-size: 8 ]
 ///                   }
 ///
@@ -295,27 +269,134 @@ func (self *WebApp) diffHndl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// actual file content
-	actualContent, err := fs.ReadTextFile(payload.ActualPath)
-	if err != nil {
-		msg := "Unable to read the actual file"
-		log.Errorf("%s: %s - %v", msg, payload.ActualPath, err)
-		http.Error(w, msg, 400)
-	}
-
-	// backup file content
-	backupContent, err := fs.ReadTextFile(payload.BackupPath)
-	if err != nil {
-		msg := "Unable to read the backup file"
-		log.Errorf("%s: %s - %v", msg, payload.ActualPath, err)
-		http.Error(w, msg, 400)
-	}
-
+	
 	// diff
-	diff := diff.NewDiff(backupContent, actualContent, payload.DiffContextSize)
-	encodeJsonAndRespond(w, r, diff)
+	diffs, err := diff.NewDiffFromPath(payload.BackupPath, payload.ActualPath, payload.DiffContextSize)
+	if err != nil {
+		msg := "Unable to create diff"
+		log.Errorf("%s: %v", msg, err)
+		http.Error(w, msg, 400)
+		return
+	}
+	encodeJsonAndRespond(w, r, diffs)
 }
 
+/// revert a changeset
+///
+/// expected payload: { actualPath: "/path/to/file"
+///                   , backupPath: "/snapshot/file"
+///                   , deltaIdx: 0
+///                   }
+func (self *WebApp) revertChangeHndl(w http.ResponseWriter, r *http.Request) {
+	// decode the payload
+	type Payload struct {
+		ActualPath      string `json:"actualPath"`
+		BackupPath      string `json:"backupPath"`
+		DeltaIdx        int    `json:"deltaIdx"`
+	}
+
+	payload, ok := decodeJsonPayload(w, r, &Payload{}).(*Payload)
+	if !ok {
+		return
+	}
+
+	// validate the requestd path is in the actual dataset
+	if _, err := self.zfs.FindDatasetForPath(payload.ActualPath); err != nil {
+		msg := "Requested file was not in the dataset"
+		log.Errorf("%s - actual-path: %s", msg, payload.ActualPath)
+		http.Error(w, msg, 400)
+		return
+	}
+	if _, err := self.zfs.FindDatasetForPath(payload.BackupPath); err != nil {
+		msg := "Requested file was not in the dataset"
+		log.Errorf("%s - backup-path: %s", msg, payload.BackupPath)
+		http.Error(w, msg, 400)
+		return
+	}
+
+	
+	// diff
+	diffs, err := diff.NewDiffFromPath(payload.BackupPath, payload.ActualPath, 3)
+	if err != nil {
+		msg := "Unable to create diff"
+		log.Errorf("%s: %v", msg, err)
+		http.Error(w, msg, 400)
+		return
+	}
+
+
+	err = diff.PatchPath(payload.ActualPath, diffs.Deltas[payload.DeltaIdx]);
+	if err != nil {
+		msg := "Unable to revert change"
+		log.Errorf("%s: %v", msg, err)
+		http.Error(w, msg, 400)
+		return
+	}
+}
+
+/// restore a file version
+///
+/// expected payload: { actualPath: "/path/to/file"
+///                   , backupPath: "/snapshot/file"
+///                   }
+func (self *WebApp) restoreFileHndl(w http.ResponseWriter, r *http.Request) {
+	// decode the payload
+	type Payload struct {
+		ActualPath      string `json:"actualPath"`
+		BackupPath      string `json:"backupPath"`
+	}
+
+	payload, ok := decodeJsonPayload(w, r, &Payload{}).(*Payload)
+	if !ok {
+		return
+	}
+
+	// validate the requestd path is in the actual dataset
+	if _, err := self.zfs.FindDatasetForPath(payload.ActualPath); err != nil {
+		msg := "Requested file was not in the dataset"
+		log.Errorf("%s - actual-path: %s", msg, payload.ActualPath)
+		http.Error(w, msg, 400)
+		return
+	}
+	if _, err := self.zfs.FindDatasetForPath(payload.BackupPath); err != nil {
+		msg := "Requested file was not in the dataset"
+		log.Errorf("%s - backup-path: %s", msg, payload.BackupPath)
+		http.Error(w, msg, 400)
+		return
+	}
+
+	actualFh, err := fs.NewFileHandle(payload.ActualPath)
+	if err != nil {
+		msg := "Unable to open actual file"
+		log.Errorf("%s - actual-path: %s", msg, payload.ActualPath)
+		http.Error(w, msg, 400)
+		return		
+	}
+	
+	backupFh, err := fs.NewFileHandle(payload.BackupPath)
+	if err != nil {
+		msg := "Unable to open backup file"
+		log.Errorf("%s - backup-path: %s", msg, payload.BackupPath)
+		http.Error(w, msg, 400)
+		return		
+	}
+
+	if err := fs.Backup(actualFh); err != nil {
+		msg := "Unable to backup the file"
+		log.Errorf("%s - acutal-path: %s", msg, payload.ActualPath)
+		http.Error(w, msg, 400)
+		return		
+	}
+	
+	if err := backupFh.Copy(payload.ActualPath); err != nil {
+		msg := "Unable to restore backup file"
+		log.Errorf("%s - backup-path: %s", msg, payload.BackupPath)
+		http.Error(w, msg, 400)
+		return		
+	}
+}	
+
+	
 func decodeJsonPayload(w http.ResponseWriter, r *http.Request, payload interface{}) interface{} {
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(payload); err != nil {

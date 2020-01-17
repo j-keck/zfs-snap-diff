@@ -5,10 +5,9 @@ import Data.Array.NonEmpty as ANE
 import Data.Monoid (guard)
 import Data.Tuple (Tuple(..), fst)
 import Effect (Effect)
-import Prelude (Unit, map, ($), (<>), (==), discard)
+import Prelude (Unit, map, ($), (<>), (==))
 import React.Basic (Component, JSX, createComponent, make)
 import React.Basic.DOM as R
-import React.Basic.DOM.Components.LogLifecycles (logLifecycles)
 import React.Basic.DOM.Events (capture_)
 
 
@@ -23,7 +22,7 @@ type Props =
 type State = { activeViewTitle :: Title }
 
 navbar :: Props -> JSX
-navbar props = logLifecycles $ make component { initialState, render } props
+navbar props = make component { initialState, render } props
 
   where
 
@@ -69,9 +68,7 @@ navbar props = logLifecycles $ make component { initialState, render } props
         [ R.a
           { className: "nav-link"
           , href: "#"
-          , onClick: capture_ $ do
-              self.setState _ { activeViewTitle = title }
-              self.props.onViewSelected view
+          , onClick: capture_ $ self.setStateThen _ { activeViewTitle = title } (self.props.onViewSelected view)
           , children: [ R.text title ]
           }
         ]

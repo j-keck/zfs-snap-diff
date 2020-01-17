@@ -116,11 +116,11 @@ func createInlineDiffHTMLFragment(charBasedDeltas Deltas) []string {
 			var className string
 			switch delta.Type {
 			case Ins:
-				className = "ins"
+				className = "diff-ins"
 			case Del:
-				className = "del"
+				className = "diff-del"
 			case Eq:
-				className = "eq"
+				className = "diff-eq"
 			}
 
 			text := html.EscapeString(delta.Text)
@@ -136,7 +136,7 @@ func createInlineDiffHTMLFragment(charBasedDeltas Deltas) []string {
 		lineNr := deltas[0].LineNrTarget
 		var buffer bytes.Buffer
 		for i, line := range splitText(contextBlock.String()) {
-			buffer.WriteString(fmt.Sprintf("<span class='line-nr'>%d</span> %s", lineNr+i, line))
+			buffer.WriteString(fmt.Sprintf("<span class='diff-line-nr'>%d</span> %s", lineNr+i, line))
 		}
 		htmlBlocks = append(htmlBlocks, buffer.String())
 	}

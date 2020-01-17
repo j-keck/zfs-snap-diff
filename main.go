@@ -16,6 +16,7 @@ var version string = "SNAPSHOT"
 type CliConfig struct {
 	logLevel      plog.LogLevel
 	logTimestamps bool
+	logLocations  bool
 	printVersion  bool
 }
 
@@ -51,8 +52,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "\nABORT:\n  no dataset with name: '%s' found\n", datasetName)
 
 		// lookup all dataset names and print them as a hint for the user
-		useSudo := false
-		zfsCmd := zfs.NewZFSCmd(useSudo)
+		zfsCmd := zfs.NewZFSCmd(zsdCfg.ZFS.UseSudo)
 		if stdout, _, err := zfsCmd.Exec("list", "-H", "-t", "filesystem", "-o", "name"); err == nil {
 			datasetNames := strings.Join(strings.Split(stdout, "\n"), ", ")
 			fmt.Fprintf(os.Stderr, "\nPossible dataset names: %s", datasetNames)
@@ -73,6 +73,7 @@ func parseFlags() (CliConfig, config.Config) {
 	plog.FlagDebugVar(&cliCfg.logLevel, "v", "debug output")
 	plog.FlagTraceVar(&cliCfg.logLevel, "vv", "trace output with caller location")
 	flag.BoolVar((&cliCfg.logTimestamps), "log-timestamps", false, "log messages with timestamps in unix format")
+	flag.BoolVar((&cliCfg.logLocations), "log-locations", false, "log messages with caller location")
 
 	// webserver
 	webCfg := &zsdCfg.Webserver
@@ -107,7 +108,7 @@ func setupLogger(cliCfg CliConfig) plog.Logger {
 
 	consoleLogger.AddLogFormatter(plog.Level)
 
-	if cliCfg.logLevel == plog.Trace {
+	if cliCfg.logLevel == plog.Trace || cliCfg.logLocations {
 		consoleLogger.AddLogFormatter(plog.Location)
 	}
 

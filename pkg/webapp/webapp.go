@@ -74,4 +74,6 @@ func (self *WebApp) registerApiEndpoints() {
 	http.HandleFunc("/api/mime-type", self.mimeTypeHndl)
 	http.HandleFunc("/api/download", self.downloadHndl)
 	http.HandleFunc("/api/diff", self.diffHndl)
+	http.HandleFunc("/api/revert-change", self.revertChangeHndl)
+	http.HandleFunc("/api/restore-file", self.restoreFileHndl)
 }

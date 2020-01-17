@@ -2,6 +2,7 @@ package diff
 
 import (
 	"github.com/j-keck/go-diff/diffmatchpatch"
+	"github.com/j-keck/zfs-snap-diff/pkg/fs"
 )
 
 type Diff struct {
@@ -51,3 +52,27 @@ func NewDiff(from, target string, contextSize int) Diff {
 		createInlineDiffHTMLFragment(charBasedDeltas),
 	}
 }
+
+func NewDiffFromPath(from, target string, contextSize int) (Diff, error) {
+	fromContent, err := readTextFile(from)
+	if err != nil {
+		return Diff{}, err
+	}
+
+	targetContent, err := readTextFile(target)
+	if err != nil {
+		return Diff{}, err
+	}
+
+	return NewDiff(fromContent, targetContent, contextSize), nil
+}
+
+func readTextFile(path string) (string, error) {
+	fh, err := fs.NewFileHandle(path)
+	if err != nil {
+		return "", err
+	}
+
+	return fh.ReadString()
+}
+

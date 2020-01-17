@@ -5,12 +5,10 @@ import Prelude
 import Data.Either (Either(..))
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
-import Data.Newtype (class Newtype)
 import Effect.Aff (Aff)
 import Foreign (ForeignError(..))
 import Foreign as Foreign
 import Simple.JSON (class ReadForeign)
-import Simple.JSON as F
 import ZSD.HTTP as HTTP
 import ZSD.Model.AppError (AppError(..))
 import ZSD.Model.FSEntry (FSEntry)
@@ -20,7 +18,7 @@ import ZSD.Model.FileVersion (FileVersion(..))
 type Diff =
   { deltas :: Array Deltas
   , patches :: Array String
-  , sideBySideHTMLFragment :: Array String
+  , sideBySideDiffHTMLFragment :: Array String
   , inlineDiffHTMLFragment :: Array String
   }
 
@@ -56,5 +54,13 @@ type Deltas = Array Delta
 
 
 fetch :: FSEntry -> FileVersion -> Aff (Either AppError Diff)
-fetch { path } (BackupVersion { file }) = HTTP.post' "/api/diff" { "actual-path": path, "backup-path": file.path}
+fetch { path } (BackupVersion { file }) = HTTP.post' "/api/diff" { "actualPath": path, "backupPath": file.path}
 fetch _ (ActualVersion _ ) = pure $ Left $ Bug "diff with the same version not possible"
+
+
+
+revert :: FSEntry -> FileVersion -> Int -> Aff (Either AppError Unit)
+revert { path } (BackupVersion { file }) deltaIdx = HTTP.post_ "/api/revert-change"
+                                                      { "actualPath": path, "backupPath": file.path, deltaIdx }
+revert _ (ActualVersion _) _ = pure $ Left $ Bug "revert for the actual version not possible"                                                      
+

@@ -1,28 +1,32 @@
+-- | A `Panel` component contains a panel-header and a panel-body.
+-- | Title and body parts are provided in the `Props` record.
+-- | The body can be hidden with the provided `HideBodyFn` function.
 module ZSD.Components.Panel where
 
 import Prelude
-
 import Data.Monoid (guard)
-import Effect.Console (log, logShow)
-import Effect.Ref (Ref)
-import Effect.Ref as Ref
+import Effect (Effect)
 import React.Basic (Component, JSX, createComponent, make)
 import React.Basic.DOM as R
-import React.Basic.DOM.Components.LogLifecycles (logLifecycles)
 import React.Basic.DOM.Events (capture_)
 
+-- | Type of the function to hide the body
+type HideBodyFn = Effect Unit
 
+-- | - `title`
+-- |   - Panel header title
+-- | - `body`
+-- |   - Panel body
 type Props =
   { title :: String
-  , body :: JSX
-  , showBody :: Ref Boolean
+  , body :: HideBodyFn -> JSX
   }
 
 type State = { showBody :: Boolean }
 
 
 panel :: Props -> JSX
-panel = logLifecycles <<< make component { initialState, render, didUpdate }
+panel = make component { initialState, render }
 
   where
 
@@ -31,18 +35,13 @@ panel = logLifecycles <<< make component { initialState, render, didUpdate }
 
     initialState = { showBody: true }
 
-
-    didUpdate self { prevProps, prevState } = do
-      changed <- (/=) <$> Ref.read self.props.showBody <*> Ref.read prevProps.showBody
-      guard changed
-       (Ref.read prevProps.showBody >>= \b -> self.setState _ { showBody = b })
-
-    render self =
+    render self = 
+      let hideBodyFn = self.setState _ { showBody = false } in
       R.div
       { className: "card mt-3"
       , children:
         [ header self
-        , guard self.state.showBody (R.div { className: "card-body", children: [self.props.body] })
+        , guard self.state.showBody (R.div { className: "card-body", children: [self.props.body hideBodyFn ] })
         ]
       }
 

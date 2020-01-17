@@ -3,11 +3,12 @@
 { pkgs ? import <nixpkgs> {} }:
 let
 
+  # nix-prefetch-git https://github.com/justinwoo/easy-purescript-nix
   easy-ps = import (pkgs.fetchFromGitHub {
     owner = "justinwoo";
     repo = "easy-purescript-nix";
-    rev = "aa94aeac3a6ad9b4dfa0e807ad1421097d74f663";
-    sha256 = "1kfhi6rscgf165zg4f1s0fgppygisvc7dppxb93n02rypxfxjirm";
+    rev = "a09d4ff6a8e4a8a24b26f111c2a39d9ef7fed720";
+    sha256 = "1iaid67vf8frsqfnw1vm313d50mdws9qg4bavrhfhmgjhcyqmb52";
   }) { inherit pkgs; };
 
 
@@ -22,6 +23,7 @@ let
         "${react}/lib/node_modules/react/node_modules"
         "${react-dom}/lib/node_modules"
         "${react-dom}/lib/node_modules/react-dom/node_modules"
+        "${highlight.js}"
         "${bootstrap}"
         "${octicons}"
       ];

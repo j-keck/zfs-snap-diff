@@ -19,9 +19,10 @@ type Comparator interface {
 	HasChanged(other fs.FileHandle) bool
 }
 
-func NewComparator(method string, actual fs.FileHandle) (Comparator, error) {
-	var comparator Comparator
 
+func NewComparator(method string, fh fs.FileHandle) (Comparator, error) {
+
+	var comparator Comparator
 	switch method {
 	case "size":
 		comparator = new(CompareBySize)
@@ -35,7 +36,7 @@ func NewComparator(method string, actual fs.FileHandle) (Comparator, error) {
 		comparator = new(CompareByMD5)
 	case "auto":
 		// use md5 for text files, size+modTime for others
-		mimeType, _ := actual.MimeType()
+		mimeType, _ := fh.MimeType()
 		if strings.HasPrefix(mimeType, "text") {
 			comparator = new(CompareByMD5)
 		} else {
@@ -44,8 +45,8 @@ func NewComparator(method string, actual fs.FileHandle) (Comparator, error) {
 	default:
 		return nil, fmt.Errorf("no such comparator: '%s'", method)
 	}
+	comparator.init(fh)
 
-	comparator.init(actual)
 	return comparator, nil
 }
 

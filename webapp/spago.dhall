@@ -6,11 +6,13 @@
     , "effect"
     , "formatters"
     , "js-timers"
+    , "now"
     , "numbers"
     , "psci-support"
     , "react-basic"
     , "simple-json"
     , "stringutils"
+    , "test-unit"
     , "unfoldable"
     ]
 , packages =

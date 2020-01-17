@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// FIXME: make this a function from FileHandle
 func Backup(fh FileHandle) error {
 	backupDir := fmt.Sprintf("%s/.zsd", filepath.Dir(fh.Path))
 
@@ -24,7 +25,8 @@ func Backup(fh FileHandle) error {
 		return errors.New(msg)
 	}
 
-	// move file, don't update Name / Path in FileHandle
+	// FIXME: make a copy instead of a move?
+	// move the file in the backup location
 	now := time.Now().Format("20060102_150405")
 	backupFilePath := fmt.Sprintf("%s/%s_%s", backupDir, fh.Name, now)
 	log.Infof("move actual file in backup directory: %s\n", backupFilePath)

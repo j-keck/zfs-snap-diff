@@ -1,6 +1,5 @@
 -- | WebApp entry point
 -- |
--- | Contains the Navigation and the current view
 module ZSD.WebApp where
 
 import Data.Array.NonEmpty (NonEmptyArray)
@@ -8,7 +7,6 @@ import Data.Array.NonEmpty as ANE
 import Data.Tuple (Tuple(..), snd)
 import Prelude (($))
 import React.Basic (Component, JSX, createComponent, fragment, make)
-import React.Basic.DOM.Components.LogLifecycles (logLifecycles)
 import ZSD.Components.Navbar (navbar)
 import ZSD.Model.Config (Config)
 import ZSD.Views.BrowseFilesystem (browseFilesystem)
@@ -26,7 +24,7 @@ type State =
 
 
 webApp :: Props -> JSX
-webApp props = logLifecycles $ make component { initialState, render } props
+webApp props = make component { initialState, render } props
 
   where
 
@@ -35,9 +33,9 @@ webApp props = logLifecycles $ make component { initialState, render } props
 
 
     initialState =
-      let views =
-           (ANE.singleton $ Tuple "Browse filesystem"
-                                  $ browseFilesystem { config: props.config })
+      let views = ANE.cons'
+                  (Tuple "Browse filesystem"  $ browseFilesystem { config: props.config })
+                  []
        in { views, activeView: snd $ ANE.head views }
 
 

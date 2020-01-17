@@ -1,20 +1,23 @@
 module ZSD.Model.FileVersion where
 
-import Data.Either (Either)
+import Prelude
+import Data.Either (Either(..))
+import Control.Alt ((<|>))
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
 import Data.Maybe (maybe)
-import Data.String as S
 import Effect.Aff (Aff)
-import Prelude (class Eq, class Show, flip, ($), (<>))
+import Data.String as S
+import Simple.JSON (class ReadForeign, readImpl)
 import ZSD.HTTP as HTTP
-import ZSD.Model.AppError (AppError)
 import ZSD.Model.FSEntry (FSEntry)
 import ZSD.Model.Snapshot (Snapshot)
-import ZSD.Ops ((<$$$>))
+import ZSD.Model.AppError (AppError(..))
 
 type FileVersions = Array FileVersion
 
+-- FIXME: include the FSEntry from the actual version in the BackupVersion and
+-- adjust all functions to receive only the FileVersion
 data FileVersion =
     ActualVersion FSEntry
   | BackupVersion
@@ -26,6 +29,9 @@ derive instance genericFileVersion :: Generic FileVersion _
 derive instance eqFileVersion :: Eq FileVersion
 instance showFileVersion :: Show FileVersion where
   show = genericShow
+instance readForeignFileVersion :: ReadForeign FileVersion where
+  readImpl f =     BackupVersion <$> readImpl f
+               <|> ActualVersion <$> readImpl f
 
 unwrapFile :: FileVersion -> FSEntry
 unwrapFile = case _ of
@@ -43,6 +49,14 @@ uniqueName = case _ of
     in before <> "-" <> snapshot.name <> after
 
 
+isBackupVersion :: FileVersion -> Boolean
+isBackupVersion = case _ of
+  BackupVersion _ -> true
+  _ -> false
 
-fetch :: FSEntry -> Aff (Either AppError FileVersions)
-fetch { path } = BackupVersion <$$$> HTTP.post' "/api/find-file-versions" { path, "compare-method": "auto" }
+
+
+restore :: FSEntry -> FileVersion -> Aff (Either AppError Unit)
+restore { path } (BackupVersion { file }) = HTTP.post_ "/api/restore-file"
+                                             { "actualPath": path, "backupPath": file.path }
+restore _ (ActualVersion _) = pure $ Left $ Bug "restore the actual version not possible"
