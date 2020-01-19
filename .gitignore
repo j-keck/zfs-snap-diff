@@ -1,3 +1,10 @@
-/zfs-snap-diff
-/webapp/.spago
-/webapp/.spago2nix
+zfs-snap-diff
+!/cmd/zfs-snap-diff/
+result*
+webapp/.cache
+webapp/.spago
+webapp/.spago2nix
+webapp/.psci_modules/
+webapp/node_modules
+webapp/output
+

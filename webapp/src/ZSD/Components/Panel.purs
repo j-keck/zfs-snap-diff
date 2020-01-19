@@ -51,12 +51,10 @@ panel = make component { initialState, render }
       , style: R.css { cursor: "pointer" }
       , onClick: capture_ $ self.setState \s -> s { showBody = not s.showBody }
       , children:
-        [ R.img
-          { className: "p-1"
-          , src: if self.state.showBody
-                 then "icons/chevron-up.svg"
-                 else "icons/chevron-down.svg"
-          , height: "32"
+        [ R.span
+          { className: "p-1 fas fa-chevron-" <> if self.state.showBody
+                                                then "up"
+                                                else "down"
           }
         , R.text self.props.title
         ]

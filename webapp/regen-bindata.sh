@@ -1,3 +1,0 @@
-#!/bin/sh
-$GOPATH/bin/go-bindata -pkg webapp -prefix dist -o ../pkg/webapp/bindata.go dist/...
-
