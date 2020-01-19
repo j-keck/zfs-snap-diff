@@ -5,6 +5,7 @@
     "cssnano": "^4.1.10"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.12.0",
     "bootstrap": "^4.4.1",
     "highlight.js": "^9.17.1",
     "jquery": "^3.4.1",

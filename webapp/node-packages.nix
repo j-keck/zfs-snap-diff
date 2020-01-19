@@ -4,6 +4,15 @@
 
 let
   sources = {
+    "@fortawesome/fontawesome-free-5.12.0" = {
+      name = "_at_fortawesome_slash_fontawesome-free";
+      packageName = "@fortawesome/fontawesome-free";
+      version = "5.12.0";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@fortawesome/fontawesome-free/-/fontawesome-free-5.12.0.tgz";
+        sha512 = "vKDJUuE2GAdBERaQWmmtsciAMzjwNrROXA5KTGSZvayAsmuTGjam5z6QNqNPCwDfVljLWuov1nEC3mEQf/n6fQ==";
+      };
+    };
     "bootstrap-4.4.1" = {
       name = "bootstrap";
       packageName = "bootstrap";
@@ -191,6 +200,7 @@ let
     version = "0.0.0";
     src = ./.;
     dependencies = [
+      sources."@fortawesome/fontawesome-free-5.12.0"
       sources."bootstrap-4.4.1"
       sources."commander-2.20.3"
       sources."handlebars-4.7.2"

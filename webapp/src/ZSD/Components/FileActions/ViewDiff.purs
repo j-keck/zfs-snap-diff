@@ -55,7 +55,7 @@ update self = case _ of
     _ <- Diff.revert self.props.file self.props.version idx
     liftEffect $ update self Diff
 
-    
+
 viewDiff :: Props -> JSX
 viewDiff = make component { initialState, render, didMount }
   where
@@ -80,9 +80,9 @@ viewDiff = make component { initialState, render, didMount }
              InlineDiff -> inlineDiff self
              SideBySideDiff -> sideBySideDiff self
       ]
-      
 
-    mkTabEntry id self = 
+
+    mkTabEntry id self =
       R.li
       { className: "nav-item"
       , children: [ R.a { className: "nav-link" <> guard (self.state.view == id) " active"
@@ -102,15 +102,16 @@ viewDiff = make component { initialState, render, didMount }
                         [ actionButton
                           { text: "Revert"
                           , textConfirm: "Revert this change"
+                          , icon: ""
                           , action: update self (Revert idx)
                           }
                         , R.pre_ [ R.code { dangerouslySetInnerHTML: { __html: html } } ]
                         ]
                       }
         Left err -> R.text $ show err
-                      
-        
-    
+
+
+
     sideBySideDiff self =
       case self.state.diff of
         Right diff -> fragment $ flip map (zipWithIndex diff.sideBySideDiffHTMLFragment) \(Tuple idx html) ->
@@ -120,6 +121,7 @@ viewDiff = make component { initialState, render, didMount }
                         [ actionButton
                           { text: "Revert"
                           , textConfirm: "Revert this change"
+                          , icon: ""
                           , action: update self (Revert idx)
                           }
                         , R.table
@@ -127,7 +129,7 @@ viewDiff = make component { initialState, render, didMount }
                           , dangerouslySetInnerHTML: { __html: html }
                           }
                         ]
-                      }          
+                      }
         Left err -> R.text $ show err
 
 

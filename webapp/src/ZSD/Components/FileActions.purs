@@ -104,11 +104,15 @@ fileAction = make component { initialState, render, didMount, didUpdate }
         [ R.div
           { className: "btn-group"
           , children:
-            [ btn "View" View $ A.any (\f -> f self.state.mimeType)
-                                      [MimeType.isText, MimeType.isImage, MimeType.isPDF]
-            , btn "Diff" Diff $ (MimeType.isText self.state.mimeType) && (FileVersion.isBackupVersion self.props.version)
-            , btn "Download" Download true
+            [ btn "View" "fas fa-eye" View $
+                A.any (\f -> f self.state.mimeType) [MimeType.isText, MimeType.isImage, MimeType.isPDF]
+
+            , btn "Diff" "fas fa-random" Diff $
+                (MimeType.isText self.state.mimeType) && (FileVersion.isBackupVersion self.props.version)
+
+            , btn "Download" "fas fa-download" Download true
             , actionButton { text: "Restore"
+                           , icon: "fas fa-archive"
                            , textConfirm: "Restore the old version of " <> self.props.file.name
                            , action: update self Restore
                            }
@@ -140,10 +144,14 @@ fileAction = make component { initialState, render, didMount, didUpdate }
 
       where
 
-        btn title action enabled = R.button
-                            { className: "btn btn-secondary" <> guard (not enabled) " disabled"
-                            , onClick: capture_ $ if(enabled)
-                                                  then update self action
-                                                  else pure unit
-                            , children: [ R.text title ]
-                            }
+        btn title icon action enabled =
+          R.button
+          { className: "btn btn-secondary" <> guard (not enabled) " disabled"
+          , onClick: capture_ $ if(enabled)
+                                then update self action
+                                else pure unit
+          , children:
+            [ R.span { className: icon <> " p-1" }
+            , R.text title
+            ]
+          }

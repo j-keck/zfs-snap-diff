@@ -12,6 +12,7 @@ import React.Basic.DOM.Events (capture_)
 type Props =
   { text :: String
   , textConfirm :: String
+  , icon :: String
   , action :: Effect Unit
   }
 
@@ -44,11 +45,17 @@ actionButton = make component { initialState, render }
       case self.state of
         Clean -> R.button { className
                           , onClick: capture_ $ update self Clicked
-                          , children: [ R.text self.props.text ]
+                          , children:
+                            [ R.span { className: self.props.icon <> " p-1" }
+                            , R.text self.props.text
+                            ]
                           }
         Clicked -> R.button { className: className <> " btn-warning"
                             , onClick: capture_ $ update self Confirmed
-                            , children: [ R.text self.props.textConfirm ]
+                            , children:
+                              [ R.span { className:  "fas fa-exclamation p-1" }
+                              , R.text self.props.textConfirm
+                              ]
                             }
         Confirmed -> mempty
 

@@ -91,7 +91,7 @@ in
 if pkgs.lib.inNixShell then pkgs.mkShell {
   inherit buildInputs;
   shellHooks = ''
-    alias serv="parcel serve --host 0.0.0.0 webapp/index.html"
+    alias serv="parcel serve --host 0.0.0.0 index.html"
   '';
 }
 else {
