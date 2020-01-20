@@ -1,19 +1,13 @@
 module ZSD.Views.BrowseFilesystem where
 
-
 import Prelude
-import ZSD.Views.X (x)
-
 import Data.Foldable (foldMap)
 import Data.Maybe (Maybe(..))
 import Data.Tuple.Nested (tuple2, uncurry2)
 import Effect (Effect)
-
-import Effect.Timer (setTimeout)
 import React.Basic (Component, JSX, createComponent, make)
 import React.Basic as React
 import React.Basic.DOM as R
-import React.Basic.DOM.Components.LogLifecycles (logLifecycles)
 import ZSD.Components.DatasetSelector (datasetSelector)
 import ZSD.Components.DirBrowser (dirBrowser)
 import ZSD.Components.FileActions (fileAction)
@@ -56,15 +50,12 @@ update self = case _ of
                     , selectedVersion = Nothing
                     }
 
-  VersionSelected v ->
---    log $ "VersionSelected: " <> show v
-    -- FIXME: why this triggers 'didMount' in FileVersionSelector????????
-    void $ setTimeout 500 $ self.setState _ { selectedVersion = Just v }
+  VersionSelected v -> self.setState _ { selectedVersion = Just v }
 
 
 
 browseFilesystem :: Props -> JSX
-browseFilesystem = logLifecycles <<< make component { initialState, render }
+browseFilesystem = make component { initialState, render }
 
   where
 
@@ -89,13 +80,11 @@ browseFilesystem = logLifecycles <<< make component { initialState, render }
                        } ) self.state.selectedDataset
 
 
-        -- FIXME: remove this 
-      , foldMap (\file -> x { file }) self.state.selectedFile 
-        
       , foldMap (\file -> fileVersionSelector
                          { file
                          , onVersionSelected: update self <<< VersionSelected 
                          }) self.state.selectedFile
+
         
       , foldMap (uncurry2 (\file version -> fileAction { file, version }))
                 $ (tuple2 <$> self.state.selectedFile

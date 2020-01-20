@@ -11,12 +11,10 @@ import Data.Time.Duration as Date
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
-import Effect.Console (log)
 import Partial.Unsafe (unsafePartial)
-import React.Basic (Component, JSX, createComponent, fragment, make)
+import React.Basic (Component, JSX, createComponent, fragment, make, readState)
 import React.Basic as React
 import React.Basic.DOM as R
-import React.Basic.DOM.Components.LogLifecycles (logLifecycles)
 import React.Basic.DOM.Events (capture_)
 import ZSD.Component.Table (table)
 import ZSD.Components.Panel (panel)
@@ -38,7 +36,8 @@ type Props =
 type State = { versions :: Array FileVersion, scanResult :: Maybe ScanResult }
 
 data Action =
-    Scan DateRange
+    DidMount
+  |  Scan DateRange
   | ScanMore
 
 hasSnapshotsToScan :: Maybe ScanResult -> Boolean
@@ -49,11 +48,17 @@ hasSnapshotsToScan = case _ of
 
 update :: React.Self Props State -> Action -> Effect Unit
 update self = case _ of
+  DidMount -> do
+    self.setState _ { versions = [ ActualVersion self.props.file ] }
+    DateRange.lastNDays 1 >>= update self <<< Scan
+
   Scan dateRange -> launchAff_ $ do
     scanResult <- unsafePartial $ fromRight <$> ScanResult.fetch self.props.file dateRange
-    let versions = A.concat [self.state.versions, scanResult.fileVersions]
-    liftEffect $ self.setState \s -> s { scanResult = Just scanResult
-                                       , versions = versions }
+    liftEffect $ do
+      state <- readState self
+      let versions = A.concat [state.versions, scanResult.fileVersions]
+      self.setState $ const $ state { scanResult = Just scanResult
+                                    , versions = versions }
     
   ScanMore -> guard (hasSnapshotsToScan self.state.scanResult) do
     let dateRange = unsafePartial $ (fromJust self.state.scanResult).scannedDateRange
@@ -63,19 +68,16 @@ update self = case _ of
 
 
 fileVersionSelector :: Props -> JSX
-fileVersionSelector props = logLifecycles $ make component { initialState, didMount, render } props
+fileVersionSelector = make component { initialState, didMount, render } 
 
   where
 
      component :: Component Props
      component = createComponent "FileVersionSelector"
 
-     initialState = { versions: [ActualVersion props.file], scanResult: Nothing }
+     initialState = { versions: [], scanResult: Nothing }
 
-     didMount self = do
-       log "FileVersionSelector - didMount"
-       DateRange.lastNDays 1 >>= update self <<< Scan
-
+     didMount self = update self DidMount
 
      render self =
        panel

@@ -7,4 +7,5 @@ webapp/.spago2nix
 webapp/.psci_modules/
 webapp/node_modules
 webapp/output
+webapp/dist
 
