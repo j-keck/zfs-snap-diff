@@ -15,9 +15,6 @@ let
     (with pkgs.nodePackages; [ parcel-bundler node2nix ]) ++
     (with easy-ps; [ purs spago spago2nix ]);
 
-
-
-
   webapp =
     let
 
@@ -89,7 +86,14 @@ let
 in
 
 if pkgs.lib.inNixShell then pkgs.mkShell {
-  inherit buildInputs;
+
+  buildInputs = buildInputs ++ (with pkgs;
+                [ go_1_13
+                  ((emacsPackagesGen emacs).emacsWithPackages (epkgs:
+                    (with epkgs.melpaStablePackages; [ magit go-mode nix-mode ivy swiper ]) ++
+                    (with epkgs.melpaPackages; [ purescript-mode psc-ide ])))
+                ]);
+  
   shellHooks = ''
     alias serv="parcel serve --host 0.0.0.0 index.html"
   '';
