@@ -105,14 +105,8 @@ func (self *ZFS) scanDatasets(name string) (Datasets, error) {
 	var datasets Datasets
 	for _, line := range strings.Split(stdout, "\n") {
 		if name, used, avail, refer, mountPoint, ok := parse(line); ok {
-			if mountPoint != "legacy" {
-				log.Debugf("dataset found - name: '%s', mountpoint: '%s'", name, mountPoint)
-				if dirHandle, err := fs.NewDirHandle(mountPoint); err != nil {
-					log.Warnf("unable to stat directory for dataset: %s - err: %s", name, err)
-				} else {
-					datasets = append(datasets, Dataset{name, used, avail, refer, dirHandle, self.cmd})
-				}
-			} else {
+			switch mountPoint {
+			case "legacy":
 				// lookup real mount point
 				log.Tracef("dataset: '%s' has legacy mountpoint - try to find the mountpoint", name)
 
@@ -126,6 +120,18 @@ func (self *ZFS) scanDatasets(name string) (Datasets, error) {
 					} else {
 						datasets = append(datasets, Dataset{name, used, avail, refer, dirHandle, self.cmd})
 					}
+				}
+				
+			case "none":
+				log.Notef("ignore not mounted dataset: '%s'", name);
+				continue
+				
+			default:
+				log.Debugf("dataset found - name: '%s', mountpoint: '%s'", name, mountPoint)
+				if dirHandle, err := fs.NewDirHandle(mountPoint); err != nil {
+					log.Warnf("unable to stat directory for dataset: %s - err: %s", name, err)
+				} else {
+					datasets = append(datasets, Dataset{name, used, avail, refer, dirHandle, self.cmd})
 				}
 			}
 		} else {
