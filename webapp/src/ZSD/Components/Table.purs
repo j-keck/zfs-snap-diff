@@ -1,8 +1,8 @@
 module ZSD.Component.Table where
 
 import Prelude
+
 import Data.Array as A
-import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import React.Basic (Component, JSX, createComponent, makeStateless)
 import React.Basic.DOM as R
@@ -35,6 +35,4 @@ table = makeStateless component \props ->
 
     component :: Component (Props a)
     component = createComponent "Table"
-
-    initialState = { activeRow: Nothing }
 

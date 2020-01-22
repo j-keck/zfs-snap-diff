@@ -1,9 +1,10 @@
 module ZSD.Components.DatasetSelector where
 
 import Prelude
+
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
-import React.Basic (Component, JSX, createComponent, make)
+import React.Basic (Component, JSX, createComponent, empty, make)
 import React.Basic.DOM as R
 import ZSD.Component.Table (table)
 import ZSD.Components.Panel (panel)
@@ -29,8 +30,8 @@ datasetSelector = make component { initialState, render }
     initialState = { selectedDataset: Nothing }
 
     render self =
-      panel
-      { title: "Datasets"
+      panel 
+      { header: R.text "Datasets"
       , body: \hidePanelBodyFn ->
           table
             { header: ["Name", "Used", "Avail", "Refer", "Mountpoint"]
@@ -45,4 +46,5 @@ datasetSelector = make component { initialState, render }
                     self.setState _ { selectedDataset = Just ds }
                     self.props.onDatasetSelected ds
             }
+      , footer: empty
       }
