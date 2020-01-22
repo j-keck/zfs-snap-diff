@@ -8,6 +8,7 @@ import Data.Monoid (guard)
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
+import Effect.Console (log)
 import Partial.Unsafe (unsafePartial)
 import React.Basic (Component, JSX, createComponent, empty, make)
 import React.Basic as React
@@ -29,7 +30,7 @@ import ZSD.Model.MimeType as MimeType
 
 
 type Props = { file :: FSEntry, version :: FileVersion }
-type State = { view :: JSX, mimeType :: MimeType }
+type State = { view :: JSX, cmd :: Command, mimeType :: MimeType }
 
 data Command =
     View
@@ -43,9 +44,10 @@ data Command =
 update :: React.Self Props State -> Command -> Effect Unit
 update self = case _ of
 
-  View -> if(MimeType.isText self.state.mimeType)
-           then update self ViewText
-           else update self ViewBlob
+  View -> self.setStateThen _ { cmd = View } $
+            if(MimeType.isText self.state.mimeType)
+              then update self ViewText
+              else update self ViewBlob
 
 
   ViewText -> launchAff_ $ do
@@ -63,7 +65,7 @@ update self = case _ of
   Diff -> do
     let file = self.props.file
         version = self.props.version
-    self.setState _ { view = viewDiff { file, version } }
+    self.setState _ { view = viewDiff { file, version }, cmd = Diff }
 
 
   Download -> do
@@ -86,7 +88,7 @@ fileAction = make component { initialState, render, didMount, didUpdate }
     component :: Component Props
     component = createComponent "FileAction"
 
-    initialState = { view: empty, mimeType: MimeType "text/plain" }
+    initialState = { view: empty, cmd: View, mimeType: MimeType "text/plain" }
 
     didMount self = launchAff_ $ do
       -- FIXME: handle error
@@ -94,7 +96,7 @@ fileAction = make component { initialState, render, didMount, didUpdate }
       liftEffect $ self.setStateThen _ { mimeType = mimeType } (update self View)
 
     didUpdate self { prevProps } = do
-      guard (self.props /= prevProps) $ update self View
+      guard (self.props /= prevProps) $ update self self.state.cmd
 
 
     render self =
