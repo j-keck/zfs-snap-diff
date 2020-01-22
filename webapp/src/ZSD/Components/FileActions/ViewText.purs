@@ -10,7 +10,7 @@ type Props = { content :: String }
 foreign import highlightCode :: Effect Unit
 
 viewText :: Props -> JSX
-viewText = make component { initialState, render }
+viewText = make component { initialState, render, didMount, didUpdate }
 
   where
     
@@ -19,9 +19,9 @@ viewText = make component { initialState, render }
 
     initialState = unit
     
-    didMount self = highlightCode
+    didMount _ = highlightCode
 
-    didUpdate self {prevState, prevProps } = highlightCode
+    didUpdate _ _ = highlightCode
 
     render self = 
       R.pre_ [ R.code_ [ R.text self.props.content ] ]
