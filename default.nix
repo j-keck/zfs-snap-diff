@@ -18,7 +18,7 @@ let
   webapp =
     let
 
-      # regenerate spago packages per: (nix-shell; cd webapp; spago2nix generate)
+      # regenerate spago packages per: (nix-shell --run 'cd webapp; spago2nix generate')
       webapp_ps = (import (./webapp/spago-packages.nix) { inherit pkgs; }).mkBuildProjectOutput {
         # include only directories and purescript source files
         src = with builtins; filterSource (p: t: t == "directory" || match ".*\.purs|.*\.js" p != null) ./webapp;
