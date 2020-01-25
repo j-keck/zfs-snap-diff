@@ -70,7 +70,7 @@ let
     pname = "zfs-snap-diff";
     version = "0.0.0";
     src = pkgs.nix-gitignore.gitignoreSource [ ".gitignore" "/webapp/" ] ./.;
-    modSha256 = "133xfsv45b6c0rh7p34nic1favbkl3827j5ik8l2yvhnai5gqlpp";
+    modSha256 = "1xlgs16lbwdnm2rbzfxwsg5vyc20fsgq506w2ms46a9z3i06zmv1";
 
     preBuild = ''
       cp -v ${bindata}/bindata.go pkg/webapp/bindata.go
