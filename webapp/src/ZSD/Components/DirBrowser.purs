@@ -7,11 +7,9 @@ import Data.Array as A
 import Data.Either (fromRight)
 import Data.Maybe (Maybe(..), maybe)
 import Data.Monoid (guard)
-import Data.Tuple (snd)
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
-import Effect.Console (log)
 import Partial.Unsafe (unsafePartial)
 import React.Basic (Component, JSX, createComponent, make)
 import React.Basic as React
@@ -19,14 +17,13 @@ import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture_)
 import ZSD.Component.Table (table)
 import ZSD.Formatter as Formatter
-import ZSD.Model.Dataset (Dataset)
 import ZSD.Model.DirListing as DirListing
 import ZSD.Model.FSEntry (FSEntry)
 import ZSD.Model.FSEntry as FSEntry
 
 
 type Props =
-  { path            :: FSEntry
+  { dir             :: FSEntry
   , onFileSelected  :: FSEntry -> Effect Unit
   , onDirSelected   :: FSEntry -> Effect Unit
   }
@@ -52,7 +49,7 @@ update :: Self -> Command -> Effect Unit
 update self = case _ of
   StartAt target -> do
     update self $ ReadDir target
-    self.setState _ { breadcrumb = [target] }
+    self.setState _ { breadcrumb = [target], selectedFile = Nothing }
 
   ChangeDir target -> do
     update self $ ReadDir target
@@ -95,11 +92,11 @@ dirBrowser = make component { initialState, render, didMount, didUpdate }
     initialState = { breadcrumb: [], dirListing: [], selectedFile: Nothing
                    , showBrowser: true, showHidden: false }
 
-    didMount self = update self (StartAt self.props.path)
+    didMount self = update self (StartAt self.props.dir)
 
     didUpdate self {prevProps} = do
-      guard (self.props.path /= prevProps.path) $
-        update self (StartAt self.props.path)
+      guard (self.props.dir /= prevProps.dir) $
+        update self (StartAt self.props.dir)
 
 
     render self =

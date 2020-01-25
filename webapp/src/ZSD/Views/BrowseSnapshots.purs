@@ -3,6 +3,7 @@ module ZSD.View.BrowseSnapshots where
 
 import Prelude
 
+import Data.Array as A
 import Data.Either (either)
 import Data.Foldable (foldMap)
 import Data.Maybe (Maybe(..))
@@ -30,10 +31,11 @@ import ZSD.Views.BrowseSnapshots.SnapshotSelector (snapshotSelector)
 type Props = { config :: Config }
 
 type State =
-  { selectedDataset :: Maybe Dataset
+  { selectedDataset  :: Maybe Dataset
   , snapshots        :: Maybe Snapshots
   , selectedSnapshot :: Maybe Snapshot
   , selectedFile     :: Maybe FSEntry
+  , selectedDir      :: Maybe FSEntry
   } 
 
 
@@ -61,6 +63,7 @@ browseSnapshots = make component { initialState, render }
                    , snapshots: Nothing
                    , selectedSnapshot: Nothing
                    , selectedFile: Nothing
+                   , selectedDir: Nothing
                    }
 
     render self =
@@ -71,20 +74,22 @@ browseSnapshots = make component { initialState, render }
 
       , foldMap (\snapshots -> snapshotSelector
                               { snapshots
-                              , onSnapshotSelected: \snap -> self.setState _ { selectedSnapshot = Just snap }
+                              , onSnapshotSelected: \snap -> self.setState _ { selectedSnapshot = Just snap, selectedFile = Nothing, selectedDir = Nothing }
                               }) self.state.snapshots
         
       , foldMap (\snapshot -> dirBrowser
-                              { path: snapshot.dir
+                              { dir: snapshot.dir 
                               , onFileSelected: \file -> self.setState _ { selectedFile = Just file }
-                              , onDirSelected: \_ -> self.setState _ { selectedFile = Nothing }
+                              , onDirSelected: \dir -> self.setState _ { selectedDir = Just dir, selectedFile = Nothing }
                               }) self.state.selectedSnapshot
 
       , foldMap (uncurry2 (\file snapshot ->
                   -- FIXME: cleanup: update the file path in the dataset
-                  let relFilePath = unsafeFromJust $ S.stripPrefix (S.Pattern snapshot.dir.path) file.path
+                  let snapPathElements = S.split (S.Pattern "/") snapshot.dir.path
+                      filePathElements = S.split (S.Pattern "/") file.path
+                      relPath = S.joinWith "/" $ A.drop (A.length snapPathElements) filePathElements
                       dsPath = (unsafeFromJust self.state.selectedDataset).mountPoint.path
-                      file' = file { path = dsPath <> "/" <> relFilePath }
+                      file' = file { path = dsPath <> "/" <> relPath } 
                       version = BackupVersion {file, snapshot}
                   in fileAction { file: file', version }))
           (tuple2 <$> self.state.selectedFile
