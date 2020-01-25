@@ -8,7 +8,6 @@ import Data.Monoid (guard)
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
-import Effect.Console (log)
 import Partial.Unsafe (unsafePartial)
 import React.Basic (Component, JSX, createComponent, empty, make)
 import React.Basic as React
@@ -40,6 +39,7 @@ data Command =
   | Download
   | Restore
 
+derive instance eqCommand :: Eq Command
 
 update :: React.Self Props State -> Command -> Effect Unit
 update self = case _ of
@@ -149,6 +149,7 @@ fileAction = make component { initialState, render, didMount, didUpdate }
         btn title icon action enabled =
           R.button
           { className: "btn btn-secondary" <> guard (not enabled) " disabled"
+                                           <> guard (self.state.cmd == action) " active"
           , onClick: capture_ $ if(enabled)
                                 then update self action
                                 else pure unit
