@@ -48,7 +48,11 @@ func (self *Dataset) ScanSnapshots() (Snapshots, error) {
 			snapName := fields[len(fields)-1]
 
 			// path
-			path := self.MountPoint.Path + "/.zfs/snapshot/" + snapName
+			p := self.MountPoint.Path + "/.zfs/snapshot/" + snapName
+			path, err := fs.NewDirHandle(p)
+			if err != nil {
+				return nil, err
+			}
 
 			// append new snap to snapshots
 			snapshots = append(snapshots, Snapshot{snapName, creation, path})

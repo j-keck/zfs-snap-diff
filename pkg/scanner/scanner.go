@@ -114,7 +114,7 @@ func (self *Scanner) FindFileVersions(pathActualVersion string) (ScanResult, err
 
 func (self *Scanner) pathInSnapshot(pathActualVersion string, snap zfs.Snapshot) string {
 	p := strings.TrimPrefix(pathActualVersion, self.dataset.MountPoint.Path)
-	return path.Join(snap.Path, p)
+	return path.Join(snap.Dir.Path, p)
 }
 
 func (self *Scanner) findLastPathInSnap(p string, idx int, snaps []zfs.Snapshot) (string, bool) {

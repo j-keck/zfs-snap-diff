@@ -74,7 +74,7 @@ browseFilesystem = make component { initialState, render }
                         }
 
       , foldMap (\ds -> dirBrowser
-                       { dataset: ds
+                       { path: ds.mountPoint
                        , onFileSelected: update self <<< FileSelected
                        , onDirSelected: update self <<< DirSelected
                        } ) self.state.selectedDataset
