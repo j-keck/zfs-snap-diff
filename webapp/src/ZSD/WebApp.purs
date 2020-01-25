@@ -9,6 +9,7 @@ import Prelude (($))
 import React.Basic (Component, JSX, createComponent, fragment, make)
 import ZSD.Components.Navbar (navbar)
 import ZSD.Model.Config (Config)
+import ZSD.View.BrowseSnapshots (browseSnapshots)
 import ZSD.Views.BrowseFilesystem (browseFilesystem)
 
 
@@ -35,7 +36,7 @@ webApp props = make component { initialState, render } props
     initialState =
       let views = ANE.cons'
                   (Tuple "Browse filesystem"  $ browseFilesystem { config: props.config })
-                  []
+                  [ Tuple "Browse snapshots" $ browseSnapshots { config: props.config }]
        in { views, activeView: snd $ ANE.head views }
 
 

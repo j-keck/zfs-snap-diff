@@ -111,6 +111,44 @@ func (self *WebApp) findFileVersionsHndl(w http.ResponseWriter, r *http.Request)
 	encodeJsonAndRespond(w, r, versions)
 }
 
+
+/// responds with a list of snapshots for the given dataset
+///
+/// expected payload: { datasetName: "name" }
+func (self *WebApp) snapshotsForDatasetHndl(w http.ResponseWriter, r *http.Request) {
+	// decode the payload
+	type Payload struct {
+		DatasetName   string            `json:"datasetName"`
+	}
+
+	payload, ok := decodeJsonPayload(w, r, &Payload{}).(*Payload)
+	if !ok {
+		return
+	}
+	
+
+	// get the dataset
+	ds, err := self.zfs.FindDatasetByName(payload.DatasetName)
+	if err != nil {
+		log.Errorf("Dataset with name: %s not found - %v", payload.DatasetName, err)
+		http.Error(w, "Dataset with the given name not found", 400)
+		return
+	}
+
+
+	// snapshots
+	snaps, err := ds.ScanSnapshots();
+	if err != nil {
+		log.Errorf("Unable to scan snapshots for Dataset: %s - %v", payload.DatasetName, err)
+		http.Error(w, "Unable to scan snapshots for the Dataset", 400)
+		return
+	}
+
+	
+	encodeJsonAndRespond(w, r, snaps)
+}
+
+
 /// responds with the mime type of the request file
 ///
 /// expected payload: { path: "/path/to/file" }

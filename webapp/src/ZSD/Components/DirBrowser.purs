@@ -26,7 +26,7 @@ import ZSD.Model.FSEntry as FSEntry
 
 
 type Props =
-  { dataset         :: Dataset
+  { path            :: FSEntry
   , onFileSelected  :: FSEntry -> Effect Unit
   , onDirSelected   :: FSEntry -> Effect Unit
   }
@@ -95,11 +95,11 @@ dirBrowser = make component { initialState, render, didMount, didUpdate }
     initialState = { breadcrumb: [], dirListing: [], selectedFile: Nothing
                    , showBrowser: true, showHidden: false }
 
-    didMount self = update self (StartAt self.props.dataset.mountPoint)
+    didMount self = update self (StartAt self.props.path)
 
     didUpdate self {prevProps} = do
-      guard (self.props.dataset /= prevProps.dataset) $
-        update self (StartAt self.props.dataset.mountPoint)
+      guard (self.props.path /= prevProps.path) $
+        update self (StartAt self.props.path)
 
 
     render self =

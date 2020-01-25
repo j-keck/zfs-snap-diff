@@ -22,14 +22,16 @@ type Props =
 type State = { activeViewTitle :: Title }
 
 navbar :: Props -> JSX
-navbar props = make component { initialState, render } props
+navbar = make component { initialState, didMount, render } 
 
   where
 
     component :: Component Props
     component = createComponent "Navbar"
 
-    initialState = { activeViewTitle: fst $ ANE.head props.views }
+    initialState = { activeViewTitle: "" }
+
+    didMount self = self.setState _ { activeViewTitle = fst $ ANE.head self.props.views }
 
     render self =
       R.nav
@@ -55,7 +57,7 @@ navbar props = make component { initialState, render } props
       , children:
         [ R.ul
           { className: "navbar-nav"
-          , children: ANE.toUnfoldable $ map (mkNavItem self) props.views
+          , children: ANE.toUnfoldable $ map (mkNavItem self) self.props.views
           }
         ]
       }

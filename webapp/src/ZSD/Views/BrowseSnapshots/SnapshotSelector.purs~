@@ -1,0 +1,33 @@
+module ZSD.Views.BrowseSnapshots.SnapshotSelector where
+
+import Effect.Console (logShow)
+import Prelude (($))
+import React.Basic (Component, JSX, createComponent, make)
+import React.Basic.DOM as R
+import ZSD.Component.Table (table)
+import ZSD.Formatter as Formatter
+import ZSD.Model.Snapshot (Snapshots)
+
+type Props =
+  { snapshots :: Snapshots }
+
+type State = {}
+
+
+snapshotSelector :: Props -> JSX
+snapshotSelector = make component { initialState, render }
+  where
+
+    component :: Component Props
+    component = createComponent "SelectSnapshot"
+
+    initialState = {}
+
+    render self =
+      table
+       { header: ["Snapshot Name", "Snapshot Created"]
+       , rows: self.props.snapshots
+       , mkRow: \s -> [ R.text s.name, R.text $ Formatter.dateTime s.created ]
+       , onRowSelected: logShow
+       }
+

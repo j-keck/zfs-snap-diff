@@ -71,6 +71,7 @@ func (self *WebApp) registerApiEndpoints() {
 	http.HandleFunc("/api/datasets", self.datasetsHndl)
 	http.HandleFunc("/api/dir-listing", self.dirListingHndl)
 	http.HandleFunc("/api/find-file-versions", self.findFileVersionsHndl)
+	http.HandleFunc("/api/snapshots-for-dataset", self.snapshotsForDatasetHndl)
 	http.HandleFunc("/api/mime-type", self.mimeTypeHndl)
 	http.HandleFunc("/api/download", self.downloadHndl)
 	http.HandleFunc("/api/diff", self.diffHndl)
