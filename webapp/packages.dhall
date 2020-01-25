@@ -42,6 +42,16 @@ let additions =
           , repo = "https://github.com/slamdata/purescript-affjax.git"
           , version = "v10.0.0"
           }
+      ,react-basic-textf =
+       { dependencies =
+           [ "foreign"
+ 	   , "maybe"
+ 	   , "react-basic"
+ 	   , "unsafe-coerce"
+ 	   ]
+       , repo = "https://github.com/j-keck/purescript-react-basic-textf.git"
+       , version = "v0.3.0"
+       }
       }
 
 in  upstream // overrides // additions

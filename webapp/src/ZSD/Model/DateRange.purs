@@ -1,15 +1,14 @@
 module ZSD.Model.DateRange
-       ( DateRange
-       , lastNDays
-       , dayCount
-       , slide
-       , adjustFrom
-       , adjustTo
-       )
+       -- ( DateRange(..)
+       -- , lastNDays
+       -- , dayCount
+       -- , slide
+       -- , adjustFrom
+       -- , adjustTo
+       -- )
        where
 
 import Data.Date
-
 import Control.Monad.Except (except)
 import Data.Bifunctor (lmap)
 import Data.Date as Date
@@ -24,7 +23,7 @@ import Data.Time.Duration (Days(..), Milliseconds)
 import Effect (Effect)
 import Effect.Now as Effect
 import Foreign (F, ForeignError(..))
-import Prelude (class Eq, class Show, bind, bottom, const, identity, negate, pure, ($), (/), (<$>), (>>=), (>>>))
+import Prelude (class Eq, class Semigroup, class Show, bind, bottom, const, identity, negate, pure, ($), (/), (<$>), (>>=), (>>>))
 import Simple.JSON (class ReadForeign, class WriteForeign)
 import Simple.JSON as F
 
@@ -93,3 +92,7 @@ instance writeForeignDateRange :: WriteForeign DateRange where
                          dash = Placeholder "-"
                          fmt = L.fromFoldable [YearFull, dash, MonthTwoDigits, dash, DayOfMonthTwoDigits]
                      in format fmt dt
+
+instance semigroupDateRange :: Semigroup DateRange where
+  append (DateRange { from }) (DateRange { to }) =
+    DateRange { from, to }

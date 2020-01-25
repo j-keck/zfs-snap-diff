@@ -20,11 +20,10 @@ type Scanner struct {
 
 type ScanResult struct {
 	FileVersions             []FileVersion  `json:"fileVersions"`
-	ScannedDateRange         DateRange      `json:"scannedDateRange"`
-	SkippedSnapshots         int            `json:"skippedSnapshots"`
-	ScannedSnapshots         int            `json:"scannedSnapshots"`
-	SnapshotsToScan          int            `json:"snapshotsToScan"`
-	FileMissingSnapshots     int            `json:"fileMissingSnapshots"`
+	DateRange                DateRange      `json:"dateRange"`
+	SnapsScanned             int            `json:"snapsScanned"`
+	SnapsToScan              int            `json:"snapsToScan"`
+	SnapsFileMissing         int            `json:"snapsFileMissing"`
 	LastScannedSnapshot      zfs.Snapshot   `json:"lastScannedSnapshot"`
 	ScanDuration             time.Duration  `json:"scanDuration"`
 }
@@ -40,7 +39,7 @@ func NewScanner(dateRange DateRange, compareMethod string, dataset zfs.Dataset) 
 
 
 func (self *Scanner) FindFileVersions(pathActualVersion string) (ScanResult, error) {
-	sr := ScanResult{FileVersions: make([]FileVersion, 0), ScannedDateRange: self.dateRange}
+	sr := ScanResult{FileVersions: make([]FileVersion, 0), DateRange: self.dateRange}
 	startTs := time.Now()
 
 	snaps, err := self.dataset.ScanSnapshots()
@@ -51,10 +50,11 @@ func (self *Scanner) FindFileVersions(pathActualVersion string) (ScanResult, err
 	log.Debugf("search for file versions for file: %s, in the date range: %s",
 		pathActualVersion, self.dateRange.String())
 	var cmp Comparator
+	snapsSkipped := 0
 	for idx, snap := range snaps {
         if self.dateRange.IsBefore(snap.Created) {
-			sr.SkippedSnapshots = sr.SkippedSnapshots + 1
-			log.Debugf("skip snapshot - snapshot is younger (%s) than the time-range: %s",
+			snapsSkipped = snapsSkipped + 1
+			log.Tracef("skip snapshot - snapshot is younger (%s) than the time-range: %s",
 				snap.Created, self.dateRange.String())
 
 			continue
@@ -87,13 +87,13 @@ func (self *Scanner) FindFileVersions(pathActualVersion string) (ScanResult, err
 			break
 		}
 
-		sr.ScannedSnapshots = sr.ScannedSnapshots + 1
+		sr.SnapsScanned = sr.SnapsScanned + 1
 		sr.LastScannedSnapshot = snap
 
 		fh, err := fs.NewFileHandle(self.pathInSnapshot(pathActualVersion, snap))
 		if err != nil {
 			// not every snapshot has a version of the file - ignore errors
-            sr.FileMissingSnapshots = sr.FileMissingSnapshots + 1
+			sr.SnapsFileMissing = sr.SnapsFileMissing + 1
 			continue
 		}
 
@@ -105,7 +105,7 @@ func (self *Scanner) FindFileVersions(pathActualVersion string) (ScanResult, err
 	}
 
 	sr.ScanDuration = time.Now().Sub(startTs)
-	sr.SnapshotsToScan = len(snaps) - sr.SkippedSnapshots - sr.ScannedSnapshots
+	sr.SnapsToScan = len(snaps) - snapsSkipped - sr.SnapsScanned
 
 	log.Debugf("%d versions for file %s found - scan duration: %s",
 		len(sr.FileVersions), pathActualVersion, sr.ScanDuration)

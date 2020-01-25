@@ -54,7 +54,7 @@ panel = make component { initialState, render }
             , self.props.header
             ]
           }
-        , R.div { className: "card-body" <> guard (not self.state.showBody) " d-none"
+        , R.div { className: "card-body pb-0" <> guard (not self.state.showBody) " d-none"
                 , children: [self.props.body hideBodyFn ]
                 }
         , self.props.footer

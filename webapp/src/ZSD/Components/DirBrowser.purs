@@ -7,10 +7,11 @@ import Data.Array as A
 import Data.Either (fromRight)
 import Data.Maybe (Maybe(..), maybe)
 import Data.Monoid (guard)
+import Data.Tuple (snd)
 import Effect (Effect)
-import Effect.Console (log)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
+import Effect.Console (log)
 import Partial.Unsafe (unsafePartial)
 import React.Basic (Component, JSX, createComponent, make)
 import React.Basic as React
@@ -94,9 +95,7 @@ dirBrowser = make component { initialState, render, didMount, didUpdate }
     initialState = { breadcrumb: [], dirListing: [], selectedFile: Nothing
                    , showBrowser: true, showHidden: false }
 
-    didMount self = do
-      log "dirBrowser didMount"
-      update self (StartAt self.props.dataset.mountPoint)
+    didMount self = update self (StartAt self.props.dataset.mountPoint)
 
     didUpdate self {prevProps} = do
       guard (self.props.dataset /= prevProps.dataset) $
