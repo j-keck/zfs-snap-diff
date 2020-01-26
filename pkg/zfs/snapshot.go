@@ -34,21 +34,3 @@ func (s *Snapshots) Filter(f func(Snapshot) bool) Snapshots {
 	}
 	return newS
 }
-
-// // FilterWhereFileWasModified finds all snapshots where the file was modified
-// func (s *Snapshots) FilterWhereFileWasModified(path string, fileHasChangedFuncGen file.FileHasChangedFuncGen) Snapshots {
-//	//	fh, _ := file.NewFileHandle(path)
-//	//	fileHasChangedFunc := fileHasChangedFuncGen(fh)
-
-//	return s.Filter(func(snap Snapshot) bool {
-//		// ignore errors here if file not found (e.g. was deleted)
-//		// if snapFileFh, err := file.NewFileHandleInSnapshot(path, snap.Name); err == nil {
-//		//	if fileHasChangedFunc(fh, snapFileFh) {
-//		//		// file changed in snapshot
-//		//		fh = snapFileFh
-//		//		return true
-//		//	}
-//		// }
-//		return false
-//	})
-// }
