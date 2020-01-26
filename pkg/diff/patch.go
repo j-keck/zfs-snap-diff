@@ -17,6 +17,7 @@ func PatchPath(path string, deltas Deltas) error {
 
 	return Patch(fh, deltas)
 }
+
 // Patch applys the given deltas to the current file
 //   * deleted entries are inserted
 //   * inserted entries are removed

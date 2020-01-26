@@ -1,15 +1,14 @@
 package diff
 
 import (
-	"fmt"
 	"bytes"
+	"fmt"
 	"html"
 	"strings"
 )
 
-
 func createSideBySideDiffHTMLFragment(lineBasedDeltas Deltas) []string {
-		var htmlBlocks []string
+	var htmlBlocks []string
 
 	if len(lineBasedDeltas) == 0 {
 		// noting to do
@@ -143,8 +142,6 @@ func createInlineDiffHTMLFragment(charBasedDeltas Deltas) []string {
 
 	return htmlBlocks
 }
-
-
 
 func splitDeltasByContext(deltas Deltas) []Deltas {
 

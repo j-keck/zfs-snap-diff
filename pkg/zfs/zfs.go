@@ -2,13 +2,13 @@ package zfs
 
 import (
 	"fmt"
+	"github.com/j-keck/plog"
 	"github.com/j-keck/zfs-snap-diff/pkg/config"
 	"github.com/j-keck/zfs-snap-diff/pkg/fs"
-	"github.com/j-keck/plog"
+	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
-	"sort"
-	"path/filepath"
 )
 
 var log = plog.GlobalLogger()
@@ -50,10 +50,10 @@ func (self *ZFS) FindDatasetByName(name string) (Dataset, error) {
 
 func (self *ZFS) FindDatasetForPath(path string) (Dataset, error) {
 	datasets := self.Datasets()
-    sort.Sort(SortByPathDesc(datasets))
+	sort.Sort(SortByPathDesc(datasets))
 	for _, ds := range datasets {
 		// TODO: filepath.HasPrefix is buggy
-	    //  see: https://github.com/golang/go/issues/18358
+		//  see: https://github.com/golang/go/issues/18358
 		if filepath.HasPrefix(path, ds.MountPoint.Path) {
 			log.Tracef("Dataset for path found - ds: %+v, for path: %s", ds, path)
 			return ds, nil
@@ -121,11 +121,11 @@ func (self *ZFS) scanDatasets(name string) (Datasets, error) {
 						datasets = append(datasets, Dataset{name, used, avail, refer, dirHandle, self.cmd})
 					}
 				}
-				
+
 			case "none":
-				log.Notef("ignore not mounted dataset: '%s'", name);
+				log.Notef("ignore not mounted dataset: '%s'", name)
 				continue
-				
+
 			default:
 				log.Debugf("dataset found - name: '%s', mountpoint: '%s'", name, mountPoint)
 				if dirHandle, err := fs.NewDirHandle(mountPoint); err != nil {
@@ -142,8 +142,8 @@ func (self *ZFS) scanDatasets(name string) (Datasets, error) {
 	return datasets, nil
 }
 
-
 type SortByPathDesc Datasets
+
 func (s SortByPathDesc) Len() int {
 	return len(s)
 }

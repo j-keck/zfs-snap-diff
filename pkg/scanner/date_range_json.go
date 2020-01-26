@@ -1,11 +1,10 @@
 package scanner
 
 import (
-	"time"
-	"fmt"
 	"encoding/json"
+	"fmt"
+	"time"
 )
-
 
 func (self DateRange) MarshalJSON() ([]byte, error) {
 	type J struct {
@@ -17,15 +16,12 @@ func (self DateRange) MarshalJSON() ([]byte, error) {
 	)
 }
 
-
-
 func (self *DateRange) UnmarshalJSON(b []byte) error {
 	// unmarshal in a map
 	var m map[string]interface{}
 	if err := json.Unmarshal(b, &m); err != nil {
 		return err
 	}
-
 
 	// extract values
 	daysI, daysOk := m["days"]
@@ -87,7 +83,7 @@ func (self *DateRange) UnmarshalJSON(b []byte) error {
 
 func readDate(dateI interface{}) (time.Time, error) {
 	dateS, ok := dateI.(string)
-	if ! ok {
+	if !ok {
 		return time.Time{}, fmt.Errorf("date in json was not a string: %v", dateI)
 	}
 
@@ -101,7 +97,7 @@ func readDate(dateI interface{}) (time.Time, error) {
 
 func readDays(daysI interface{}) (int, error) {
 	daysF, ok := daysI.(float64)
-	if ! ok {
+	if !ok {
 		return 0, fmt.Errorf("days in json was not numeric: %v", daysI)
 	}
 

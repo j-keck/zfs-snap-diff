@@ -11,8 +11,7 @@ func TestTimeRangeContains(t *testing.T) {
 		t.Error(err.Error())
 	}
 
-
-	if ! tr.Contains(tr.From.Add(1 * time.Second)) {
+	if !tr.Contains(tr.From.Add(1 * time.Second)) {
 		t.Error("expected time is in range")
 	}
 

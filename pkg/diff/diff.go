@@ -75,4 +75,3 @@ func readTextFile(path string) (string, error) {
 
 	return fh.ReadString()
 }
-

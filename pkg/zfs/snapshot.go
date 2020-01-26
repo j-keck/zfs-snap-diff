@@ -1,15 +1,15 @@
 package zfs
 
 import (
-	"time"
 	"github.com/j-keck/zfs-snap-diff/pkg/fs"
+	"time"
 )
 
 // Snapshot - zfs snapshot
 type Snapshot struct {
-	Name     string       `json:"name"`
-	Created  time.Time    `json:"created"`
-	Dir      fs.DirHandle  `json:"dir"`
+	Name    string       `json:"name"`
+	Created time.Time    `json:"created"`
+	Dir     fs.DirHandle `json:"dir"`
 }
 
 // Snapshots represents snapshots from a zfs dataset

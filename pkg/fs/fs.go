@@ -21,5 +21,3 @@ import (
 )
 
 var log = plog.GlobalLogger()
-
-

@@ -58,7 +58,6 @@ func (deltas Deltas) String() string {
 	return buffer.String()
 }
 
-
 func createDeltasFromDiffs(diffs []diffmatchpatch.Diff, contextSize int) Deltas {
 	var deltas Deltas
 	var lineNrFrom, lineNrTarget int = 1, 1       // first line is line nr. 1

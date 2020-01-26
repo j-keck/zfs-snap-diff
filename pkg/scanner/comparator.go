@@ -12,13 +12,11 @@ import (
 	"time"
 )
 
-
 // Comparator compares ...
 type Comparator interface {
 	init(actual fs.FileHandle)
 	HasChanged(other fs.FileHandle) bool
 }
-
 
 func NewComparator(method string, fh fs.FileHandle) (Comparator, error) {
 

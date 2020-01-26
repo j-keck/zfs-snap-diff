@@ -41,7 +41,6 @@ func TestUnmarshalWithFrom(t *testing.T) {
 	}
 }
 
-
 func TestJSON(t *testing.T) {
 	dr := NewDateRange(time.Now(), 1)
 	js, err := json.Marshal(dr)

@@ -62,7 +62,6 @@ func (self *Dataset) ScanSnapshots() (Snapshots, error) {
 	return snapshots.Reverse(), nil
 }
 
-
 // Datasets are a list of Dataset
 type Datasets []Dataset
 

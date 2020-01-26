@@ -17,15 +17,14 @@ type Scanner struct {
 	dataset       zfs.Dataset
 }
 
-
 type ScanResult struct {
-	FileVersions             []FileVersion  `json:"fileVersions"`
-	DateRange                DateRange      `json:"dateRange"`
-	SnapsScanned             int            `json:"snapsScanned"`
-	SnapsToScan              int            `json:"snapsToScan"`
-	SnapsFileMissing         int            `json:"snapsFileMissing"`
-	LastScannedSnapshot      zfs.Snapshot   `json:"lastScannedSnapshot"`
-	ScanDuration             time.Duration  `json:"scanDuration"`
+	FileVersions        []FileVersion `json:"fileVersions"`
+	DateRange           DateRange     `json:"dateRange"`
+	SnapsScanned        int           `json:"snapsScanned"`
+	SnapsToScan         int           `json:"snapsToScan"`
+	SnapsFileMissing    int           `json:"snapsFileMissing"`
+	LastScannedSnapshot zfs.Snapshot  `json:"lastScannedSnapshot"`
+	ScanDuration        time.Duration `json:"scanDuration"`
 }
 
 type FileVersion struct {
@@ -34,9 +33,8 @@ type FileVersion struct {
 }
 
 func NewScanner(dateRange DateRange, compareMethod string, dataset zfs.Dataset) Scanner {
-	return Scanner { dateRange, compareMethod, dataset }
+	return Scanner{dateRange, compareMethod, dataset}
 }
-
 
 func (self *Scanner) FindFileVersions(pathActualVersion string) (ScanResult, error) {
 	sr := ScanResult{FileVersions: make([]FileVersion, 0), DateRange: self.dateRange}
@@ -52,7 +50,7 @@ func (self *Scanner) FindFileVersions(pathActualVersion string) (ScanResult, err
 	var cmp Comparator
 	snapsSkipped := 0
 	for idx, snap := range snaps {
-        if self.dateRange.IsBefore(snap.Created) {
+		if self.dateRange.IsBefore(snap.Created) {
 			snapsSkipped = snapsSkipped + 1
 			log.Tracef("skip snapshot - snapshot is younger (%s) than the time-range: %s",
 				snap.Created, self.dateRange.String())
@@ -64,7 +62,7 @@ func (self *Scanner) FindFileVersions(pathActualVersion string) (ScanResult, err
 			// init comparator
 
 			var pathInitVersion string
-			if p, ok := self.findLastPathInSnap(pathActualVersion, idx - 1, snaps); ok {
+			if p, ok := self.findLastPathInSnap(pathActualVersion, idx-1, snaps); ok {
 				pathInitVersion = p
 			} else {
 				pathInitVersion = pathActualVersion
@@ -119,7 +117,7 @@ func (self *Scanner) pathInSnapshot(pathActualVersion string, snap zfs.Snapshot)
 
 func (self *Scanner) findLastPathInSnap(p string, idx int, snaps []zfs.Snapshot) (string, bool) {
 	for idx >= 0 {
-	pathInSnap := self.pathInSnapshot(p, snaps[idx])
+		pathInSnap := self.pathInSnapshot(p, snaps[idx])
 		if _, err := fs.NewFileHandle(pathInSnap); err == nil {
 			return pathInSnap, true
 		}

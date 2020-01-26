@@ -111,21 +111,19 @@ func (self *WebApp) findFileVersionsHndl(w http.ResponseWriter, r *http.Request)
 	encodeJsonAndRespond(w, r, versions)
 }
 
-
 /// responds with a list of snapshots for the given dataset
 ///
 /// expected payload: { datasetName: "name" }
 func (self *WebApp) snapshotsForDatasetHndl(w http.ResponseWriter, r *http.Request) {
 	// decode the payload
 	type Payload struct {
-		DatasetName   string            `json:"datasetName"`
+		DatasetName string `json:"datasetName"`
 	}
 
 	payload, ok := decodeJsonPayload(w, r, &Payload{}).(*Payload)
 	if !ok {
 		return
 	}
-	
 
 	// get the dataset
 	ds, err := self.zfs.FindDatasetByName(payload.DatasetName)
@@ -135,19 +133,16 @@ func (self *WebApp) snapshotsForDatasetHndl(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-
 	// snapshots
-	snaps, err := ds.ScanSnapshots();
+	snaps, err := ds.ScanSnapshots()
 	if err != nil {
 		log.Errorf("Unable to scan snapshots for Dataset: %s - %v", payload.DatasetName, err)
 		http.Error(w, "Unable to scan snapshots for the Dataset", 400)
 		return
 	}
 
-	
 	encodeJsonAndRespond(w, r, snaps)
 }
-
 
 /// responds with the mime type of the request file
 ///
@@ -307,7 +302,6 @@ func (self *WebApp) diffHndl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	
 	// diff
 	diffs, err := diff.NewDiffFromPath(payload.BackupPath, payload.ActualPath, payload.DiffContextSize)
 	if err != nil {
@@ -328,9 +322,9 @@ func (self *WebApp) diffHndl(w http.ResponseWriter, r *http.Request) {
 func (self *WebApp) revertChangeHndl(w http.ResponseWriter, r *http.Request) {
 	// decode the payload
 	type Payload struct {
-		ActualPath      string `json:"actualPath"`
-		BackupPath      string `json:"backupPath"`
-		DeltaIdx        int    `json:"deltaIdx"`
+		ActualPath string `json:"actualPath"`
+		BackupPath string `json:"backupPath"`
+		DeltaIdx   int    `json:"deltaIdx"`
 	}
 
 	payload, ok := decodeJsonPayload(w, r, &Payload{}).(*Payload)
@@ -352,7 +346,6 @@ func (self *WebApp) revertChangeHndl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	
 	// diff
 	diffs, err := diff.NewDiffFromPath(payload.BackupPath, payload.ActualPath, 3)
 	if err != nil {
@@ -362,8 +355,7 @@ func (self *WebApp) revertChangeHndl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
-	err = diff.PatchPath(payload.ActualPath, diffs.Deltas[payload.DeltaIdx]);
+	err = diff.PatchPath(payload.ActualPath, diffs.Deltas[payload.DeltaIdx])
 	if err != nil {
 		msg := "Unable to revert change"
 		log.Errorf("%s: %v", msg, err)
@@ -380,8 +372,8 @@ func (self *WebApp) revertChangeHndl(w http.ResponseWriter, r *http.Request) {
 func (self *WebApp) restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 	// decode the payload
 	type Payload struct {
-		ActualPath      string `json:"actualPath"`
-		BackupPath      string `json:"backupPath"`
+		ActualPath string `json:"actualPath"`
+		BackupPath string `json:"backupPath"`
 	}
 
 	payload, ok := decodeJsonPayload(w, r, &Payload{}).(*Payload)
@@ -408,33 +400,32 @@ func (self *WebApp) restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 		msg := "Unable to open actual file"
 		log.Errorf("%s - actual-path: %s", msg, payload.ActualPath)
 		http.Error(w, msg, 400)
-		return		
+		return
 	}
-	
+
 	backupFh, err := fs.NewFileHandle(payload.BackupPath)
 	if err != nil {
 		msg := "Unable to open backup file"
 		log.Errorf("%s - backup-path: %s", msg, payload.BackupPath)
 		http.Error(w, msg, 400)
-		return		
+		return
 	}
 
 	if err := fs.Backup(actualFh); err != nil {
 		msg := "Unable to backup the file"
 		log.Errorf("%s - acutal-path: %s", msg, payload.ActualPath)
 		http.Error(w, msg, 400)
-		return		
+		return
 	}
-	
+
 	if err := backupFh.Copy(payload.ActualPath); err != nil {
 		msg := "Unable to restore backup file"
 		log.Errorf("%s - backup-path: %s", msg, payload.BackupPath)
 		http.Error(w, msg, 400)
-		return		
+		return
 	}
-}	
+}
 
-	
 func decodeJsonPayload(w http.ResponseWriter, r *http.Request, payload interface{}) interface{} {
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(payload); err != nil {
