@@ -1,6 +1,7 @@
 module ZSD.Views.BrowseFilesystem where
 
 import Prelude
+
 import Data.Foldable (foldMap)
 import Data.Maybe (Maybe(..))
 import Data.Tuple.Nested (tuple2, uncurry2)
@@ -11,11 +12,11 @@ import React.Basic.DOM as R
 import ZSD.Components.DatasetSelector (datasetSelector)
 import ZSD.Components.DirBrowser (dirBrowser)
 import ZSD.Components.FileActions (fileAction)
-import ZSD.Views.BrowseFilesystem.FileVersionSelector (fileVersionSelector)
 import ZSD.Model.Config (Config)
 import ZSD.Model.Dataset (Dataset)
 import ZSD.Model.FSEntry (FSEntry)
 import ZSD.Model.FileVersion (FileVersion)
+import ZSD.Views.BrowseFilesystem.FileVersionSelector (fileVersionSelector)
 
 type Props = { config :: Config }
 

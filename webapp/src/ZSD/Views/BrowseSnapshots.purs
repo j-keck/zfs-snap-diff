@@ -32,7 +32,6 @@ type Props = { config :: Config }
 
 type State =
   { selectedDataset  :: Maybe Dataset
-  , snapshots        :: Maybe Snapshots
   , selectedSnapshot :: Maybe Snapshot
   , selectedFile     :: Maybe FSEntry
   , selectedDir      :: Maybe FSEntry
@@ -45,11 +44,7 @@ data Command =
 update :: (React.Self Props State) -> Command -> Effect Unit
 update self = case _ of
   DatasetSelected ds -> do
-    self.setState _ { selectedDataset = Just ds
-                    }
-    launchAff_ $ do
-      res <- Snapshots.fetchForDataset ds 
-      liftEffect $ self.setState _ { snapshots = either (const Nothing) Just res }
+    self.setState _ { selectedDataset = Just ds }
 
 
 browseSnapshots :: Props -> JSX
@@ -60,7 +55,6 @@ browseSnapshots = make component { initialState, render }
     component = createComponent "BrowseSnapshots"
 
     initialState = { selectedDataset: Nothing
-                   , snapshots: Nothing
                    , selectedSnapshot: Nothing
                    , selectedFile: Nothing
                    , selectedDir: Nothing
@@ -72,10 +66,10 @@ browseSnapshots = make component { initialState, render }
                         , onDatasetSelected: update self <<< DatasetSelected
                         }
 
-      , foldMap (\snapshots -> snapshotSelector
-                              { snapshots
+      , foldMap (\dataset -> snapshotSelector
+                              { dataset 
                               , onSnapshotSelected: \snap -> self.setState _ { selectedSnapshot = Just snap, selectedFile = Nothing, selectedDir = Nothing }
-                              }) self.state.snapshots
+                              }) self.state.selectedDataset
         
       , foldMap (\snapshot -> dirBrowser
                               { dir: snapshot.dir 

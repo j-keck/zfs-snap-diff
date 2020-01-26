@@ -1,4 +1,4 @@
-module ZSD.Component.TableX where
+module ZSD.Components.TableX where
 
 import Prelude
 
@@ -23,11 +23,11 @@ type Props a =
   }
 
 tableX :: forall a. Props a -> JSX
-tableX = makeStateless component \props -> 
+tableX = makeStateless component \props ->
 
   R.table
       { className: "table table-hover table-sm"
-      , children: 
+      , children:
         [ R.thead_ [ R.tr_ $ map (R.text >>> A.singleton >>> R.th_) props.header ]
         , R.tbody_ $ flip map (zipWithIndex props.rows) \t@(Tuple idx x) ->
            R.tr
