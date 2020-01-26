@@ -5,7 +5,7 @@ import ZSD.Model.DateRange
 import ZSD.Ops
 
 import Data.Array as A
-import Data.Either (either, fromRight)
+import Data.Either (either)
 import Data.Foldable (foldMap)
 import Data.Int (toNumber)
 import Data.Maybe (Maybe(..), maybe)
@@ -18,12 +18,13 @@ import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Console (logShow)
 import Foreign.Object as O
-import Partial.Unsafe (unsafePartial)
 import React.Basic (Component, JSX, createComponent, fragment, make, readState, empty)
 import React.Basic as React
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture_)
 import React.Basic.DOM.Textf as TF
+import ZSD.Components.Notifications (enqueueAppError)
+import ZSD.Components.Notifications as Notifications
 import ZSD.Components.Panel (panel)
 import ZSD.Components.Spinner as Spinner
 import ZSD.Components.TableX (tableX)
@@ -71,15 +72,16 @@ update self = case _ of
                    (unwrap >>> _.dateRange >>> DateRange.slide days >>> pure)
                    (A.last state.scanResults )
     launchAff_ $ do
-      scanResult <- unsafePartial $ fromRight <$> ScanResult.fetch self.props.file range
-      liftEffect $ do
+      res <- ScanResult.fetch self.props.file range
+      liftEffect $ either enqueueAppError (\scanResult ->  do
         state <- readState self
         let versions = A.concat [state.versions, (unwrap scanResult).fileVersions]
         self.setStateThen (const $ state { scanResults = state.scanResults `A.snoc` scanResult
                                          , versions = versions
                                          , spinner = empty
                                          })
-                                 $ update self next
+                                 $ update self next) res
+          
       
   SelectVersionByIdx idx -> do
     state <- readState self

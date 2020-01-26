@@ -8,6 +8,7 @@ import Data.Tuple (Tuple(..), snd)
 import Prelude (($))
 import React.Basic (Component, JSX, createComponent, fragment, make)
 import ZSD.Components.Navbar (navbar)
+import ZSD.Components.Notifications (notifications)
 import ZSD.Model.Config (Config)
 import ZSD.View.BrowseSnapshots (browseSnapshots)
 import ZSD.Views.BrowseFilesystem (browseFilesystem)
@@ -46,5 +47,6 @@ webApp props = make component { initialState, render } props
         { views: self.state.views
         , onViewSelected: \view -> self.setState _ { activeView = view }
         }
+      , notifications
       , self.state.activeView
       ]

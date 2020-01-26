@@ -2,7 +2,7 @@ module ZSD.Components.FileAction.ViewDiff where
 
 import Prelude
 
-import Data.Either (fromRight)
+import Data.Either (either)
 import Data.Foldable (foldMap)
 import Data.Maybe (Maybe(..))
 import Data.Monoid (guard)
@@ -10,12 +10,12 @@ import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
-import Partial.Unsafe (unsafePartial)
 import React.Basic (Component, JSX, createComponent, fragment, make)
 import React.Basic as React
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture_)
 import ZSD.Components.ActionButton (actionButton)
+import ZSD.Components.Notifications (enqueueAppError)
 import ZSD.Model.Diff (Diff)
 import ZSD.Model.Diff as Diff
 import ZSD.Model.FSEntry (FSEntry)
@@ -53,9 +53,9 @@ update self = case _ of
   Diff -> case self.props.version of
     ActualVersion _ -> self.setState _ { diff = Nothing }
     BackupVersion _ -> launchAff_ $ do
-      res <- unsafePartial $ fromRight <$> Diff.fetch self.props.file self.props.version
-      liftEffect $ self.setState _ { diff = Just res }
-
+      res <- Diff.fetch self.props.file self.props.version
+      liftEffect $ either enqueueAppError (\diff -> self.setState _ { diff = Just diff}) res
+ 
   Revert idx -> launchAff_ $ do
     _ <- Diff.revert self.props.file self.props.version idx
     liftEffect $ update self Diff

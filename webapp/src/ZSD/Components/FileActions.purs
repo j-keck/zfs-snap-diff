@@ -3,12 +3,11 @@ module ZSD.Components.FileActions where
 import Prelude
 
 import Data.Array as A
-import Data.Either (fromRight)
+import Data.Either (either)
 import Data.Monoid (guard)
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
-import Partial.Unsafe (unsafePartial)
 import React.Basic (Component, JSX, createComponent, empty, make)
 import React.Basic as React
 import React.Basic.DOM as R
@@ -20,6 +19,7 @@ import ZSD.Components.ActionButton (actionButton)
 import ZSD.Components.FileAction.ViewDiff (viewDiff)
 import ZSD.Components.FileActions.ViewBlob (viewBlob)
 import ZSD.Components.FileActions.ViewText (viewText)
+import ZSD.Components.Notifications (enqueueAppError)
 import ZSD.Model.FSEntry (FSEntry)
 import ZSD.Model.FSEntry as FSEntry
 import ZSD.Model.FileVersion (FileVersion(..))
@@ -52,14 +52,14 @@ update self = case _ of
 
   ViewText -> launchAff_ $ do
     let file = FileVersion.unwrapFile self.props.version
-    content <- unsafePartial $ fromRight <$> FSEntry.downloadText file
-    liftEffect $ self.setState _ { view = viewText { content } }
+    res <- FSEntry.downloadText file
+    liftEffect $ either enqueueAppError (\content -> self.setState _ { view = viewText { content } }) res
 
 
   ViewBlob -> launchAff_ $ do
     let file = FileVersion.unwrapFile self.props.version
-    content <- unsafePartial $ fromRight <$> FSEntry.downloadBlob file
-    liftEffect $ self.setState _ { view = viewBlob { content } }
+    res <- FSEntry.downloadBlob file
+    liftEffect $ either enqueueAppError (\content -> self.setState _ { view = viewBlob { content } }) res
 
 
   Diff -> do
@@ -91,9 +91,8 @@ fileAction = make component { initialState, render, didMount, didUpdate }
     initialState = { view: empty, cmd: View, mimeType: MimeType "text/plain" }
 
     didMount self = launchAff_ $ do
-      -- FIXME: handle error
-      mimeType <- unsafePartial $ fromRight <$> MimeType.fetch self.props.file
-      liftEffect $ self.setStateThen _ { mimeType = mimeType } (update self View)
+      res <- MimeType.fetch self.props.file
+      liftEffect $ either enqueueAppError (\mt -> self.setStateThen _ { mimeType = mt } (update self View)) res
 
     didUpdate self { prevProps } = do
       guard (self.props /= prevProps) $ update self self.state.cmd

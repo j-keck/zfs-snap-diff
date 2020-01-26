@@ -4,18 +4,18 @@ import Prelude
 
 import Data.Array (snoc)
 import Data.Array as A
-import Data.Either (fromRight)
+import Data.Either (either)
 import Data.Maybe (Maybe(..), maybe)
 import Data.Monoid (guard)
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
-import Partial.Unsafe (unsafePartial)
 import React.Basic (Component, JSX, createComponent, make)
 import React.Basic as React
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture_)
 import ZSD.Component.Table (table)
+import ZSD.Components.Notifications (enqueueAppError)
 import ZSD.Formatter as Formatter
 import ZSD.Model.DirListing as DirListing
 import ZSD.Model.FSEntry (FSEntry)
@@ -63,9 +63,8 @@ update self = case _ of
                     , showBrowser = true, selectedFile = Nothing }
 
   ReadDir fh -> launchAff_ $ do
-    dirListing <- DirListing.fetch fh
-    -- FIXME: handle errors
-    liftEffect $ self.setState _ { dirListing = unsafePartial $ fromRight dirListing }
+    res <- DirListing.fetch fh
+    liftEffect $ either enqueueAppError (\ls -> self.setState _ { dirListing = ls }) res
 
 
   OnClick fsh -> do
