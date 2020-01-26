@@ -19,7 +19,7 @@ and run it per
   `./zfs-snap-diff <POOL>`
 
 
-[Browse Filesystem](doc/browse-filesystem.png)
+![Browse Filesystem](doc/browse-filesystem.png)
 
 
 after the rewrite is done, i can add new features.
