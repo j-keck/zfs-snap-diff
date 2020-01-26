@@ -5,31 +5,35 @@ import ZSD.Model.DateRange
 import ZSD.Ops
 
 import Data.Array as A
-import Data.Either (fromRight)
+import Data.Either (either, fromRight)
 import Data.Foldable (foldMap)
+import Data.Int (toNumber)
 import Data.Maybe (Maybe(..), maybe)
 import Data.Monoid (guard)
 import Data.Newtype (unwrap)
-import Data.Time.Duration as Date
+import Data.Time.Duration (Days(..))
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
+import Effect.Console (logShow)
+import Foreign.Object as O
 import Partial.Unsafe (unsafePartial)
 import React.Basic (Component, JSX, createComponent, fragment, make, readState, empty)
 import React.Basic as React
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture_)
 import React.Basic.DOM.Textf as TF
-import ZSD.Components.TableX (tableX)
-import ZSD.Components.Spinner as Spinner
 import ZSD.Components.Panel (panel)
+import ZSD.Components.Spinner as Spinner
+import ZSD.Components.TableX (tableX)
 import ZSD.Formatter as Formatter
 import ZSD.Model.DateRange as DateRange
 import ZSD.Model.FSEntry (FSEntry)
 import ZSD.Model.FileVersion (FileVersion(..))
 import ZSD.Model.ScanResult (ScanResult(..))
 import ZSD.Model.ScanResult as ScanResult
+import ZSD.Model.Snapshot as Snapshots
 
 
 
@@ -38,12 +42,17 @@ type Props =
   , onVersionSelected :: FileVersion -> Effect Unit
   }
 
-type State = { versions :: Array FileVersion, selectedIdx :: Int, scanResults :: Array ScanResult, spinner :: JSX }
+type State = { versions :: Array FileVersion
+             , selectedIdx :: Int
+             , scanResults :: Array ScanResult
+             , scanDays :: Int
+             , spinner :: JSX }
 
 data Action =
     DidMount
-  | Scan (Maybe DateRange) Action
+  | Scan Days Action
   | SelectVersionByIdx Int
+  | NoOp
 
 
 data SelectedVersion =
@@ -54,35 +63,34 @@ update :: React.Self Props State -> Action -> Effect Unit
 update self = case _ of
   DidMount -> do
     self.setState _ { versions = [ ActualVersion self.props.file ] }
-    update self $ Scan Nothing (SelectVersionByIdx 0)
+    update self $ Scan (Days $ -1.0) (SelectVersionByIdx 0)
 
-
-  Scan (Just range) next -> self.setStateThen _ { spinner = Spinner.spinner } $ launchAff_ $ do
-    scanResult <- unsafePartial $ fromRight <$> ScanResult.fetch self.props.file range
-    liftEffect $ do
-      state <- readState self
-      let versions = A.concat [state.versions, (unwrap scanResult).fileVersions]
-      self.setStateThen (const $ state { scanResults = state.scanResults `A.snoc` scanResult
-                                       , versions = versions
-                                       , spinner = empty
-                                       })
-                               $ update self next
-
-  Scan Nothing next -> do
-    state <- readState self
-    dateRange <- maybe (DateRange.lastNDays 1)
-                       (unwrap >>> _.dateRange >>> DateRange.slide (Date.Days $ -7.0) >>> pure)
-                       (A.last state.scanResults )
-    update self $ Scan (Just dateRange) next
-
-
+  Scan days next -> self.setStateThen _ { spinner = Spinner.spinner } $ do
+    range <- readState self >>= \state ->
+             maybe (DateRange.lastNDays days) 
+                   (unwrap >>> _.dateRange >>> DateRange.slide days >>> pure)
+                   (A.last state.scanResults )
+    launchAff_ $ do
+      scanResult <- unsafePartial $ fromRight <$> ScanResult.fetch self.props.file range
+      liftEffect $ do
+        state <- readState self
+        let versions = A.concat [state.versions, (unwrap scanResult).fileVersions]
+        self.setStateThen (const $ state { scanResults = state.scanResults `A.snoc` scanResult
+                                         , versions = versions
+                                         , spinner = empty
+                                         })
+                                 $ update self next
+      
   SelectVersionByIdx idx -> do
     state <- readState self
     case A.index state.versions idx of
       Just next -> self.setStateThen _ { selectedIdx = idx } $ self.props.onVersionSelected next
-      Nothing -> guard (hasOlderVersions state) $ update self $ Scan Nothing (SelectVersionByIdx idx)
+      Nothing -> guard (hasOlderSnapshots state) $
+                        update self $ Scan (Days $ -1.0) (SelectVersionByIdx idx)
 
+  NoOp -> pure unit
 
+  
 fileVersionSelector :: Props -> JSX
 fileVersionSelector = make component { initialState, didMount, render }
 
@@ -91,7 +99,7 @@ fileVersionSelector = make component { initialState, didMount, render }
      component :: Component Props
      component = createComponent "FileVersionSelector"
 
-     initialState = { versions: [], selectedIdx: 0 , scanResults: [], spinner: empty }
+     initialState = { versions: [], selectedIdx: 0 , scanResults: [], scanDays: 1, spinner: empty }
 
      didMount self = update self DidMount
 
@@ -131,22 +139,49 @@ fileVersionSelector = make component { initialState, didMount, render }
              }
            ]
          , body: \hidePanelBodyFn ->
-             tableX
-             { header: ["File modification time", "Snapshot Created", "Snapshot Name"]
-             , rows: self.state.versions
-             , mkRow: case _ of
-                 ActualVersion f -> [ R.text $ "Actual version", R.text "-", R.text "-" ]
-                 BackupVersion v -> [ R.text $ Formatter.dateTime v.file.modTime
-                                    , R.text $ Formatter.dateTime v.snapshot.created
-                                    , R.text v.snapshot.name
-                                    ]
-             , onRowSelected: \(Tuple idx v) -> do
-                 hidePanelBodyFn
-                 self.setState _ { selectedIdx = idx }
-                 self.props.onVersionSelected v
-             , activeIdx: Just self.state.selectedIdx
-             }
-
+             fragment
+             [ tableX
+               { header: ["File modification time", "Snapshot Created", "Snapshot Name"]
+               , rows: self.state.versions
+               , mkRow: case _ of
+                   ActualVersion f -> [ R.text $ "Actual version", R.text "-", R.text "-" ]
+                   BackupVersion v -> [ R.text $ Formatter.dateTime v.file.modTime
+                                      , R.text $ Formatter.dateTime v.snapshot.created
+                                      , R.text v.snapshot.name
+                                      ]
+               , onRowSelected: \(Tuple idx v) -> do
+                   hidePanelBodyFn
+                   self.setState _ { selectedIdx = idx }
+                   self.props.onVersionSelected v
+               , activeIdx: Just self.state.selectedIdx
+               }
+             , R.div
+               { className: "btn-group"
+               , children:
+                 [ R.button
+                   { className: "btn btn-secondary"
+                         <> guard  (not $ hasOlderSnapshots self.state) " disabled"
+                   , title: "Scan " <> show self.state.scanDays <> " days back"
+                   , onClick: capture_ $ guard (hasOlderSnapshots self.state) $
+                                         update self $ Scan (Days $ negate (toNumber self.state.scanDays)) NoOp
+                   , children: [ R.text $ "Scan " <> show self.state.scanDays <> " days back" ]
+                   }
+                 , R.button
+                   { className: "btn btn-secondary dropdown-toggle dropdown-toggle-split"
+                   , _data: O.fromHomogeneous {toggle: "dropdown" }
+                   }
+                 , R.div
+                   { className: "dropdown-menu"
+                   , children:
+                     [ R.a { className: "dropdown-item", onClick: capture_ $ self.setState _ { scanDays = 1 }, children: [ R.text "1" ] }
+                     , R.a { className: "dropdown-item", onClick: capture_ $ self.setState _ { scanDays = 7 }, children: [ R.text "7" ] }
+                     , R.a { className: "dropdown-item", onClick: capture_ $ self.setState _ { scanDays = 14 }, children: [ R.text "14" ] }
+                     ]
+                   }
+                 ]
+               }
+             ]
+  
          , footer:
              R.div
              { className: "text-muted small text-center"
@@ -197,5 +232,11 @@ hasNewerVersions state = state.selectedIdx /= 0
 
 hasOlderVersions :: State -> Boolean
 hasOlderVersions state = state.selectedIdx < (A.length state.versions) - 1 ||
-                         maybe false (unwrap >>> _.snapsToScan >>> (/=) 0) (A.last state.scanResults)
+                         hasOlderSnapshots state
 
+hasOlderSnapshots :: State -> Boolean
+hasOlderSnapshots state = maybe false (unwrap >>> _.snapsToScan >>> (/=) 0) (A.last state.scanResults)
+
+
+fileWasMissingInLastScan :: State -> Boolean
+fileWasMissingInLastScan state = maybe false (unwrap >>> _.snapsFileMissing >>> (/=) 0) (A.last state.scanResults)

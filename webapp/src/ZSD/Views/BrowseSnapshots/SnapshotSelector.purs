@@ -2,12 +2,14 @@ module ZSD.Views.BrowseSnapshots.SnapshotSelector where
 
 import Data.Either (either)
 import Data.Maybe (Maybe(..))
+import Data.Monoid (guard)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
-import Prelude (Unit, bind, const, discard, identity, ($))
+import Prelude (Unit, bind, const, discard, identity, ($), (/=))
 import React.Basic (Component, JSX, createComponent, empty, fragment, make)
+import React.Basic as React
 import React.Basic.DOM as R
 import ZSD.Components.Panel (panel)
 import ZSD.Components.Spinner as Spinner
@@ -24,8 +26,18 @@ type State =
   { snapshots :: Snapshots, selectedIdx :: Maybe Int, spinner :: JSX}
 
 
+data Command =
+  FetchSnapshots
+
+update :: React.Self Props State -> Command -> Effect Unit
+update self = case _ of
+  FetchSnapshots ->
+    self.setStateThen _ { spinner = Spinner.spinner } $ launchAff_ $ do
+      res <- Snapshots.fetchForDataset self.props.dataset 
+      liftEffect $ self.setState _ { snapshots = either (const []) identity res, spinner = empty }
+
 snapshotSelector :: Props -> JSX
-snapshotSelector = make component { initialState, didMount, render }
+snapshotSelector = make component { initialState, didMount, didUpdate, render }
   where
 
     component :: Component Props
@@ -33,10 +45,11 @@ snapshotSelector = make component { initialState, didMount, render }
 
     initialState = { snapshots: [], selectedIdx: Nothing, spinner: empty }
 
-    didMount self = self.setStateThen _ { spinner = Spinner.spinner } $ launchAff_ $ do
-      res <- Snapshots.fetchForDataset self.props.dataset 
-      liftEffect $ self.setState _ { snapshots = either (const []) identity res, spinner = empty }
+    didMount self = update self FetchSnapshots
 
+    didUpdate self { prevProps, prevState } = 
+      guard (prevProps.dataset /= self.props.dataset) $ update self FetchSnapshots
+        
 
     render self = fragment
       [ panel

@@ -33,10 +33,10 @@ newtype DateRange = DateRange
   }
 
 
-lastNDays :: Int -> Effect DateRange
-lastNDays n = do
+lastNDays :: Days -> Effect DateRange
+lastNDays days = do
   now <- Effect.nowDate
-  pure $ adjustFrom (Days (toNumber $ -n)) $ DateRange { from: now, to: now }
+  pure $ adjustFrom days $ DateRange { from: now, to: now }
 
 
 dayCount :: DateRange -> Int

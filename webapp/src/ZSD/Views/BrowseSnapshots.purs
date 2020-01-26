@@ -40,12 +40,34 @@ type State =
 
 data Command =
     DatasetSelected Dataset
+  | SnapshotSelected Snapshot
+  | FileSelected FSEntry
+  | DirSelected FSEntry
 
 update :: (React.Self Props State) -> Command -> Effect Unit
 update self = case _ of
-  DatasetSelected ds -> do
-    self.setState _ { selectedDataset = Just ds }
+  DatasetSelected ds ->
+    self.setState _ { selectedDataset = Just ds
+                    , selectedSnapshot = Nothing
+                    , selectedFile = Nothing
+                    , selectedDir = Nothing
+                    }
 
+  SnapshotSelected snap -> 
+    self.setState _ { selectedSnapshot = Just snap
+                    , selectedFile = Nothing
+                    , selectedDir = Nothing
+                    }
+
+  FileSelected fh ->
+    self.setState _ { selectedFile = Just fh }
+
+  DirSelected fh ->
+    self.setState _ { selectedDir = Just fh
+                    , selectedFile = Nothing
+                    }
+
+    
 
 browseSnapshots :: Props -> JSX
 browseSnapshots = make component { initialState, render }
@@ -68,13 +90,13 @@ browseSnapshots = make component { initialState, render }
 
       , foldMap (\dataset -> snapshotSelector
                               { dataset 
-                              , onSnapshotSelected: \snap -> self.setState _ { selectedSnapshot = Just snap, selectedFile = Nothing, selectedDir = Nothing }
+                              , onSnapshotSelected: update self <<< SnapshotSelected
                               }) self.state.selectedDataset
         
       , foldMap (\snapshot -> dirBrowser
                               { dir: snapshot.dir 
-                              , onFileSelected: \file -> self.setState _ { selectedFile = Just file }
-                              , onDirSelected: \dir -> self.setState _ { selectedDir = Just dir, selectedFile = Nothing }
+                              , onFileSelected: update self <<< FileSelected
+                              , onDirSelected: update self <<< DirSelected
                               }) self.state.selectedSnapshot
 
       , foldMap (uncurry2 (\file snapshot ->
