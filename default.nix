@@ -1,5 +1,14 @@
-{ pkgs ? import <nixpkgs> {} }:
 let
+
+  fetchNixpkgs = {rev, sha256}: builtins.fetchTarball {
+    url = "https://github.com/NixOS/nixpkgs-channels/archive/${rev}.tar.gz";
+    inherit sha256;
+  };
+
+  pkgs = import (fetchNixpkgs {
+    rev = "8a9807f1941d046f120552b879cf54a94fca4b38";
+    sha256 = "0s8gj8b7y1w53ak138f3hw1fvmk40hkpzgww96qrsgf490msk236";
+  }) {};
 
   # nix-prefetch-git https://github.com/justinwoo/easy-purescript-nix
   easy-ps = import (pkgs.fetchFromGitHub {
@@ -93,7 +102,7 @@ if pkgs.lib.inNixShell then pkgs.mkShell {
                     (with epkgs.melpaStablePackages; [ magit go-mode nix-mode ivy swiper ]) ++
                     (with epkgs.melpaPackages; [ purescript-mode psc-ide ])))
                 ]);
-  
+
   shellHooks = ''
     alias serv="parcel serve --host 0.0.0.0 index.html"
   '';
