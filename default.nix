@@ -1,3 +1,4 @@
+{ goos ? "linux" }:
 let
 
   fetchNixpkgs = {rev, sha256}: builtins.fetchTarball {
@@ -95,6 +96,7 @@ let
     modSha256 = "1xlgs16lbwdnm2rbzfxwsg5vyc20fsgq506w2ms46a9z3i06zmv1";
 
     preBuild = ''
+      export GOOS=${goos}
       cp -v ${bindata}/bindata.go pkg/webapp/bindata.go
     '';
 
@@ -107,7 +109,11 @@ let
 
     installPhase = ''
       mkdir -p $out/bin
-      cp $GOPATH/bin/zfs-snap-diff $out/bin
+
+      BIN_PATH=${if goos == pkgs.stdenv.buildPlatform.parsed.kernel.name
+                 then "$GOPATH/bin"
+                 else "$GOPATH/bin/${goos}_$GOARCH"}
+      cp $BIN_PATH/zfs-snap-diff $out/bin
     '';
   };
 in
