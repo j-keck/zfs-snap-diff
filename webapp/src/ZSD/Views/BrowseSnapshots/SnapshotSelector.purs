@@ -11,6 +11,7 @@ import Prelude (Unit, bind, const, discard, identity, ($), (/=))
 import React.Basic (Component, JSX, createComponent, empty, fragment, make)
 import React.Basic as React
 import React.Basic.DOM as R
+import ZSD.Components.Messages as Messages
 import ZSD.Components.Panel (panel)
 import ZSD.Components.Spinner as Spinner
 import ZSD.Components.TableX (tableX)
@@ -34,7 +35,7 @@ update self = case _ of
   FetchSnapshots ->
     self.setStateThen _ { spinner = Spinner.spinner } $ launchAff_ $ do
       res <- Snapshots.fetchForDataset self.props.dataset 
-      liftEffect $ self.setState _ { snapshots = either (const []) identity res, spinner = empty }
+      liftEffect $ either Messages.appError (\snaps -> self.setState _ { snapshots = snaps }) res
 
 snapshotSelector :: Props -> JSX
 snapshotSelector = make component { initialState, didMount, didUpdate, render }

@@ -22,7 +22,7 @@ import React.Basic as React
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture_)
 import React.Basic.DOM.Textf as TF
-import ZSD.Components.Notifications (enqueueAppError)
+import ZSD.Components.Messages as Messages
 import ZSD.Components.Panel (panel)
 import ZSD.Components.Spinner as Spinner
 import ZSD.Components.TableX (tableX)
@@ -70,7 +70,7 @@ update self = case _ of
                    (A.last state.scanResults )
     launchAff_ $ do
       res <- ScanResult.fetch self.props.file range
-      liftEffect $ either enqueueAppError (\scanResult ->  do
+      liftEffect $ either Messages.appError (\scanResult ->  do
         state <- readState self
         let versions = A.concat [state.versions, (unwrap scanResult).fileVersions]
         self.setStateThen (const $ state { scanResults = state.scanResults `A.snoc` scanResult

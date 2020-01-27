@@ -1,7 +1,6 @@
 module ZSD.Components.Navbar where
 
-import Data.Array.NonEmpty (NonEmptyArray)
-import Data.Array.NonEmpty as ANE
+import Data.Array as A
 import Data.Monoid (guard)
 import Data.Tuple (Tuple(..), fst)
 import Effect (Effect)
@@ -9,14 +8,15 @@ import Prelude (Unit, map, ($), (<>), (==))
 import React.Basic (Component, JSX, createComponent, make)
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture_)
+import ZSD.Ops (unsafeFromJust)
 
 
 type Title = String
 type View = JSX
 
 type Props =
-  { views :: NonEmptyArray (Tuple Title View)
-  , onViewSelected :: View -> Effect Unit
+  { views :: Array (Tuple Title View)
+  , onViewSelected :: Title -> Effect Unit
   }
 
 type State = { activeViewTitle :: Title }
@@ -31,7 +31,10 @@ navbar = make component { initialState, didMount, render }
 
     initialState = { activeViewTitle: "" }
 
-    didMount self = self.setState _ { activeViewTitle = fst $ ANE.head self.props.views }
+    didMount self =
+      let title = fst $ unsafeFromJust $ A.head self.props.views in
+      self.setStateThen _ { activeViewTitle = title } $ self.props.onViewSelected title
+
 
     render self =
       R.nav
@@ -41,7 +44,6 @@ navbar = make component { initialState, didMount, render }
         , navbarItems self
         ]
       }
-
 
     navbarBrand =
       R.a
@@ -57,7 +59,7 @@ navbar = make component { initialState, didMount, render }
       , children:
         [ R.ul
           { className: "navbar-nav"
-          , children: ANE.toUnfoldable $ map (mkNavItem self) self.props.views
+          , children: map (mkNavItem self) $ self.props.views
           }
         ]
       }
@@ -70,7 +72,7 @@ navbar = make component { initialState, didMount, render }
         [ R.a
           { className: "nav-link"
           , href: "#"
-          , onClick: capture_ $ self.setStateThen _ { activeViewTitle = title } (self.props.onViewSelected view)
+          , onClick: capture_ $ self.setStateThen _ { activeViewTitle = title } (self.props.onViewSelected title)
           , children: [ R.text title ]
           }
         ]

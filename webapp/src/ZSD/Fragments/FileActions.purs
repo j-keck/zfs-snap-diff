@@ -19,7 +19,7 @@ import ZSD.Components.ActionButton (actionButton)
 import ZSD.Fragments.FileAction.ViewDiff (viewDiff)
 import ZSD.Fragments.FileActions.ViewBlob (viewBlob)
 import ZSD.Fragments.FileActions.ViewText (viewText)
-import ZSD.Components.Notifications (enqueueAppError)
+import ZSD.Components.Messages as Messages
 import ZSD.Model.FSEntry (FSEntry)
 import ZSD.Model.FSEntry as FSEntry
 import ZSD.Model.FileVersion (FileVersion(..))
@@ -56,7 +56,7 @@ update self = case _ of
   ViewText -> launchAff_ $ do
     let file = FileVersion.unwrapFile self.props.version
     res <- FSEntry.downloadText file
-    liftEffect $ either enqueueAppError (\content -> self.setState _ { view = viewText { content } }) res
+    liftEffect $ either Messages.appError (\content -> self.setState _ { view = viewText { content } }) res
 
 
   ViewBlob -> do
@@ -65,7 +65,7 @@ update self = case _ of
     then launchAff_  do
       let file = FileVersion.unwrapFile self.props.version
       res <- FSEntry.downloadBlob file
-      liftEffect $ either enqueueAppError (\content -> self.setState _ { view = viewBlob { content } }) res
+      liftEffect $ either Messages.appError (\content -> self.setState _ { view = viewBlob { content } }) res
     else
       self.setState _ { view = R.text $ show mimeType <> " not embeddable" }
 
@@ -100,7 +100,7 @@ fileAction = make component { initialState, render, didMount, didUpdate }
 
     didMount self = launchAff_ $ do
       res <- MimeType.fetch self.props.file
-      liftEffect $ either enqueueAppError (\mt -> self.setStateThen _ { mimeType = mt } (update self View)) res
+      liftEffect $ either Messages.appError (\mt -> self.setStateThen _ { mimeType = mt } (update self View)) res
 
     didUpdate self { prevProps } = do
       guard (self.props /= prevProps) $ update self self.state.cmd

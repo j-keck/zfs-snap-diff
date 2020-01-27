@@ -15,7 +15,7 @@ import React.Basic as React
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture_)
 import ZSD.Component.Table (table)
-import ZSD.Components.Notifications (enqueueAppError)
+import ZSD.Components.Messages as Messages
 import ZSD.Components.Scroll as Scroll
 import ZSD.Formatter as Formatter
 import ZSD.Model.DirListing as DirListing
@@ -65,8 +65,8 @@ update self = case _ of
 
   ReadDir fh -> launchAff_ $ do
     res <- DirListing.fetch fh
-    liftEffect $ either enqueueAppError (\ls -> self.setState _ { dirListing = ls }) res
-
+    liftEffect $ either Messages.appError (\ls -> self.setState _ { dirListing = ls }) res
+    
 
   OnClick fsh -> Scroll.scrollToTop *> do
     case fsh.kind of

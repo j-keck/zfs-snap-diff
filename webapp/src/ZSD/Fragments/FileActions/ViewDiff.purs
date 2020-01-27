@@ -15,7 +15,7 @@ import React.Basic as React
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture_)
 import ZSD.Components.ActionButton (actionButton)
-import ZSD.Components.Notifications (enqueueAppError)
+import ZSD.Components.Messages as Messages
 import ZSD.Model.Diff (Diff)
 import ZSD.Model.Diff as Diff
 import ZSD.Model.FSEntry (FSEntry)
@@ -54,7 +54,7 @@ update self = case _ of
     ActualVersion _ -> self.setState _ { diff = Nothing }
     BackupVersion _ -> launchAff_ $ do
       res <- Diff.fetch self.props.file self.props.version
-      liftEffect $ either enqueueAppError (\diff -> self.setState _ { diff = Just diff}) res
+      liftEffect $ either Messages.appError (\diff -> self.setState _ { diff = Just diff}) res 
  
   Revert idx -> launchAff_ $ do
     _ <- Diff.revert self.props.file self.props.version idx
