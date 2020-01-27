@@ -12,9 +12,10 @@ import (
 var log = plog.GlobalLogger()
 
 type Scanner struct {
-	dateRange     DateRange
-	compareMethod string
-	dataset       zfs.Dataset
+	dateRange      DateRange
+	compareMethod  string
+	dataset        zfs.Dataset
+	zfs            zfs.ZFS
 }
 
 type ScanResult struct {
@@ -32,8 +33,8 @@ type FileVersion struct {
 	Snapshot zfs.Snapshot  `json:"snapshot"`
 }
 
-func NewScanner(dateRange DateRange, compareMethod string, dataset zfs.Dataset) Scanner {
-	return Scanner{dateRange, compareMethod, dataset}
+func NewScanner(dateRange DateRange, compareMethod string, dataset zfs.Dataset, zfs zfs.ZFS) Scanner {
+	return Scanner{dateRange, compareMethod, dataset, zfs}
 }
 
 func (self *Scanner) FindFileVersions(pathActualVersion string) (ScanResult, error) {
@@ -50,6 +51,9 @@ func (self *Scanner) FindFileVersions(pathActualVersion string) (ScanResult, err
 	var cmp Comparator
 	snapsSkipped := 0
 	for idx, snap := range snaps {
+
+		// search is data-range based - check if the actual checked snapshot
+		// was created in the given range
 		if self.dateRange.IsBefore(snap.Created) {
 			snapsSkipped = snapsSkipped + 1
 			log.Tracef("skip snapshot - snapshot is younger (%s) than the time-range: %s",
@@ -58,8 +62,31 @@ func (self *Scanner) FindFileVersions(pathActualVersion string) (ScanResult, err
 			continue
 		}
 
+		if self.dateRange.IsAfter(snap.Created) {
+			log.Debugf("abort search - snapshot is older (%s) than the time-range %s",
+				snap.Created, self.dateRange.String())
+			break
+		}
+
+		// mount the snapshot if necessary
+		if self.zfs.MountSnapshots() {
+			isMounted, err := snap.IsMounted()
+			if err != nil {
+				log.Errorf("unable to check if snapshot: %s is mounted - %v", snap.Name, err)
+			}
+
+			if ! isMounted {
+				if err := self.zfs.MountSnapshot(snap); err != nil {
+					log.Errorf("unable to mount snapshot: %s - %v", snap.Name, err)
+
+					// skip this snapshot
+					continue
+				}
+			}
+		}
+
+		// initialize the file-content comparator
 		if cmp == nil {
-			// init comparator
 
 			var pathInitVersion string
 			if p, ok := self.findLastPathInSnap(pathActualVersion, idx-1, snaps); ok {
@@ -79,27 +106,26 @@ func (self *Scanner) FindFileVersions(pathActualVersion string) (ScanResult, err
 			}
 		}
 
-		if self.dateRange.IsAfter(snap.Created) {
-			log.Debugf("abort search - snapshot is older (%s) than the time-range %s",
-				snap.Created, self.dateRange.String())
-			break
-		}
 
-		sr.SnapsScanned = sr.SnapsScanned + 1
-		sr.LastScannedSnapshot = snap
-
+		// get the file-handle to the backup version in the snapshot
 		fh, err := fs.NewFileHandle(self.pathInSnapshot(pathActualVersion, snap))
 		if err != nil {
-			// not every snapshot has a version of the file - ignore errors
+			// not every snapshot MUST have a version of the file.
+			// maybe the file was deleted and restored - so ignore the error
 			sr.SnapsFileMissing = sr.SnapsFileMissing + 1
 			continue
 		}
 
+		// compare the file content
 		log.Tracef("check if file was changed under path: %s", fh.Path)
 		if cmp.HasChanged(fh) {
 			log.Debugf("file was changed in snapshot: %s", fh.Path)
 			sr.FileVersions = append(sr.FileVersions, FileVersion{fh, snap})
 		}
+
+		// update stats
+		sr.SnapsScanned = sr.SnapsScanned + 1
+		sr.LastScannedSnapshot = snap
 	}
 
 	sr.ScanDuration = time.Now().Sub(startTs)

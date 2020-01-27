@@ -17,6 +17,7 @@ var log = plog.GlobalLogger()
 type ZFS struct {
 	datasets Datasets
 	cmd      ZFSCmd
+	cfg      config.Config
 }
 
 // NewZFS returns a handler for a zfs filesystem
@@ -29,6 +30,7 @@ func NewZFS(name string, cfg config.Config) (ZFS, error) {
 		return self, err
 	}
 	self.datasets = datasets
+	self.cfg = cfg
 	return self, nil
 }
 
@@ -140,6 +142,19 @@ func (self *ZFS) scanDatasets(name string) (Datasets, error) {
 	}
 	log.Debugf("%d datasets found", len(datasets))
 	return datasets, nil
+}
+
+
+func (self *ZFS) MountSnapshots() bool {
+	return self.cfg.ZFS.MountSnapshots
+}
+
+func (self *ZFS) MountSnapshot(snap Snapshot) error {
+	log.Debugf("mount snapshot: %s", snap.Name)
+	stdout, stderr, err := self.cmd.Exec("mount", snap.FullName)
+	log.Tracef("mount snapshot stdout: %s", stdout)
+	log.Tracef("mount snapshot stderr: %s", stderr)
+	return err
 }
 
 type SortByPathDesc Datasets

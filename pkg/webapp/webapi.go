@@ -100,7 +100,7 @@ func (self *WebApp) findFileVersionsHndl(w http.ResponseWriter, r *http.Request)
 	}
 
 	// scan for other file versions
-	sc := scanner.NewScanner(payload.DateRange, payload.CompareMethod, ds)
+	sc := scanner.NewScanner(payload.DateRange, payload.CompareMethod, ds, self.zfs)
 	versions, err := sc.FindFileVersions(payload.Path)
 	if err != nil {
 		log.Errorf("File versions search failed - %v", err)

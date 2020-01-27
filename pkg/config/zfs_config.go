@@ -5,18 +5,18 @@ import (
 )
 
 type ZFSConfig struct {
-	UseSudo       bool
-	MountSnapshot bool
+	UseSudo        bool
+	MountSnapshots bool
 }
 
 func NewDefaultZFSConfig() ZFSConfig {
-	mountSnapshot := false
+	mountSnapshots := false
 	if runtime.GOOS == "darwin" {
-		mountSnapshot = true
+		mountSnapshots = true
 	}
 
 	return ZFSConfig{
 		UseSudo:       false,
-		MountSnapshot: mountSnapshot,
+		MountSnapshots: mountSnapshots,
 	}
 }

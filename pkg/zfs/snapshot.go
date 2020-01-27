@@ -3,14 +3,38 @@ package zfs
 import (
 	"github.com/j-keck/zfs-snap-diff/pkg/fs"
 	"time"
+	"os"
 )
 
 // Snapshot - zfs snapshot
 type Snapshot struct {
-	Name    string       `json:"name"`
-	Created time.Time    `json:"created"`
-	Dir     fs.DirHandle `json:"dir"`
+	Name     string       `json:"name"`
+	FullName string       `json:"fullName"`
+	Created  time.Time    `json:"created"`
+	Dir      fs.DirHandle `json:"dir"`
 }
+
+
+// Check if the snaphot is mounted
+func (s *Snapshot) IsMounted() (bool, error) {
+	log.Tracef("check if snapshot: %s is mounted", s.Name)
+
+	// to check if the snapshot is mounted, list
+	// the directory content. use 'File.Readdirnames'
+	// for the directrory listing, because it has less overhead
+
+	fh, err := os.Open(s.Dir.Path)
+	if err != nil {
+		return false, err
+	}
+
+	names, _ := fh.Readdirnames(10)
+	isMounted := len(names) > 0
+	log.Tracef("snapshot: %s is mounted = %v", s.Name, isMounted)
+	return isMounted, nil
+}
+
+
 
 // Snapshots represents snapshots from a zfs dataset
 type Snapshots []Snapshot
@@ -34,3 +58,4 @@ func (s *Snapshots) Filter(f func(Snapshot) bool) Snapshots {
 	}
 	return newS
 }
+

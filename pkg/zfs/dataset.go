@@ -42,23 +42,24 @@ func (self *Dataset) ScanSnapshots() (Snapshots, error) {
 
 	snapshots := Snapshots{}
 	for _, line := range strings.Split(stdout, "\n") {
-		if snapName, creation, ok := parse(line); ok {
+		if fullName, creation, ok := parse(line); ok {
 			// remove dataset name from snapshot
-			fields := strings.Split(snapName, "@")
-			snapName := fields[len(fields)-1]
+			fields := strings.Split(fullName, "@")
+			name := fields[len(fields)-1]
 
             // create the dir-handle per hand.
 			// this prevents a unnecessary 'os.Stat' call for each snapshot
+			// (which takes some time with thousands snapshots on spinning disks)
 			dir := fs.DirHandle{fs.FSHandle{
-				Name: snapName,
-				Path: self.MountPoint.Path + "/.zfs/snapshot/" + snapName,
+				Name: name,
+				Path: self.MountPoint.Path + "/.zfs/snapshot/" + name,
 				Kind: fs.DIR,
 				Size: 0,
 				ModTime: creation,
 			}}
 
 			// append new snap to snapshots
-			snapshots = append(snapshots, Snapshot{snapName, creation, dir})
+			snapshots = append(snapshots, Snapshot{name, fullName, creation, dir})
 		}
 
 	}
