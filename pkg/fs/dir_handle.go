@@ -24,9 +24,14 @@ func (self *DirHandle) Ls() ([]FSHandle, error) {
 		return nil, err
 	}
 
-	entries := []FSHandle{}
+	dirs := []FSHandle{}
+	files := []FSHandle{}
 	for _, fileInfo := range ls {
-		entries = append(entries, newFSHandle(self.Path, fileInfo))
+		if fileInfo.IsDir() {
+			dirs = append(dirs, newFSHandle(self.Path, fileInfo))
+		} else {
+			files = append(files, newFSHandle(self.Path, fileInfo))
+		}
 	}
-	return entries, nil
+	return append(dirs, files...), nil
 }
