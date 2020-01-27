@@ -24,6 +24,19 @@ let
     (with pkgs.nodePackages; [ parcel-bundler node2nix ]) ++
     (with easy-ps; [ purs spago spago2nix ]);
 
+
+  version =
+    let lookup-version = pkgs.stdenv.mkDerivation {
+          src = pkgs.nix-gitignore.gitignoreSource [ ".gitignore" "/webapp/" ] ./.;
+          name = "lookup-version";
+          phases = "buildPhase";
+          buildPhase = ''
+            mkdir -p $out
+            ${pkgs.git}/bin/git -C $src describe --always --tags > $out/version
+          '';
+        };
+    in pkgs.lib.removeSuffix "\n" (builtins.readFile "${lookup-version}/version");
+
   webapp =
     let
 
@@ -38,8 +51,8 @@ let
       webapp_nm = (import ./webapp { inherit pkgs; }).package;
 
     in pkgs.stdenv.mkDerivation rec {
+      inherit version;
       name = "webapp";
-      version = "0.0.0";
       src = pkgs.symlinkJoin {
         name = "webapp-ps+nm";
         paths = [
@@ -77,7 +90,7 @@ let
 
   zfs-snap-diff = pkgs.buildGoModule rec {
     pname = "zfs-snap-diff";
-    version = "0.0.0";
+    inherit version;
     src = pkgs.nix-gitignore.gitignoreSource [ ".gitignore" "/webapp/" ] ./.;
     modSha256 = "1xlgs16lbwdnm2rbzfxwsg5vyc20fsgq506w2ms46a9z3i06zmv1";
 
@@ -86,6 +99,11 @@ let
     '';
 
     CGO_ENABLED = 0;
+
+    buildFlagsArray = ''
+      -ldflags=
+      -X main.version=${version}
+    '';
 
     installPhase = ''
       mkdir -p $out/bin
