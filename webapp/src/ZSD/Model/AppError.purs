@@ -2,7 +2,7 @@ module ZSD.Model.AppError where
 
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
-import Prelude (class Show)
+import Prelude (class Show, show, (<>))
 
 
 data AppError =
@@ -10,9 +10,11 @@ data AppError =
   | GenericError String
   | Bug String
 
-derive instance genericAppError :: Generic AppError _
 instance showAppError :: Show AppError where
-  show = genericShow
+  show = case _ of
+    HTTPError err -> "HTTP error: " <> show err
+    GenericError msg -> msg
+    Bug msg -> "Unexpected interal state: " <> msg
 
 
 data HTTPErrors =
