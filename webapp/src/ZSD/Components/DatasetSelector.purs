@@ -8,6 +8,7 @@ import React.Basic (Component, JSX, createComponent, empty, make)
 import React.Basic.DOM as R
 import ZSD.Component.Table (table)
 import ZSD.Components.Panel (panel)
+import ZSD.Components.Scroll as Scroll
 import ZSD.Formatter as Formatter
 import ZSD.Model.Dataset (Datasets, Dataset)
 
@@ -43,6 +44,7 @@ datasetSelector = make component { initialState, render }
                             , R.text ds.mountPoint.path ]
             , onRowSelected: \ds -> do
                     hidePanelBodyFn
+                    Scroll.scrollToTop
                     self.setState _ { selectedDataset = Just ds }
                     self.props.onDatasetSelected ds
             }
