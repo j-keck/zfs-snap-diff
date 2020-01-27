@@ -35,7 +35,7 @@ update self = case _ of
   FetchSnapshots ->
     self.setStateThen _ { spinner = Spinner.spinner } $ launchAff_ $ do
       res <- Snapshots.fetchForDataset self.props.dataset
-      liftEffect $ either Messages.appError (\snaps -> self.setState _ { snapshots = snaps }) res
+      liftEffect $ either Messages.appError (\snaps -> self.setState _ { snapshots = snaps, spinner = empty }) res
 
 snapshotSelector :: Props -> JSX
 snapshotSelector = make component { initialState, didMount, didUpdate, render }
