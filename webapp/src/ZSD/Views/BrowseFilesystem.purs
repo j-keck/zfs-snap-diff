@@ -9,9 +9,9 @@ import Effect (Effect)
 import React.Basic (Component, JSX, createComponent, make)
 import React.Basic as React
 import React.Basic.DOM as R
-import ZSD.Components.DatasetSelector (datasetSelector)
-import ZSD.Components.DirBrowser (dirBrowser)
-import ZSD.Components.FileActions (fileAction)
+import ZSD.Fragments.DatasetSelector (datasetSelector)
+import ZSD.Fragments.DirBrowser (dirBrowser)
+import ZSD.Fragments.FileActions (fileAction)
 import ZSD.Model.Config (Config)
 import ZSD.Model.Dataset (Dataset)
 import ZSD.Model.FSEntry (FSEntry)
