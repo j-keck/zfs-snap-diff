@@ -4,14 +4,11 @@ module ZSD.View.BrowseSnapshots where
 import Prelude
 
 import Data.Array as A
-import Data.Either (either)
 import Data.Foldable (foldMap)
 import Data.Maybe (Maybe(..))
 import Data.String as S
 import Data.Tuple.Nested (tuple2, uncurry2)
 import Effect (Effect)
-import Effect.Aff (launchAff_)
-import Effect.Class (liftEffect)
 import React.Basic (Component, JSX, createComponent, make)
 import React.Basic as React
 import React.Basic.DOM as R
@@ -22,8 +19,7 @@ import ZSD.Model.Config (Config)
 import ZSD.Model.Dataset (Dataset)
 import ZSD.Model.FSEntry (FSEntry)
 import ZSD.Model.FileVersion (FileVersion(..))
-import ZSD.Model.Snapshot (Snapshots, Snapshot)
-import ZSD.Model.Snapshot as Snapshots
+import ZSD.Model.Snapshot (Snapshot)
 import ZSD.Ops (unsafeFromJust)
 import ZSD.Views.BrowseSnapshots.SnapshotSelector (snapshotSelector)
 
@@ -35,7 +31,7 @@ type State =
   , selectedSnapshot :: Maybe Snapshot
   , selectedFile     :: Maybe FSEntry
   , selectedDir      :: Maybe FSEntry
-  } 
+  }
 
 
 data Command =
@@ -53,7 +49,7 @@ update self = case _ of
                     , selectedDir = Nothing
                     }
 
-  SnapshotSelected snap -> 
+  SnapshotSelected snap ->
     self.setState _ { selectedSnapshot = Just snap
                     , selectedFile = Nothing
                     , selectedDir = Nothing
@@ -67,7 +63,7 @@ update self = case _ of
                     , selectedFile = Nothing
                     }
 
-    
+
 
 browseSnapshots :: Props -> JSX
 browseSnapshots = make component { initialState, render }
@@ -89,12 +85,12 @@ browseSnapshots = make component { initialState, render }
                         }
 
       , foldMap (\dataset -> snapshotSelector
-                              { dataset 
+                              { dataset
                               , onSnapshotSelected: update self <<< SnapshotSelected
                               }) self.state.selectedDataset
-        
+
       , foldMap (\snapshot -> dirBrowser
-                              { dir: snapshot.dir 
+                              { dir: snapshot.dir
                               , onFileSelected: update self <<< FileSelected
                               , onDirSelected: update self <<< DirSelected
                               }) self.state.selectedSnapshot
@@ -105,12 +101,12 @@ browseSnapshots = make component { initialState, render }
                       filePathElements = S.split (S.Pattern "/") file.path
                       relPath = S.joinWith "/" $ A.drop (A.length snapPathElements) filePathElements
                       dsPath = (unsafeFromJust self.state.selectedDataset).mountPoint.path
-                      file' = file { path = dsPath <> "/" <> relPath } 
+                      file' = file { path = dsPath <> "/" <> relPath }
                       version = BackupVersion {file, snapshot}
                   in fileAction { file: file', version }))
           (tuple2 <$> self.state.selectedFile
            <*> self.state.selectedSnapshot)
-                  
+
       ]
-        
- 
+
+

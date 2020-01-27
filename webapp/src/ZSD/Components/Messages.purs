@@ -8,19 +8,17 @@ module ZSD.Components.Messages
        ) where
 
 import Prelude
-
 import Data.Array as A
 import Data.DateTime (DateTime, adjust)
-import Data.Maybe (Maybe(..))
 import Data.Time.Duration (Milliseconds(..), Seconds(..))
 import Effect (Effect)
 import Effect.Aff (delay, launchAff_)
 import Effect.Class (liftEffect)
-import Effect.Now (nowDateTime, nowTime)
+import Effect.Now (nowDateTime)
 import Effect.Ref (Ref)
 import Effect.Ref as Ref
 import Effect.Unsafe (unsafePerformEffect)
-import React.Basic (JSX, createComponent, make, makeStateless, readState)
+import React.Basic (JSX, createComponent, make, readState)
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture_)
 import ZSD.Component.Table (table)
@@ -68,11 +66,11 @@ toasts :: JSX
 toasts = unit # make component { initialState, didMount, render }
   where
     component = createComponent "Messages.toasts"
-    
+
     initialState = { taken: 0, msgs: [] :: Array Message }
 
     didMount = update
-    
+
     update self = do
       state <- readState self
       newMsgs <- A.drop state.taken <$> Ref.read history
@@ -103,7 +101,7 @@ toasts = unit # make component { initialState, didMount, render }
           }
         ]
       }
-    
+
 
 messages :: JSX
 messages = unit # make component { initialState, didMount, render }
@@ -120,7 +118,7 @@ messages = unit # make component { initialState, didMount, render }
       self.setState (const msgs)
       launchAff_ $ delay (Milliseconds 500.0) *> liftEffect (update self)
 
-    render self = 
+    render self =
       table
       { header: ["Level", "Message"]
       , rows: self.state
@@ -141,7 +139,7 @@ level2name = case _ of
   Info -> "Info"
   Warning -> "Warning"
   Error -> "Error"
-  
+
 
 -- | returns the boostrap contextual varations name
 level2bs :: Level -> String

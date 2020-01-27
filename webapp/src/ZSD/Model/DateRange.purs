@@ -14,7 +14,7 @@ import Data.Bifunctor (lmap)
 import Data.Date as Date
 import Data.DateTime as DT
 import Data.Formatter.DateTime (FormatterCommand(..), format, unformatDateTime)
-import Data.Int (floor, toNumber)
+import Data.Int (floor)
 import Data.List as L
 import Data.List.NonEmpty as LNE
 import Data.Maybe (fromMaybe)

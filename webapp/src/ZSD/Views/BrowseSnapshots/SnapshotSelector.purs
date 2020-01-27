@@ -7,7 +7,7 @@ import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
-import Prelude (Unit, bind, const, discard, identity, ($), (/=))
+import Prelude (Unit, bind, discard, ($), (/=))
 import React.Basic (Component, JSX, createComponent, empty, fragment, make)
 import React.Basic as React
 import React.Basic.DOM as R
@@ -34,7 +34,7 @@ update :: React.Self Props State -> Command -> Effect Unit
 update self = case _ of
   FetchSnapshots ->
     self.setStateThen _ { spinner = Spinner.spinner } $ launchAff_ $ do
-      res <- Snapshots.fetchForDataset self.props.dataset 
+      res <- Snapshots.fetchForDataset self.props.dataset
       liftEffect $ either Messages.appError (\snaps -> self.setState _ { snapshots = snaps }) res
 
 snapshotSelector :: Props -> JSX
@@ -48,9 +48,9 @@ snapshotSelector = make component { initialState, didMount, didUpdate, render }
 
     didMount self = update self FetchSnapshots
 
-    didUpdate self { prevProps, prevState } = 
+    didUpdate self { prevProps, prevState } =
       guard (prevProps.dataset /= self.props.dataset) $ update self FetchSnapshots
-        
+
 
     render self = fragment
       [ panel

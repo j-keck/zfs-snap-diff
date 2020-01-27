@@ -1,9 +1,8 @@
 module ZSD.Views.BrowseFilesystem.FileVersionSelector where
-
-import Prelude
-import ZSD.Model.DateRange
-import ZSD.Ops
-
+import Prelude (Unit, bind, const, discard, flip, negate, not, pure, show, unit, ($), (+), (-),
+                (/=), (<), (<>), (>>=), (>>>), (||))
+import ZSD.Model.DateRange (DateRange(..))
+import ZSD.Ops (foldlSemigroup)
 import Data.Array as A
 import Data.Either (either)
 import Data.Foldable (foldMap)
@@ -65,7 +64,7 @@ update self = case _ of
 
   Scan days next -> self.setStateThen _ { spinner = Spinner.spinner } $ do
     range <- readState self >>= \state ->
-             maybe (DateRange.lastNDays days) 
+             maybe (DateRange.lastNDays days)
                    (unwrap >>> _.dateRange >>> DateRange.slide days >>> pure)
                    (A.last state.scanResults )
     launchAff_ $ do
@@ -78,8 +77,8 @@ update self = case _ of
                                          , spinner = empty
                                          })
                                  $ update self next) res
-          
-      
+
+
   SelectVersionByIdx idx -> do
     state <- readState self
     case A.index state.versions idx of
@@ -89,7 +88,7 @@ update self = case _ of
 
   NoOp -> pure unit
 
-  
+
 fileVersionSelector :: Props -> JSX
 fileVersionSelector = make component { initialState, didMount, render }
 
@@ -185,7 +184,7 @@ fileVersionSelector = make component { initialState, didMount, render }
                  ]
                }
              ]
-  
+
          , footer:
              R.div
              { className: "text-muted small text-center"
