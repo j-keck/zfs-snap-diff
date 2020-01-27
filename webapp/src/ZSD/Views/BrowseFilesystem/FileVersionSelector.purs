@@ -16,7 +16,6 @@ import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
-import Effect.Console (logShow)
 import Foreign.Object as O
 import React.Basic (Component, JSX, createComponent, fragment, make, readState, empty)
 import React.Basic as React
@@ -24,7 +23,6 @@ import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture_)
 import React.Basic.DOM.Textf as TF
 import ZSD.Components.Notifications (enqueueAppError)
-import ZSD.Components.Notifications as Notifications
 import ZSD.Components.Panel (panel)
 import ZSD.Components.Spinner as Spinner
 import ZSD.Components.TableX (tableX)
@@ -34,7 +32,6 @@ import ZSD.Model.FSEntry (FSEntry)
 import ZSD.Model.FileVersion (FileVersion(..))
 import ZSD.Model.ScanResult (ScanResult(..))
 import ZSD.Model.ScanResult as ScanResult
-import ZSD.Model.Snapshot as Snapshots
 
 
 
@@ -175,9 +172,14 @@ fileVersionSelector = make component { initialState, didMount, render }
                  , R.div
                    { className: "dropdown-menu"
                    , children:
-                     [ R.a { className: "dropdown-item", onClick: capture_ $ self.setState _ { scanDays = 1 }, children: [ R.text "1" ] }
-                     , R.a { className: "dropdown-item", onClick: capture_ $ self.setState _ { scanDays = 7 }, children: [ R.text "7" ] }
-                     , R.a { className: "dropdown-item", onClick: capture_ $ self.setState _ { scanDays = 14 }, children: [ R.text "14" ] }
+                     let mkEntry n = R.a { className: "dropdown-item"
+                                         , onClick: capture_ $ self.setState _ { scanDays = n }
+                                         , children: [ R.text $ show n ]
+                                         } in
+                     [ mkEntry 1
+                     , mkEntry 7
+                     , mkEntry 14
+                     , mkEntry 30
                      ]
                    }
                  ]
