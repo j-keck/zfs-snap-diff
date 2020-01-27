@@ -8,7 +8,7 @@ import Data.Monoid (guard)
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
-import React.Basic (Component, JSX, createComponent, empty, make)
+import React.Basic (Component, JSX, createComponent, empty, make, readState)
 import React.Basic as React
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture_)
@@ -26,6 +26,7 @@ import ZSD.Model.FileVersion (FileVersion(..))
 import ZSD.Model.FileVersion as FileVersion
 import ZSD.Model.MimeType (MimeType(..))
 import ZSD.Model.MimeType as MimeType
+import ZSD.Ops (checkAny)
 
 
 type Props = { file :: FSEntry, version :: FileVersion }
@@ -44,10 +45,12 @@ derive instance eqCommand :: Eq Command
 update :: React.Self Props State -> Command -> Effect Unit
 update self = case _ of
 
-  View -> self.setStateThen _ { cmd = View } $
-            if(MimeType.isText self.state.mimeType)
-              then update self ViewText
-              else update self ViewBlob
+  View -> do
+    state <- readState self
+    self.setStateThen _ { cmd = View } $
+      if(MimeType.isText state.mimeType)
+      then update self ViewText
+      else update self ViewBlob
 
 
   ViewText -> launchAff_ $ do
@@ -56,10 +59,15 @@ update self = case _ of
     liftEffect $ either enqueueAppError (\content -> self.setState _ { view = viewText { content } }) res
 
 
-  ViewBlob -> launchAff_ $ do
-    let file = FileVersion.unwrapFile self.props.version
-    res <- FSEntry.downloadBlob file
-    liftEffect $ either enqueueAppError (\content -> self.setState _ { view = viewBlob { content } }) res
+  ViewBlob -> do
+    mimeType <- _.mimeType <$> readState self
+    if (checkAny [MimeType.isPDF, MimeType.isImage] mimeType)
+    then launchAff_  do
+      let file = FileVersion.unwrapFile self.props.version
+      res <- FSEntry.downloadBlob file
+      liftEffect $ either enqueueAppError (\content -> self.setState _ { view = viewBlob { content } }) res
+    else
+      self.setState _ { view = R.text $ show mimeType <> " not embeddable" }
 
 
   Diff -> do
@@ -88,7 +96,7 @@ fileAction = make component { initialState, render, didMount, didUpdate }
     component :: Component Props
     component = createComponent "FileAction"
 
-    initialState = { view: empty, cmd: View, mimeType: MimeType "text/plain" }
+    initialState = { view: empty, cmd: View, mimeType: MimeType "" }
 
     didMount self = launchAff_ $ do
       res <- MimeType.fetch self.props.file

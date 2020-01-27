@@ -9,7 +9,7 @@ import Data.Maybe (Maybe(..), fromJust, maybe)
 import Data.Semigroup (class Semigroup)
 import Data.Tuple (Tuple(..))
 import Partial.Unsafe (unsafePartial)
-import Prelude (class Applicative, class Bind, class Functor, map, ($), (-), (<$>), (<*>), (<>), (>>>))
+import Prelude (class Applicative, class Bind, class Functor, map, ($), (&&), (-), (<$>), (<*>), (<>), (>>>), (||))
 
 
 mapmap :: forall f1 f2 a b. Functor f1 => Functor f2 => (a -> b) -> f1 (f2 a) -> f1 (f2 b)
@@ -41,5 +41,14 @@ foldrSemigroup = F.foldr (\a b -> maybe (Just a) (\b' -> Just $ a <> b') b) Noth
 unsafeFromJust :: forall a. Maybe a -> a
 unsafeFromJust a = unsafePartial $ fromJust a
 
+
 unsafeFromRight :: forall a b. Either a b -> b
 unsafeFromRight e = unsafePartial $ fromRight e
+
+
+checkAll :: forall a f. F.Foldable f => f (a -> Boolean) -> a -> Boolean
+checkAll fs a = F.foldl (\b f -> f a && b) true fs
+
+
+checkAny :: forall a f. F.Foldable f => f (a -> Boolean) -> a -> Boolean
+checkAny fs a = F.foldl (\b f -> f a || b) false fs
