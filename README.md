@@ -2,19 +2,41 @@
 
 in this branch i rewrite the whole codebase.
 
-  - backend is implemented in go (as before)
-  - frontend in purescript (with react-basic)
+  - backend is implemented in [Go](https://golang.org) (as before)
+  - frontend in [PureScript](http://purescript.org) (with [react-basic](https://pursuit.purescript.org/packages/purescript-react-basic))
 
 
-you need only `go` to build this project.
-the frontend code is decoded in `pkg/webapp/bindata.go`.
+You need only `go` to build this project.
+I compile the frontend code to javascript and decode it in `pkg/webapp/bindata.go`.
 
 
-to run the new buggy, unfinished code, checkout this branch and build it:
+## Build from source
 
-  `go build github.com/j-keck/zfs-snap-diff/cmd/zfs-snap-diff`
+### Build with `go`
 
-and run it per
+  - clone this repo: `git clone -b dev https://github.com/j-keck/zfs-snap-diff`
+  - change to the checkout directory: `cd zfs-snap-diff`
+  - build it: `go build -ldflags="-X main.version=$(git describe)" github.com/j-keck/zfs-snap-diff/cmd/zfs-snap-diff`
+
+The optional `-ldflags="-X main.version=$(git describe)"` flag updates the `version` string in the binary.
+
+### Build with `nix`
+
+The `nix` build also compiles the frontend to javascript and decode it in `pkg/webapp/bindata.go`.
+
+  - clone this repo: `git clone -b dev https://github.com/j-keck/zfs-snap-diff`
+  - change to the checkout directory: `cd zfs-snap-diff`
+  - build it: `nix-build -A zfs-snap-diff`
+
+To crosscompile the binary for
+
+  - FreeBSD: `nix-build -A zfs-snap-diff --argstr goos freebsd`
+  - MacOS: `nix-build -A zfs-snap-diff --argstr goos darwin`
+  - Solaris: `nix-build -A zfs-snap-diff --argstr goos solaris`
+
+
+
+## Run it
 
   `./zfs-snap-diff <POOL>`
 
