@@ -126,6 +126,7 @@ fileAction = make component { initialState, render, didMount, didUpdate }
                            , icon: "fas fa-archive"
                            , textConfirm: "Restore the old version of " <> self.props.file.name
                            , action: update self Restore
+                           , enabled: FileVersion.isBackupVersion self.props.version
                            }
             ]
           }

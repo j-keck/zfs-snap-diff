@@ -2,18 +2,19 @@
 module ZSD.Components.ActionButton where
 
 import Prelude
-
 import Effect (Effect)
 import Effect.Timer (setTimeout)
 import React.Basic (Component, JSX, Self, createComponent, make)
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture_)
+import Data.Monoid (guard)
 
 type Props =
   { text :: String
   , textConfirm :: String
   , icon :: String
   , action :: Effect Unit
+  , enabled :: Boolean
   }
 
 
@@ -25,7 +26,7 @@ data State =
 update :: Self Props State -> State -> Effect Unit
 update self = case _ of
   Clean -> self.setState (const Clean)
-  Clicked -> do
+  Clicked -> guard self.props.enabled do
     _ <- setTimeout 3000 $ update self Clean
     self.setState $ const Clicked
   Confirmed -> self.setStateThen (const Clean) $ self.props.action
@@ -43,7 +44,7 @@ actionButton = make component { initialState, render }
     render self =
       let className = "btn btn-secondary" in
       case self.state of
-        Clean -> R.button { className
+        Clean -> R.button { className: className <> guard (not self.props.enabled) " disabled"
                           , onClick: capture_ $ update self Clicked
                           , children:
                             [ R.span { className: self.props.icon <> " p-1" }

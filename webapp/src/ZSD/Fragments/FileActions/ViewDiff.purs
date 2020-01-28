@@ -114,6 +114,7 @@ viewDiff = make component { initialState, render, didMount, didUpdate }
               , textConfirm: "Revert this change"
               , icon: ""
               , action: update self (Revert idx)
+              , enabled: true
               }
             , R.pre_ [ R.code { dangerouslySetInnerHTML: { __html: html } } ]
             ]
@@ -132,6 +133,7 @@ viewDiff = make component { initialState, render, didMount, didUpdate }
               , textConfirm: "Revert this change"
               , icon: ""
               , action: update self (Revert idx)
+              , enabled: true
               }
             , R.table
               { className: "table table-borderless table-sm"
