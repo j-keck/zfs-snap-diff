@@ -80,18 +80,7 @@ func (fh *FileHandle) Copy(path string) (err error) {
 	if dst, err = os.Create(path); err != nil {
 		return err
 	}
-	defer func() {
-		closeErr := dst.Close()
-		if err == nil {
-			err = closeErr
-
-			if err == nil {
-				// copy success - update file name / path
-				fh.Name = filepath.Base(path)
-				fh.Path = path
-			}
-		}
-	}()
+	defer dst.Close()
 
 	// copy
 	if _, err = io.Copy(dst, src); err != nil {
