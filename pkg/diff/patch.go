@@ -123,10 +123,6 @@ func Patch(fh fs.FileHandle, deltas Deltas) error {
 		return fmt.Errorf("unable to apply deltas - keep file untouched - %s", err.Error())
 	}
 
-	if err := fs.Backup(fh); err != nil {
-		return err
-	}
-
 	if err := os.Rename(patchWorkFilePath, fh.Path); err != nil {
 		return fmt.Errorf("unable to rename patch file to original file - %s", err.Error())
 	}
