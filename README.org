@@ -39,7 +39,7 @@ To crosscompile the binary for
 
     ~./zfs-snap-diff <POOL>~
 
- [[./doc/browse-filesystem.png][Browse Filesystem]]
+ [[./doc/browse-filesystem.png][file:./doc/browse-filesystem.png]]
 
 
 ** Changes
