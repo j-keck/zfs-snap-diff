@@ -111,6 +111,6 @@ func (self *FileHandle) Backup() (string, error) {
 	// copy the file in the backup location
 	now := time.Now().Format("20060102_150405")
 	backupFilePath := fmt.Sprintf("%s/%s_%s", backupDir, self.Name, now)
-	log.Infof("copy actual file: %s in backup directory: %s", self.Name, backupFilePath)
+	log.Debugf("copy actual file: %s in backup directory: %s", self.Name, backupFilePath)
 	return backupFilePath, self.Copy(backupFilePath)
 }

@@ -15,6 +15,7 @@ var log = plog.GlobalLogger()
 
 // ZFS represents a zfs filesystem
 type ZFS struct {
+	name     string
 	datasets Datasets
 	cmd      ZFSCmd
 	cfg      config.Config
@@ -24,6 +25,7 @@ type ZFS struct {
 func NewZFS(name string, cfg config.Config) (ZFS, error) {
 	self := ZFS{}
 	self.cmd = NewZFSCmd(cfg.ZFS.UseSudo)
+	self.name = name
 
 	datasets, err := self.scanDatasets(name)
 	if err != nil {
@@ -32,6 +34,10 @@ func NewZFS(name string, cfg config.Config) (ZFS, error) {
 	self.datasets = datasets
 	self.cfg = cfg
 	return self, nil
+}
+
+func (self *ZFS) Name() string {
+	return self.name
 }
 
 func (self *ZFS) Datasets() Datasets {
@@ -57,7 +63,8 @@ func (self *ZFS) FindDatasetForPath(path string) (Dataset, error) {
 		// TODO: filepath.HasPrefix is buggy
 		//  see: https://github.com/golang/go/issues/18358
 		if filepath.HasPrefix(path, ds.MountPoint.Path) {
-			log.Tracef("Dataset for path found - ds: %+v, for path: %s", ds, path)
+			log.Tracef("Dataset for path found - path: %s, ds: %s, mount-point: %s",
+				path, ds.Name, ds.MountPoint.Path)
 			return ds, nil
 		}
 	}
