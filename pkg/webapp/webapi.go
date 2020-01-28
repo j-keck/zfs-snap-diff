@@ -358,6 +358,7 @@ func (self *WebApp) revertChangeHndl(w http.ResponseWriter, r *http.Request) {
 	}
 
 	msg := fmt.Sprintf("Change reverted - Backup created at '%s'", backup)
+	log.Info(msg)
 	w.Write([]byte(msg))
 }
 
@@ -428,5 +429,6 @@ func (self *WebApp) restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 
 	msg := fmt.Sprintf("File '%s' restored. Backup created at '%s'",
 		actualFh.Name, backup)
+	log.Info(msg)
 	w.Write([]byte(msg))
 }
