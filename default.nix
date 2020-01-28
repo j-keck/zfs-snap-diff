@@ -73,7 +73,7 @@ let
   bindata =
     let
       go-bindata = pkgs.buildGoModule rec {
-        name = "go-bindata-${version}";
+        name = "go-bindata";
         version = "8639be0519b3f65dc77b41e3e1df0e54b71fc57e";
         src = pkgs.fetchFromGitHub {
           owner = "go-bindata";
@@ -81,7 +81,7 @@ let
           rev = version;
           sha256 = "11j2cph5w042qx1d91gbwkcq884dlz0lc7ngq1xvyg5hhpd3j8qv";
         };
-        modSha256 = "0yc3d1d355l3qirqy7rjb2q8z2r8886nnpfr1714m5i5fcznlj5f";
+        modSha256 = "00zr3kpaywqi5kgjzvmf284njxl1fs1k9xaz1b8azwxnjpy77i0c";
       };
     in pkgs.runCommand "bindata.go" {} ''
       mkdir -p $out
