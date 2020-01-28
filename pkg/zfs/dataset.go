@@ -47,14 +47,14 @@ func (self *Dataset) ScanSnapshots() (Snapshots, error) {
 			fields := strings.Split(fullName, "@")
 			name := fields[len(fields)-1]
 
-            // create the dir-handle per hand.
+			// create the dir-handle per hand.
 			// this prevents a unnecessary 'os.Stat' call for each snapshot
 			// (which takes some time with thousands snapshots on spinning disks)
 			dir := fs.DirHandle{fs.FSHandle{
-				Name: name,
-				Path: self.MountPoint.Path + "/.zfs/snapshot/" + name,
-				Kind: fs.DIR,
-				Size: 0,
+				Name:    name,
+				Path:    self.MountPoint.Path + "/.zfs/snapshot/" + name,
+				Kind:    fs.DIR,
+				Size:    0,
 				ModTime: creation,
 			}}
 

@@ -1,8 +1,7 @@
 package webapp
 
 import (
-	"bytes"
-	"encoding/json"
+	"fmt"
 	"github.com/j-keck/zfs-snap-diff/pkg/diff"
 	"github.com/j-keck/zfs-snap-diff/pkg/fs"
 	"github.com/j-keck/zfs-snap-diff/pkg/scanner"
@@ -19,12 +18,12 @@ func (self *WebApp) configHndl(w http.ResponseWriter, r *http.Request) {
 		Datasets zfs.Datasets `json:"datasets"`
 	}
 	payload.Datasets = self.zfs.Datasets()
-	encodeJsonAndRespond(w, r, payload)
+	respond(w, r, payload)
 }
 
 /// responds with a list of all available datasets
 func (self *WebApp) datasetsHndl(w http.ResponseWriter, r *http.Request) {
-	encodeJsonAndRespond(w, r, self.zfs.Datasets())
+	respond(w, r, self.zfs.Datasets())
 }
 
 /// responds with a directory listing
@@ -32,7 +31,6 @@ func (self *WebApp) datasetsHndl(w http.ResponseWriter, r *http.Request) {
 /// expected payload: { path: "/path/to/dir" }
 ///
 func (self *WebApp) dirListingHndl(w http.ResponseWriter, r *http.Request) {
-
 	// decode payload
 	type Payload struct {
 		Path string `json:"path"`
@@ -42,11 +40,8 @@ func (self *WebApp) dirListingHndl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// validate the requestd path is in the actual dataset
-	if _, err := self.zfs.FindDatasetForPath(payload.Path); err != nil {
-		msg := "Requested file was not in the dataset"
-		log.Errorf("%s - path: %s", msg, payload.Path)
-		http.Error(w, msg, 400)
+	if err := self.checkPathIsAllowed(payload.Path); err != nil {
+		http.Error(w, err.Error(), 400)
 		return
 	}
 
@@ -54,7 +49,7 @@ func (self *WebApp) dirListingHndl(w http.ResponseWriter, r *http.Request) {
 	dh, err := fs.NewDirHandle(payload.Path)
 	if err != nil {
 		log.Errorf("Unable to get directory handle for: %s - %v", payload.Path, err)
-		http.Error(w, "Unable to create a directory handle", 400)
+		http.Error(w, "Unable to get directory handle", 400)
 		return
 	}
 
@@ -62,11 +57,11 @@ func (self *WebApp) dirListingHndl(w http.ResponseWriter, r *http.Request) {
 	entries, err := dh.Ls()
 	if err != nil {
 		log.Errorf("Directory listing failed for directory: %s - %v", payload.Path, err)
-		http.Error(w, "Directroy listing failed", 500)
+		http.Error(w, "Directory listing failed", 500)
 		return
 	}
 
-	encodeJsonAndRespond(w, r, entries)
+	respond(w, r, entries)
 }
 
 /// responds with a list of file versions
@@ -101,14 +96,14 @@ func (self *WebApp) findFileVersionsHndl(w http.ResponseWriter, r *http.Request)
 
 	// scan for other file versions
 	sc := scanner.NewScanner(payload.DateRange, payload.CompareMethod, ds, self.zfs)
-	versions, err := sc.FindFileVersions(payload.Path)
+	scanResult, err := sc.FindFileVersions(payload.Path)
 	if err != nil {
 		log.Errorf("File versions search failed - %v", err)
 		http.Error(w, "File versions search failed", 500)
 		return
 	}
 
-	encodeJsonAndRespond(w, r, versions)
+	respond(w, r, scanResult)
 }
 
 /// responds with a list of snapshots for the given dataset
@@ -141,7 +136,7 @@ func (self *WebApp) snapshotsForDatasetHndl(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	encodeJsonAndRespond(w, r, snaps)
+	respond(w, r, snaps)
 }
 
 /// responds with the mime type of the request file
@@ -159,18 +154,15 @@ func (self *WebApp) mimeTypeHndl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// validate the requestd path is in the actual dataset
-	if _, err := self.zfs.FindDatasetForPath(payload.Path); err != nil {
-		msg := "Requested file was not in the dataset"
-		log.Errorf("%s - path: %s", msg, payload.Path)
-		http.Error(w, msg, 400)
+	if err := self.checkPathIsAllowed(payload.Path); err != nil {
+		http.Error(w, err.Error(), 400)
 		return
 	}
 
 	// open the file handle
 	fh, err := fs.NewFileHandle(payload.Path)
 	if err != nil {
-		log.Errorf("Unable to open the file: %v", err)
+		log.Errorf("Unable to open the file: %s - %v", payload.Path, err)
 		http.Error(w, "Unable to open the requested file", 500)
 		return
 	}
@@ -178,12 +170,12 @@ func (self *WebApp) mimeTypeHndl(w http.ResponseWriter, r *http.Request) {
 	// build the response
 	mimeType, err := fh.MimeType()
 	if err != nil {
-		log.Errorf("Unable to determine the mime type for the file: %v", err)
+		log.Errorf("Unable to determine the mime type for the file: %s - %v", payload.Path, err)
 		http.Error(w, "Unable to determine the mime type", 500)
 		return
 	}
 
-	encodeJsonAndRespond(w, r, struct {
+	respond(w, r, struct {
 		MimeType string `json:"mimeType"`
 	}{mimeType})
 }
@@ -230,22 +222,19 @@ func (self *WebApp) downloadHndl(w http.ResponseWriter, r *http.Request) {
 
 	if len(payload.AsName) == 0 {
 		asName := filepath.Base(payload.Path)
-		log.Tracef("Parameter 'as-name' missing - use: %s by default", asName)
+		log.Debugf("Parameter 'asName' missing - use: %s by default", asName)
 		payload.AsName = asName
 	}
 
-	// validate the requestd path is in the actual dataset
-	if _, err := self.zfs.FindDatasetForPath(payload.Path); err != nil {
-		msg := "Requested file was not in the dataset"
-		log.Errorf("%s - path: %s", msg, payload.Path)
-		http.Error(w, msg, 400)
+	if err := self.checkPathIsAllowed(payload.Path); err != nil {
+		http.Error(w, err.Error(), 400)
 		return
 	}
 
 	// open the file handle
 	fh, err := fs.NewFileHandle(payload.Path)
 	if err != nil {
-		log.Errorf("Unable to open the file: %v", err)
+		log.Errorf("Unable to open the file: %s - %v", payload.Path, err)
 		http.Error(w, "Unable to open the requested file", 500)
 		return
 	}
@@ -253,7 +242,7 @@ func (self *WebApp) downloadHndl(w http.ResponseWriter, r *http.Request) {
 	// build the response
 	contentType, err := fh.MimeType()
 	if err != nil {
-		log.Errorf("Unable to determine the mime type for the file: %v", err)
+		log.Errorf("Unable to determine the mime type for the file: %s - %v", payload.Path, err)
 		http.Error(w, "Unable to determine the mime type", 500)
 		return
 	}
@@ -288,17 +277,13 @@ func (self *WebApp) diffHndl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// validate the requestd path is in the actual dataset
-	if _, err := self.zfs.FindDatasetForPath(payload.ActualPath); err != nil {
-		msg := "Requested file was not in the dataset"
-		log.Errorf("%s - actual-path: %s", msg, payload.ActualPath)
-		http.Error(w, msg, 400)
+	if err := self.checkPathIsAllowed(payload.ActualPath); err != nil {
+		http.Error(w, err.Error(), 400)
 		return
 	}
-	if _, err := self.zfs.FindDatasetForPath(payload.BackupPath); err != nil {
-		msg := "Requested file was not in the dataset"
-		log.Errorf("%s - backup-path: %s", msg, payload.BackupPath)
-		http.Error(w, msg, 400)
+
+	if err := self.checkPathIsAllowed(payload.BackupPath); err != nil {
+		http.Error(w, err.Error(), 400)
 		return
 	}
 
@@ -310,7 +295,7 @@ func (self *WebApp) diffHndl(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, msg, 400)
 		return
 	}
-	encodeJsonAndRespond(w, r, diffs)
+	respond(w, r, diffs)
 }
 
 /// revert a changeset
@@ -332,17 +317,15 @@ func (self *WebApp) revertChangeHndl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// validate the requestd path is in the actual dataset
-	if _, err := self.zfs.FindDatasetForPath(payload.ActualPath); err != nil {
-		msg := "Requested file was not in the dataset"
-		log.Errorf("%s - actual-path: %s", msg, payload.ActualPath)
-		http.Error(w, msg, 400)
+	// valiate path
+	if err := self.checkPathIsAllowed(payload.ActualPath); err != nil {
+		http.Error(w, err.Error(), 400)
 		return
 	}
-	if _, err := self.zfs.FindDatasetForPath(payload.BackupPath); err != nil {
-		msg := "Requested file was not in the dataset"
-		log.Errorf("%s - backup-path: %s", msg, payload.BackupPath)
-		http.Error(w, msg, 400)
+
+	// validate path
+	if err := self.checkPathIsAllowed(payload.BackupPath); err != nil {
+		http.Error(w, err.Error(), 400)
 		return
 	}
 
@@ -355,6 +338,17 @@ func (self *WebApp) revertChangeHndl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// create a backup from the actual file
+	var backup string
+	fh, _ := fs.NewFileHandle(payload.ActualPath)
+	if backup, err = fh.Backup(); err != nil {
+		msg := "Unable to backup the file"
+		log.Errorf("%s - acutal-path: %s - %v", msg, payload.ActualPath, err)
+		http.Error(w, msg, 400)
+		return
+	}
+
+	// patch
 	err = diff.PatchPath(payload.ActualPath, diffs.Deltas[payload.DeltaIdx])
 	if err != nil {
 		msg := "Unable to revert change"
@@ -362,6 +356,9 @@ func (self *WebApp) revertChangeHndl(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, msg, 400)
 		return
 	}
+
+	msg := fmt.Sprintf("Change reverted - Backup created at '%s'", backup)
+	w.Write([]byte(msg))
 }
 
 /// restore a file version
@@ -381,77 +378,55 @@ func (self *WebApp) restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// validate the requestd path is in the actual dataset
-	if _, err := self.zfs.FindDatasetForPath(payload.ActualPath); err != nil {
-		msg := "Requested file was not in the dataset"
-		log.Errorf("%s - actual-path: %s", msg, payload.ActualPath)
-		http.Error(w, msg, 400)
-		return
-	}
-	if _, err := self.zfs.FindDatasetForPath(payload.BackupPath); err != nil {
-		msg := "Requested file was not in the dataset"
-		log.Errorf("%s - backup-path: %s", msg, payload.BackupPath)
-		http.Error(w, msg, 400)
+	// valiate path
+	if err := self.checkPathIsAllowed(payload.ActualPath); err != nil {
+		http.Error(w, err.Error(), 400)
 		return
 	}
 
+	// validate path
+	if err := self.checkPathIsAllowed(payload.BackupPath); err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
+
+	// get the actual file
 	actualFh, err := fs.NewFileHandle(payload.ActualPath)
 	if err != nil {
 		msg := "Unable to open actual file"
-		log.Errorf("%s - actual-path: %s", msg, payload.ActualPath)
+		log.Errorf("%s, path: %s - %v", msg, payload.ActualPath, err)
 		http.Error(w, msg, 400)
 		return
 	}
 
+	// get the backup file
 	backupFh, err := fs.NewFileHandle(payload.BackupPath)
 	if err != nil {
 		msg := "Unable to open backup file"
-		log.Errorf("%s - backup-path: %s", msg, payload.BackupPath)
+		log.Errorf("%s, path: %s - %v", msg, payload.BackupPath, err)
 		http.Error(w, msg, 400)
 		return
 	}
 
-	if err := fs.Backup(actualFh); err != nil {
+	// create a backup from the actual file
+	var backup string
+	if backup, err = actualFh.Backup(); err != nil {
 		msg := "Unable to backup the file"
-		log.Errorf("%s - acutal-path: %s", msg, payload.ActualPath)
+		log.Errorf("%s, path: %s - %v", msg, payload.ActualPath, err)
 		http.Error(w, msg, 400)
 		return
 	}
 
+	// restore the backup file
 	if err := backupFh.Copy(payload.ActualPath); err != nil {
-		msg := "Unable to restore backup file"
-		log.Errorf("%s - backup-path: %s", msg, payload.BackupPath)
+		msg := "Unable to restore the file"
+		log.Errorf("%s, actual: %s, backup: %s - %v",
+			msg, payload.ActualPath, payload.BackupPath, err)
 		http.Error(w, msg, 400)
 		return
 	}
-}
 
-func decodeJsonPayload(w http.ResponseWriter, r *http.Request, payload interface{}) interface{} {
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(payload); err != nil {
-		log.Errorf("Decoding payload error - request at: %s, error: %v", r.URL, err)
-		http.Error(w, "Invalid payload", 400)
-		return nil
-	}
-	log.Tracef("decodeJsonPayload for request at: %s - payload: %+v", r.URL, payload)
-	return payload
-}
-
-// encode the given payload as json and write it in the given ResponseWriter
-func encodeJsonAndRespond(w http.ResponseWriter, r *http.Request, payload interface{}) {
-	if js, err := json.Marshal(payload); err == nil {
-		if log.IsTraceEnabled() {
-			log.Tracef("encodeJsonAndRespond to request at: %s", r.URL)
-
-			// format the json response and log it
-			var buf bytes.Buffer
-			json.Indent(&buf, js, "                                ", "  ")
-			log.Tracef("  json: %s", buf.String())
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(js)
-	} else {
-		log.Errorf("Unable to marshal payload as json: %v", err)
-		http.Error(w, "Json encoding error", 500)
-	}
+	msg := fmt.Sprintf("File '%s' restored. Backup created at '%s'",
+		actualFh.Name, backup)
+	w.Write([]byte(msg))
 }

@@ -12,10 +12,10 @@ import (
 var log = plog.GlobalLogger()
 
 type Scanner struct {
-	dateRange      DateRange
-	compareMethod  string
-	dataset        zfs.Dataset
-	zfs            zfs.ZFS
+	dateRange     DateRange
+	compareMethod string
+	dataset       zfs.Dataset
+	zfs           zfs.ZFS
 }
 
 type ScanResult struct {
@@ -75,7 +75,7 @@ func (self *Scanner) FindFileVersions(pathActualVersion string) (ScanResult, err
 				log.Errorf("unable to check if snapshot: %s is mounted - %v", snap.Name, err)
 			}
 
-			if ! isMounted {
+			if !isMounted {
 				if err := self.zfs.MountSnapshot(snap); err != nil {
 					log.Errorf("unable to mount snapshot: %s - %v", snap.Name, err)
 
@@ -105,7 +105,6 @@ func (self *Scanner) FindFileVersions(pathActualVersion string) (ScanResult, err
 				return sr, err
 			}
 		}
-
 
 		// get the file-handle to the backup version in the snapshot
 		fh, err := fs.NewFileHandle(self.pathInSnapshot(pathActualVersion, snap))

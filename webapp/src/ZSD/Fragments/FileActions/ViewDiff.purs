@@ -54,11 +54,13 @@ update self = case _ of
     ActualVersion _ -> self.setState _ { diff = Nothing }
     BackupVersion _ -> launchAff_ $ do
       res <- Diff.fetch self.props.file self.props.version
-      liftEffect $ either Messages.appError (\diff -> self.setState _ { diff = Just diff}) res 
- 
+      liftEffect $ either Messages.appError (\diff -> self.setState _ { diff = Just diff}) res
+
   Revert idx -> launchAff_ $ do
-    _ <- Diff.revert self.props.file self.props.version idx
-    liftEffect $ update self Diff
+    res <- Diff.revert self.props.file self.props.version idx
+    liftEffect $ do
+      either Messages.appError Messages.info res
+      update self Diff
 
 
 viewDiff :: Props -> JSX
@@ -116,7 +118,7 @@ viewDiff = make component { initialState, render, didMount, didUpdate }
             , R.pre_ [ R.code { dangerouslySetInnerHTML: { __html: html } } ]
             ]
           }
-        
+
 
 
     sideBySideDiff self =

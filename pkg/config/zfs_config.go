@@ -16,7 +16,7 @@ func NewDefaultZFSConfig() ZFSConfig {
 	}
 
 	return ZFSConfig{
-		UseSudo:       false,
+		UseSudo:        false,
 		MountSnapshots: mountSnapshots,
 	}
 }

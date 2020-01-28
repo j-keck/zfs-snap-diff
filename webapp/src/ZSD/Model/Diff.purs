@@ -9,6 +9,7 @@ import Effect.Aff (Aff)
 import Foreign (ForeignError(..))
 import Foreign as Foreign
 import Simple.JSON (class ReadForeign)
+import Affjax.ResponseFormat as ARF
 import ZSD.HTTP as HTTP
 import ZSD.Model.AppError (AppError(..))
 import ZSD.Model.FSEntry (FSEntry)
@@ -59,8 +60,7 @@ fetch _ (ActualVersion _ ) = pure $ Left $ Bug "diff with the same version not p
 
 
 
-revert :: FSEntry -> FileVersion -> Int -> Aff (Either AppError Unit)
-revert { path } (BackupVersion { file }) deltaIdx = HTTP.post_ "/api/revert-change"
+revert :: FSEntry -> FileVersion -> Int -> Aff (Either AppError String)
+revert { path } (BackupVersion { file }) deltaIdx = HTTP.post ARF.string "/api/revert-change"
                                                       { "actualPath": path, "backupPath": file.path, deltaIdx }
-revert _ (ActualVersion _) _ = pure $ Left $ Bug "revert for the actual version not possible"                                                      
-
+revert _ (ActualVersion _) _ = pure $ Left $ Bug "revert for the actual version not possible"

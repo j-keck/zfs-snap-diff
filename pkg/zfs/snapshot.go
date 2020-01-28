@@ -2,8 +2,8 @@ package zfs
 
 import (
 	"github.com/j-keck/zfs-snap-diff/pkg/fs"
-	"time"
 	"os"
+	"time"
 )
 
 // Snapshot - zfs snapshot
@@ -13,7 +13,6 @@ type Snapshot struct {
 	Created  time.Time    `json:"created"`
 	Dir      fs.DirHandle `json:"dir"`
 }
-
 
 // Check if the snaphot is mounted
 func (s *Snapshot) IsMounted() (bool, error) {
@@ -33,8 +32,6 @@ func (s *Snapshot) IsMounted() (bool, error) {
 	log.Tracef("snapshot: %s is mounted = %v", s.Name, isMounted)
 	return isMounted, nil
 }
-
-
 
 // Snapshots represents snapshots from a zfs dataset
 type Snapshots []Snapshot
@@ -58,4 +55,3 @@ func (s *Snapshots) Filter(f func(Snapshot) bool) Snapshots {
 	}
 	return newS
 }
-

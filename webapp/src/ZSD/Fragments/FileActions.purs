@@ -84,8 +84,10 @@ update self = case _ of
     assign ("/api/download?path=" <> path <> "&as-name=" <> asName) location
 
   Restore -> launchAff_ $ do
-    _ <- FileVersion.restore self.props.file self.props.version
-    liftEffect $ update self View
+    res <- FileVersion.restore self.props.file self.props.version
+    liftEffect $ do
+      either Messages.appError Messages.info res
+      update self View
 
 
 fileAction :: Props -> JSX

@@ -9,6 +9,7 @@ import Data.Maybe (maybe)
 import Effect.Aff (Aff)
 import Data.String as S
 import Simple.JSON (class ReadForeign, readImpl)
+import Affjax.ResponseFormat as ARF
 import ZSD.HTTP as HTTP
 import ZSD.Model.FSEntry (FSEntry)
 import ZSD.Model.Snapshot (Snapshot)
@@ -56,7 +57,7 @@ isBackupVersion = case _ of
 
 
 
-restore :: FSEntry -> FileVersion -> Aff (Either AppError Unit)
-restore { path } (BackupVersion { file }) = HTTP.post_ "/api/restore-file"
+restore :: FSEntry -> FileVersion -> Aff (Either AppError String)
+restore { path } (BackupVersion { file }) = HTTP.post ARF.string "/api/restore-file"
                                              { "actualPath": path, "backupPath": file.path }
 restore _ (ActualVersion _) = pure $ Left $ Bug "restore the actual version not possible"
