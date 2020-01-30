@@ -52,3 +52,9 @@ checkAll fs a = F.foldl (\b f -> f a && b) true fs
 
 checkAny :: forall a f. F.Foldable f => f (a -> Boolean) -> a -> Boolean
 checkAny fs a = F.foldl (\b f -> f a || b) false fs
+
+
+pathAppend :: String -> String -> String
+pathAppend a b = a <> "/" <> b
+infix 4 pathAppend as </>
+

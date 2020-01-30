@@ -69,6 +69,7 @@ func (self *WebApp) registerAssetsEndpoint() {
 func (self *WebApp) registerApiEndpoints() {
 	http.HandleFunc("/api/config", self.configHndl)
 	http.HandleFunc("/api/datasets", self.datasetsHndl)
+	http.HandleFunc("/api/stat", self.statHndl)
 	http.HandleFunc("/api/dir-listing", self.dirListingHndl)
 	http.HandleFunc("/api/find-file-versions", self.findFileVersionsHndl)
 	http.HandleFunc("/api/snapshots-for-dataset", self.snapshotsForDatasetHndl)

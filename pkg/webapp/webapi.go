@@ -26,6 +26,26 @@ func (self *WebApp) datasetsHndl(w http.ResponseWriter, r *http.Request) {
 	respond(w, r, self.zfs.Datasets())
 }
 
+func (self *WebApp) statHndl(w http.ResponseWriter, r *http.Request) {
+	// decode payload
+	type Payload struct {
+		Path string `json:"path"`
+	}
+	payload, ok := decodeJsonPayload(w, r, &Payload{}).(*Payload)
+	if !ok {
+		return
+	}
+
+	fh, err := fs.NewFSHandle(payload.Path)
+	if err != nil {
+		log.Errorf("Unable to stat path: %s - %v", payload.Path, err)
+		http.Error(w, "Unable to stat path", 400)
+		return
+	}
+	respond(w, r, fh)
+}
+
+
 /// responds with a directory listing
 ///
 /// expected payload: { path: "/path/to/dir" }

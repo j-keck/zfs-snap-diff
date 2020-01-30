@@ -89,11 +89,12 @@ browseSnapshots = make component { initialState, render }
                               , onSnapshotSelected: update self <<< SnapshotSelected
                               }) self.state.selectedDataset
 
-      , foldMap (\snapshot -> dirBrowser
-                              { dir: snapshot.dir
+      , foldMap (uncurry2 (\ds snapshot -> dirBrowser
+                              { ds
+                              , root: snapshot.dir
                               , onFileSelected: update self <<< FileSelected
                               , onDirSelected: update self <<< DirSelected
-                              }) self.state.selectedSnapshot
+                              })) (tuple2 <$> self.state.selectedDataset <*> self.state.selectedSnapshot)
 
       , foldMap (uncurry2 (\file snapshot ->
                   -- FIXME: cleanup: update the file path in the dataset

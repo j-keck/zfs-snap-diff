@@ -35,3 +35,6 @@ downloadText { path } = HTTP.post ARF.string "/api/download" { path }
 
 downloadBlob :: FSEntry -> Aff (Either AppError Blob)
 downloadBlob { path } = HTTP.post ARF.blob "/api/download" { path }
+
+stat :: String -> Aff (Either AppError FSEntry)
+stat path = HTTP.post' "/api/stat" { path }

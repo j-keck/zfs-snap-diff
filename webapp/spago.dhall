@@ -14,6 +14,7 @@
     , "stringutils"
     , "test-unit"
     , "unfoldable"
+    , "unordered-collections"
     ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]
