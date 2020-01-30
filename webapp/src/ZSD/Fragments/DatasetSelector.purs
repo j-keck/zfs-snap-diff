@@ -3,6 +3,7 @@ module ZSD.Fragments.DatasetSelector where
 import Prelude
 
 import Data.Maybe (Maybe(..))
+import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import React.Basic (Component, JSX, createComponent, empty, make)
@@ -45,7 +46,7 @@ datasetSelector = make component { initialState, render }
                             , R.text $ Formatter.filesize ds.used
                             , R.text $ Formatter.filesize ds.avail
                             , R.text $ Formatter.filesize ds.refer
-                            , R.text ds.mountPoint.path ]
+                            , R.text (unwrap ds.mountPoint).path ]
             , onRowSelected: \(Tuple idx ds) -> do
                     hidePanelBodyFn
                     Scroll.scrollToTop

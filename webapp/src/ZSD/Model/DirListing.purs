@@ -6,7 +6,7 @@ import Data.Either (Either)
 import Effect.Aff (Aff)
 import ZSD.HTTP as HTTP
 import ZSD.Model.AppError (AppError)
-import ZSD.Model.FSEntry (FSEntry)
+import ZSD.Model.FSEntry (FSEntry(..))
 import ZSD.Model.FSEntry as FSEntry
 
 type DirListing = Array FSEntry
@@ -16,4 +16,4 @@ filter p = A.filter (\e -> (FSEntry.isHidden e) == p.showHidden)
 
 
 fetch :: FSEntry -> Aff (Either AppError DirListing)
-fetch { path } = HTTP.post' "/api/dir-listing" { path }
+fetch (FSEntry { path }) = HTTP.post' "/api/dir-listing" { path }

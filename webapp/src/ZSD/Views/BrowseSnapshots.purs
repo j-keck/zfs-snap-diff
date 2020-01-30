@@ -6,6 +6,7 @@ import Prelude
 import Data.Array as A
 import Data.Foldable (foldMap)
 import Data.Maybe (Maybe(..))
+import Data.Newtype (over, unwrap)
 import Data.String as S
 import Data.Tuple.Nested (tuple2, uncurry2)
 import Effect (Effect)
@@ -17,7 +18,7 @@ import ZSD.Fragments.DirBrowser (dirBrowser)
 import ZSD.Fragments.FileActions (fileAction)
 import ZSD.Model.Config (Config)
 import ZSD.Model.Dataset (Dataset)
-import ZSD.Model.FSEntry (FSEntry)
+import ZSD.Model.FSEntry (FSEntry(..)) 
 import ZSD.Model.FileVersion (FileVersion(..))
 import ZSD.Model.Snapshot (Snapshot)
 import ZSD.Ops (unsafeFromJust)
@@ -98,11 +99,11 @@ browseSnapshots = make component { initialState, render }
 
       , foldMap (uncurry2 (\file snapshot ->
                   -- FIXME: cleanup: update the file path in the dataset
-                  let snapPathElements = S.split (S.Pattern "/") snapshot.dir.path
-                      filePathElements = S.split (S.Pattern "/") file.path
+                  let snapPathElements = S.split (S.Pattern "/") (unwrap snapshot.dir).path
+                      filePathElements = S.split (S.Pattern "/") (unwrap file).path
                       relPath = S.joinWith "/" $ A.drop (A.length snapPathElements) filePathElements
-                      dsPath = (unsafeFromJust self.state.selectedDataset).mountPoint.path
-                      file' = file { path = dsPath <> "/" <> relPath }
+                      dsPath = (unwrap (unsafeFromJust self.state.selectedDataset).mountPoint).path
+                      file' = over FSEntry (_ { path = dsPath <> "/" <> relPath }) file
                       version = BackupVersion {file, snapshot}
                   in fileAction { file: file', version }))
           (tuple2 <$> self.state.selectedFile

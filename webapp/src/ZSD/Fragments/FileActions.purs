@@ -5,6 +5,7 @@ import Prelude
 import Data.Array as A
 import Data.Either (either)
 import Data.Monoid (guard)
+import Data.Newtype (unwrap)
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
@@ -16,10 +17,10 @@ import Web.HTML (window)
 import Web.HTML.Location (assign)
 import Web.HTML.Window (location)
 import ZSD.Components.ActionButton (actionButton)
+import ZSD.Components.Messages as Messages
 import ZSD.Fragments.FileAction.ViewDiff (viewDiff)
 import ZSD.Fragments.FileActions.ViewBlob (viewBlob)
 import ZSD.Fragments.FileActions.ViewText (viewText)
-import ZSD.Components.Messages as Messages
 import ZSD.Model.FSEntry (FSEntry)
 import ZSD.Model.FSEntry as FSEntry
 import ZSD.Model.FileVersion (FileVersion(..))
@@ -54,7 +55,7 @@ update self = case _ of
 
 
   ViewText -> launchAff_ $ do
-    let file = FileVersion.unwrapFile self.props.version
+    let file = FileVersion.unwrapFSEntry self.props.version
     res <- FSEntry.downloadText file
     liftEffect $ either Messages.appError (\content -> self.setState _ { view = viewText { content } }) res
 
@@ -63,7 +64,7 @@ update self = case _ of
     mimeType <- _.mimeType <$> readState self
     if (checkAny [MimeType.isPDF, MimeType.isImage] mimeType)
     then launchAff_  do
-      let file = FileVersion.unwrapFile self.props.version
+      let file = FileVersion.unwrapFSEntry self.props.version
       res <- FSEntry.downloadBlob file
       liftEffect $ either Messages.appError (\content -> self.setState _ { view = viewBlob { content } }) res
     else
@@ -77,7 +78,7 @@ update self = case _ of
 
 
   Download -> do
-    let path = (FileVersion.unwrapFile self.props.version).path
+    let path = FileVersion.unwrapPath self.props.version
         asName = FileVersion.uniqueName self.props.version
 
     location <- window >>= location
@@ -124,7 +125,7 @@ fileAction = make component { initialState, render, didMount, didUpdate }
             , btn "Download" "fas fa-download" Download true
             , actionButton { text: "Restore"
                            , icon: "fas fa-archive"
-                           , textConfirm: "Restore the old version of " <> self.props.file.name
+                           , textConfirm: "Restore the old version of " <> (unwrap self.props.file).name
                            , action: update self Restore
                            , enabled: FileVersion.isBackupVersion self.props.version
                            }
@@ -136,11 +137,11 @@ fileAction = make component { initialState, render, didMount, didUpdate }
             [ R.div
               { className: "card-header"
               , children: case self.props.version of
-                             ActualVersion { name } -> [ R.text "Actual content from: "
-                                                      , R.b_ [ R.text name ]
-                                                      ]
+                             ActualVersion file -> [ R.text "Actual content from: "
+                                                   , R.b_ [ R.text $ (unwrap >>> _.name) file ]
+                                                   ] 
                              BackupVersion { file, snapshot } -> [ R.text "Content from: "
-                                                                 , R.b_ [ R.text file.name ]
+                                                                 , R.b_ [ R.text $ (unwrap >>> _.name) file ]
                                                                  , R.text " from snapshot: "
                                                                  , R.b_ [ R.text snapshot.name ]
                                                                 ]

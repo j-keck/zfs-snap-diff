@@ -104,7 +104,7 @@ fileVersionSelector = make component { initialState, didMount, render }
      render self = fragment
        [ panel
          { header: fragment
-           [ R.text $ "Versions for file: " <> self.props.file.name
+           [ R.text $ "Versions for file: " <> (unwrap self.props.file).name
            , R.span
              { className: "float-right"
              , children:
@@ -115,7 +115,7 @@ fileVersionSelector = make component { initialState, didMount, render }
                      { className: "btn btn-secondary" <> guard  (not $ hasOlderVersions self.state) " disabled"
                      , title: "Select the previous version"
                      , onClick: capture_ $ guard (hasOlderVersions self.state)
-                                         $ update self (SelectVersionByIdx (self.state.selectedIdx + 1))
+                                         $ update self (SelectVersionByIdx (self.state.selectedIdx + 1)) 
                      , children:
                        [ R.span { className: "fas fa-backward p-1" }
                        , R.text "Older"
@@ -143,7 +143,7 @@ fileVersionSelector = make component { initialState, didMount, render }
                , rows: self.state.versions
                , mkRow: case _ of
                    ActualVersion f -> [ R.text $ "Actual version", R.text "-", R.text "-" ]
-                   BackupVersion v -> [ R.text $ Formatter.dateTime v.file.modTime
+                   BackupVersion v -> [ R.text $ Formatter.dateTime (unwrap v.file).modTime
                                       , R.text $ Formatter.dateTime v.snapshot.created
                                       , R.text v.snapshot.name
                                       ]

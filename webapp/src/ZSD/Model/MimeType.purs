@@ -9,7 +9,7 @@ import Simple.JSON (class ReadForeign)
 import Simple.JSON as F
 import ZSD.HTTP as HTTP
 import ZSD.Model.AppError (AppError)
-import ZSD.Model.FSEntry (FSEntry)
+import ZSD.Model.FSEntry (FSEntry(..))
 
 
 newtype MimeType = MimeType String
@@ -33,4 +33,4 @@ isPDF :: MimeType -> Boolean
 isPDF (MimeType mimeType) = mimeType == "application/pdf"
 
 fetch :: FSEntry -> Aff (Either AppError MimeType)
-fetch { path } = HTTP.post' "/api/mime-type" { path }
+fetch (FSEntry { path }) = HTTP.post' "/api/mime-type" { path }

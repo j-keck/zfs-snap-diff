@@ -8,7 +8,7 @@ import Prelude (class Eq, class Semigroup, class Show, (+))
 import ZSD.HTTP as HTTP
 import ZSD.Model.AppError (AppError)
 import ZSD.Model.DateRange (DateRange)
-import ZSD.Model.FSEntry (FSEntry)
+import ZSD.Model.FSEntry (FSEntry(..))
 import ZSD.Model.FileVersion (FileVersions)
 import ZSD.Model.Snapshot (Snapshot)
 import ZSD.Ops ((<$$>))
@@ -25,7 +25,7 @@ newtype ScanResult = ScanResult
   }
  
 fetch :: FSEntry -> DateRange -> Aff (Either AppError ScanResult)
-fetch { path } dateRange = ScanResult <$$> HTTP.post' "/api/find-file-versions" { path, dateRange }
+fetch (FSEntry { path }) dateRange = ScanResult <$$> HTTP.post' "/api/find-file-versions" { path, dateRange }
 
 
 

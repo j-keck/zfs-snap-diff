@@ -2,6 +2,7 @@ module ZSD.Model.Diff where
 
 import Prelude
 
+import Affjax.ResponseFormat as ARF
 import Data.Either (Either(..))
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
@@ -9,10 +10,9 @@ import Effect.Aff (Aff)
 import Foreign (ForeignError(..))
 import Foreign as Foreign
 import Simple.JSON (class ReadForeign)
-import Affjax.ResponseFormat as ARF
 import ZSD.HTTP as HTTP
 import ZSD.Model.AppError (AppError(..))
-import ZSD.Model.FSEntry (FSEntry)
+import ZSD.Model.FSEntry (FSEntry(..))
 import ZSD.Model.FileVersion (FileVersion(..))
 
 
@@ -55,12 +55,13 @@ type Deltas = Array Delta
 
 
 fetch :: FSEntry -> FileVersion -> Aff (Either AppError Diff)
-fetch { path } (BackupVersion { file }) = HTTP.post' "/api/diff" { "actualPath": path, "backupPath": file.path}
+fetch (FSEntry { path: actualPath }) (BackupVersion { file: (FSEntry { path: backupPath })}) =
+  HTTP.post' "/api/diff" { actualPath, backupPath }
 fetch _ (ActualVersion _ ) = pure $ Left $ Bug "diff with the same version not possible"
 
 
 
 revert :: FSEntry -> FileVersion -> Int -> Aff (Either AppError String)
-revert { path } (BackupVersion { file }) deltaIdx = HTTP.post ARF.string "/api/revert-change"
-                                                      { "actualPath": path, "backupPath": file.path, deltaIdx }
+revert (FSEntry { path: actualPath }) (BackupVersion { file: (FSEntry { path: backupPath })}) deltaIdx =
+  HTTP.post ARF.string "/api/revert-change" { actualPath, backupPath, deltaIdx }
 revert _ (ActualVersion _) _ = pure $ Left $ Bug "revert for the actual version not possible"

@@ -1,6 +1,6 @@
 module ZSD.Model.Dataset where
 
-import ZSD.Model.DateTime
+import ZSD.Model.FSEntry (FSEntry)
 
 type Datasets = Array Dataset
 
@@ -9,14 +9,5 @@ type Dataset =
   , used :: Number
   , avail :: Number
   , refer :: Number
-  , mountPoint :: MountPoint
+  , mountPoint :: FSEntry
   }
-
-type MountPoint =
-  { name :: String
-  , path :: String
-  , kind :: String
-  , size :: Number
-  , modTime :: DateTime
-  }
-

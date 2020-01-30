@@ -7,6 +7,7 @@ import Data.Array as A
 import Data.Either (Either(..), either)
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Data.Monoid (guard)
+import Data.Newtype (unwrap)
 import Data.String as S
 import Data.Traversable as T
 import Effect (Effect)
@@ -23,7 +24,7 @@ import ZSD.Components.Scroll as Scroll
 import ZSD.Formatter as Formatter
 import ZSD.Model.Dataset (Dataset)
 import ZSD.Model.DirListing as DirListing
-import ZSD.Model.FSEntry (FSEntry)
+import ZSD.Model.FSEntry (FSEntry(..))
 import ZSD.Model.FSEntry as FSEntry
 import ZSD.Ops (unsafeFromJust, (</>))
 import ZSD.Views.BookmarkManager as BM
@@ -78,7 +79,7 @@ update self = case _ of
 
   PickFromBookmark path -> do
     launchAff_ $ do
-      let pathElements = T.scanl (</>) "" (S.split (S.Pattern "/") $ self.props.root.path <>  path)
+      let pathElements = T.scanl (</>) "" (S.split (S.Pattern "/") $ (unwrap self.props.root).path <>  path)
       T.sequence <$> T.traverse FSEntry.stat pathElements >>= (case _ of
         Left err -> Messages.appError err
         Right ps -> do
@@ -95,7 +96,7 @@ update self = case _ of
    
 
   OnClick fsh -> Scroll.scrollToTop *> do
-    case fsh.kind of
+    case (unwrap fsh).kind of
       "DIR" -> do
         -- FIXME: spinning modal?
         update self $ ChangeDir fsh
@@ -134,10 +135,11 @@ dirBrowser = make component { initialState, render, didMount, didUpdate }
              table
               { header: ["Name", "Size", "Modify time"]
               , rows: DirListing.filter self.state self.state.dirListing
-              , mkRow: \f -> [ R.span { className: icon f } <> R.text f.name
-                            , R.text $ Formatter.filesize f.size
-                            , R.text $ Formatter.dateTime f.modTime
-                            ]
+              , mkRow: \f@(FSEntry { name, size, modTime }) ->
+                         [ R.span { className: icon f } <> R.text name
+                         , R.text $ Formatter.filesize size
+                         , R.text $ Formatter.dateTime modTime
+                         ]
               , onRowSelected: update self <<< OnClick
               }
         ]
@@ -163,14 +165,14 @@ dirBrowser = make component { initialState, render, didMount, didUpdate }
                            [ R.a
                              { onClick: capture_ $ update self (PickFromBreadcrumb h)
                              , href: "#"
-                             , children: [ R.text h.name ]
+                             , children: [ R.text (unwrap h).name ]
                              }
                            ]
                          }
                   ) self.state.breadcrumb
               `A.snoc` (maybe mempty (\f -> R.li
                                             { className: "breadcrumb-item"
-                                            , children: [ R.text f.name ]
+                                            , children: [ R.text (unwrap f).name ]
                                             })
                         $ self.state.selectedFile)
             , [ R.div
@@ -211,7 +213,7 @@ dirBrowser = make component { initialState, render, didMount, didUpdate }
        ]
 
 
-    currentDir self = dropRoot $ (fromMaybe self.props.root $ A.last self.state.breadcrumb).path
-      where dropRoot p = fromMaybe p $ S.stripPrefix (S.Pattern self.props.root.path) p
+    currentDir self = dropRoot $ (unwrap (fromMaybe self.props.root $ A.last self.state.breadcrumb)).path
+      where dropRoot p = fromMaybe p $ S.stripPrefix (S.Pattern (unwrap self.props.root).path) p
             
     isCurrentDirBookmarked self = A.elem (currentDir self) self.state.bookmarks
