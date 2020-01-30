@@ -1,18 +1,19 @@
 module ZSD.Model.AppError where
 
-import Data.Generic.Rep (class Generic)
-import Data.Generic.Rep.Show (genericShow)
+import Affjax (URL)
 import Prelude (class Show, show, (<>))
 
 
 data AppError =
-    HTTPError HTTPErrors
+    HTTPError URL HTTPErrors
   | GenericError String
   | Bug String
 
 instance showAppError :: Show AppError where
   show = case _ of
-    HTTPError err -> "HTTP error: " <> show err
+    HTTPError url err -> "client <-> server communication error at endpoint: '"
+                         <> url <> "' - "
+                         <> show err
     GenericError msg -> msg
     Bug msg -> "Unexpected interal state: " <> msg
 
@@ -27,6 +28,13 @@ data HTTPErrors =
   | RequestError String
   | JSONError String
 
-derive instance genericBackendErrors :: Generic HTTPErrors _
-instance showBackendErrors :: Show HTTPErrors where
-  show = genericShow
+instance showHTTPErrors :: Show HTTPErrors where
+  show = case _ of
+    BadRequest msg -> "bad request: " <> msg
+    Unauthorized -> "unauthorized"
+    Forbidden -> "forbidden"
+    NotFound -> "resource not found"
+    ServerError msg -> "server error: " <> msg
+    ResponseFormatError msg -> "response format error: " <> msg
+    RequestError msg -> "request error: " <> msg
+    JSONError msg -> "json error: " <> msg
