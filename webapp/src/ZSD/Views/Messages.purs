@@ -1,4 +1,4 @@
-module ZSD.Components.Messages
+module ZSD.Views.Messages
        ( info
        , warning
        , error
@@ -8,6 +8,7 @@ module ZSD.Components.Messages
        ) where
 
 import Prelude
+
 import Data.Array as A
 import Data.DateTime (DateTime, adjust)
 import Data.Time.Duration (Milliseconds(..), Seconds(..))
@@ -21,9 +22,11 @@ import Effect.Unsafe (unsafePerformEffect)
 import React.Basic (JSX, createComponent, make, readState)
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture_)
-import ZSD.Component.Table (table)
+
+import ZSD.Components.Table (table)
+import ZSD.Components.Spinner as Spinner
 import ZSD.Model.AppError (AppError)
-import ZSD.Ops (unsafeFromJust)
+import ZSD.Utils.Ops (unsafeFromJust)
 
 type Message =
   { ts :: DateTime, level :: Level, msg :: String }
@@ -54,6 +57,7 @@ appError = push Error <<< show
 
 push :: Level -> String -> Effect Unit
 push level msg = do
+  Spinner.remove
   ts <- nowDateTime
   Ref.modify_ (_ `A.snoc` { ts, level, msg }) history
 

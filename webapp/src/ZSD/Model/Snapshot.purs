@@ -2,17 +2,18 @@ module ZSD.Model.Snapshot where
 
 import Data.Either (Either)
 import Effect.Aff (Aff)
-import ZSD.HTTP as HTTP
+
+import ZSD.Utils.HTTP as HTTP
 import ZSD.Model.AppError (AppError)
 import ZSD.Model.Dataset (Dataset)
 import ZSD.Model.DateTime (DateTime)
-import ZSD.Model.FSEntry (FSEntry)
+import ZSD.Model.MountPoint (MountPoint)
 
 type Snapshot =
-  { name     :: String
-  , fullName :: String
-  , created  :: DateTime
-  , dir      :: FSEntry
+  { name       :: String
+  , fullName   :: String
+  , created    :: DateTime
+  , mountPoint :: MountPoint
   }
 
 

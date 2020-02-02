@@ -10,7 +10,8 @@ import Effect (Effect)
 import React.Basic (Component, JSX, createComponent, makeStateless)
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture_)
-import ZSD.Ops (zipWithIndex)
+
+import ZSD.Utils.Ops (zipWithIndex)
 
 type Idx = Int
 

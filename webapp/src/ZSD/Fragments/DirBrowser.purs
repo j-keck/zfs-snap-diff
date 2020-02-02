@@ -2,110 +2,128 @@ module ZSD.Fragments.DirBrowser where
 
 import Prelude
 
-import Data.Array (snoc)
 import Data.Array as A
-import Data.Either (Either(..), either)
+import Data.Either (either)
+import Data.Foldable (foldMap)
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Data.Monoid (guard)
 import Data.Newtype (unwrap)
 import Data.String as S
 import Data.Traversable as T
+import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
-import Foreign.Object as O
+import Effect.Unsafe (unsafePerformEffect)
 import React.Basic (Component, JSX, createComponent, make)
 import React.Basic as React
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture_)
-import ZSD.Component.Table (table)
-import ZSD.Components.Messages as Messages
+import Unsafe.Coerce (unsafeCoerce)
+import ZSD.Components.DropDownButton (dropDownButton)
 import ZSD.Components.Scroll as Scroll
-import ZSD.Formatter as Formatter
+import ZSD.Components.Spinner as Spinner
+import ZSD.Components.Table (table)
 import ZSD.Model.Dataset (Dataset)
-import ZSD.Model.DirListing as DirListing
-import ZSD.Model.FSEntry (FSEntry(..))
-import ZSD.Model.FSEntry as FSEntry
-import ZSD.Ops (unsafeFromJust, (</>))
-import ZSD.Views.BookmarkManager as BM
+import ZSD.Model.FH (FH(..), From(..), To(..), switchMountPoint)
+import ZSD.Model.FH as FH
+import ZSD.Model.Kind (Kind(..), icon)
+import ZSD.Model.MountPoint (MountPoint)
+import ZSD.Utils.BookmarkManager as BM
+import ZSD.Utils.Formatter as Formatter
+import ZSD.Utils.Ops (tupleM, (</>))
+import ZSD.Views.Messages as Messages
 
 
 type Props =
   { ds              :: Dataset
-  , root            :: FSEntry
-  , onFileSelected  :: FSEntry -> Effect Unit
-  , onDirSelected   :: FSEntry -> Effect Unit
+  , altRoot         :: Maybe MountPoint
+  , onFileSelected  :: FH -> Effect Unit
+  , onDirSelected   :: FH -> Effect Unit
   }
 
+type Path = String
+
 type State =
-  { breadcrumb     :: Array FSEntry
-  , dirListing     :: Array FSEntry
-  , selectedFile   :: Maybe FSEntry
+  { breadcrumb     :: Array FH
+  , dirListing     :: Array FH
+  , currentDir     :: FH
+  , selectedFile   :: Maybe FH
   , showBrowser    :: Boolean
   , showHidden     :: Boolean
-  , bookmarks      :: Array String
   }
 
 type Self = React.Self Props State
 
 data Command =
-    StartAt FSEntry
-  | ChangeDir FSEntry
-  | PickFromBreadcrumb FSEntry
-  | PickFromBookmark String
-  | OnClick FSEntry
-  | ReadDir FSEntry
+    StartAt MountPoint
+  | PickFromBreadcrumb FH
+  | PickFromBookmark FH
+  | OnClick FH
+  | ReadDir FH
+  | SwitchRoot From To
 
 update :: Self -> Command -> Effect Unit
 update self = case _ of
-  
-  StartAt target -> do
-    update self $ ReadDir target
-    bms <- BM.getBookmarks self.props.ds
-    self.setState _ { breadcrumb = [target], selectedFile = Nothing, bookmarks = bms }
+
+  StartAt mp -> do
+    let fh = FH.fromMountPoint mp
+    update self $ ReadDir fh
+    bms <- BM.get self.props.ds
+    self.setState _ { breadcrumb = [fh], selectedFile = Nothing }
 
 
-  ChangeDir target -> do
-    update self $ ReadDir target
-    self.setState \s -> s { breadcrumb = s.breadcrumb `snoc` target, selectedFile = Nothing }
 
-  
-  PickFromBreadcrumb target -> do
-    let breadcrumb = A.takeWhile (_ /= target) self.state.breadcrumb
-    self.setState _ { breadcrumb = breadcrumb `snoc` target
-                    , showBrowser = true, selectedFile = Nothing }
-    update self $ ReadDir target
+  PickFromBreadcrumb fh ->
+       update self (ReadDir fh)
+    *> self.setState _ { selectedFile = Nothing, showBrowser = true }
+    *> self.props.onDirSelected fh
+    *> rebuildBreadcrumb self fh
 
 
-  PickFromBookmark path -> do
-    launchAff_ $ do
-      let pathElements = T.scanl (</>) "" (S.split (S.Pattern "/") $ (unwrap self.props.root).path <>  path)
-      T.sequence <$> T.traverse FSEntry.stat pathElements >>= (case _ of
-        Left err -> Messages.appError err
-        Right ps -> do
-          self.setState _ { breadcrumb = A.dropWhile ((/=) self.props.root) ps
-                          , selectedFile = Nothing
-                          }
-          update self $ ReadDir (unsafeFromJust $ A.last ps)
-        ) >>> liftEffect
+  PickFromBookmark fh ->
+    let fh' = maybe fh
+                    (\alt -> switchMountPoint (From self.props.ds.mountPoint) (To alt) fh)
+                    self.props.altRoot
+    in    update self (ReadDir fh')
+       *> self.setState _ { selectedFile = Nothing, showBrowser = true }
+       *> self.props.onDirSelected fh
+       *> rebuildBreadcrumb self fh'
 
-        
-  ReadDir fh -> launchAff_ do
-    res <- DirListing.fetch fh
-    liftEffect $ either Messages.appError (\ls -> self.setState _ { dirListing = ls }) res
-   
 
-  OnClick fsh -> Scroll.scrollToTop *> do
-    case (unwrap fsh).kind of
-      "DIR" -> do
-        -- FIXME: spinning modal?
-        update self $ ChangeDir fsh
-        self.props.onDirSelected fsh
-      "FILE" -> do
-        self.setState _ { showBrowser = false, selectedFile = Just fsh }
-        self.props.onFileSelected fsh
+  ReadDir fh ->
+       Spinner.display
+    *> self.setState _ { currentDir = fh }
+    *> launchAff_ (    FH.ls fh
+                   >>= either Messages.appError (\ls -> self.setState _ { dirListing = ls, currentDir = fh })
+                   >>> liftEffect)
+    *> Spinner.remove
+
+
+
+  OnClick fh -> Scroll.scrollToTop *> do
+    case (unwrap fh).kind of
+
+      Dir -> do
+        update self $ ReadDir fh
+        self.setState \s -> s { selectedFile = Nothing
+                              , breadcrumb = s.breadcrumb `A.snoc` fh
+                              }
+        self.props.onDirSelected fh
+
+      File -> do
+        self.setState _ { showBrowser = false, selectedFile = Just fh }
+        self.props.onFileSelected fh
       _ -> pure unit
 
+
+  SwitchRoot old new ->
+    let fh = switchMountPoint old new self.state.currentDir
+    in     Spinner.display
+        *> update self (ReadDir fh)
+        *> self.setState _ { currentDir = fh }
+        *> rebuildBreadcrumb self fh
+        *> Spinner.remove
 
 
 dirBrowser :: Props -> JSX
@@ -116,14 +134,24 @@ dirBrowser = make component { initialState, render, didMount, didUpdate }
     component :: Component Props
     component  = createComponent "DirBrowser"
 
-    initialState = { breadcrumb: [], dirListing: [], selectedFile: Nothing
-                   , showBrowser: true, showHidden: false, bookmarks: []}
 
-    didMount self = update self (StartAt self.props.root)
+    initialState = { breadcrumb: [], dirListing: []
+                   , currentDir: FH {name: "", path: "", kind: Dir, size: 0.0, mtime: bottom}
+                   , selectedFile: Nothing, showBrowser: true
+                   , showHidden: false
+                   }
+
+
+    didMount self = update self (StartAt $ fromMaybe self.props.ds.mountPoint self.props.altRoot)
+
 
     didUpdate self {prevProps} = do
-      guard (self.props.root /= prevProps.root) $ 
-        update self (StartAt self.props.root)
+      guard (self.props.ds /= prevProps.ds) $
+        update self (StartAt $ fromMaybe self.props.ds.mountPoint self.props.altRoot)
+
+      foldMap (\(Tuple old new) ->
+                guard (old /= new) $ update self (SwitchRoot (From old) (To new)))
+              (tupleM prevProps.altRoot self.props.altRoot)
 
 
     render self =
@@ -134,23 +162,17 @@ dirBrowser = make component { initialState, render, didMount, didUpdate }
         , guard self.state.showBrowser $
              table
               { header: ["Name", "Size", "Modify time"]
-              , rows: DirListing.filter self.state self.state.dirListing
-              , mkRow: \f@(FSEntry { name, size, modTime }) ->
-                         [ R.span { className: icon f } <> R.text name
+              , rows: filter self.state self.state.dirListing
+              , mkRow: \f@(FH { name, size, mtime }) ->
+                         [ R.span { className: (unwrap >>> _.kind >>> icon) f } <> R.text name
                          , R.text $ Formatter.filesize size
-                         , R.text $ Formatter.dateTime modTime
+                         , R.text $ Formatter.dateTime mtime
                          ]
               , onRowSelected: update self <<< OnClick
               }
         ]
       }
 
-
-    icon e
-      | FSEntry.isFile e = "fas fa-file p-1"
-      | FSEntry.isDir e = "fas fa-folder p-1"
-      | FSEntry.isLink e = "fas fa-link p-1"
-      | otherwise = "fas fa-hdd p-1"
 
 
     breadcrumb self =
@@ -178,32 +200,20 @@ dirBrowser = make component { initialState, render, didMount, didUpdate }
             , [ R.div
                 { className: "ml-auto"
                 , children:
-                  [ R.span
-                    { className: "dropdown"
-                    , children:
-                      [ R.button
-                        { className: "btn btn-secondary py-1"
-                        , onClick: capture_ $ (if isCurrentDirBookmarked self
-                                               then BM.removeBookmark self.props.ds (currentDir self)
-                                               else BM.addBookmark self.props.ds (currentDir self))
-                                      >>= \bms -> self.setState _ { bookmarks = bms }
-                        , children: [ let fa = if isCurrentDirBookmarked self then "fas" else "far" in
-                                       R.span { className: fa <> " fa-bookmark px-2" }
-                                    ]                          
-                        }
-                      , R.button
-                        { className: "btn btn-secondary py-1 dropdown-toggle dropdown-toggle-split"
-                        , _data: O.fromHomogeneous {toggle: "dropdown" }
-                        }
-                      , R.div
-                        { className: "dropdown-menu"
-                        , children: map (\b -> R.a { className: "dropdown-item"
-                                                   , href: "#"
-                                                   , onClick: capture_ $ update self $ PickFromBookmark b
-                                                   , children: [ R.text b ]
-                                                   }) self.state.bookmarks
-                        }
-                      ]
+                  [ let dir = maybe self.state.currentDir
+                                    (\mp -> switchMountPoint (From mp) (To self.props.ds.mountPoint) self.state.currentDir)
+                                    self.props.altRoot
+                    in dropDownButton
+                    { content: let fa = if BM.contains self.props.ds dir then "fas" else "far"
+                               in R.span { className: fa <> " fa-bookmark px-2" }
+                    , title: "Save bookmark"
+                    , disabled: false
+                    , onClick: (if BM.contains self.props.ds dir
+                                  then BM.remove self.props.ds dir
+                                  else BM.add self.props.ds dir) *> self.setState identity
+                    , entries: map (\bm -> Tuple (R.text $ (unwrap >>> _.path) bm) (update self $ PickFromBookmark bm))
+                                    (unsafePerformEffect $ BM.get self.props.ds)
+                    , entriesTitle: "Saved bookmarks"
                     }
                   ]
                 }
@@ -213,7 +223,28 @@ dirBrowser = make component { initialState, render, didMount, didUpdate }
        ]
 
 
-    currentDir self = dropRoot $ (unwrap (fromMaybe self.props.root $ A.last self.state.breadcrumb)).path
-      where dropRoot p = fromMaybe p $ S.stripPrefix (S.Pattern (unwrap self.props.root).path) p
-            
-    isCurrentDirBookmarked self = A.elem (currentDir self) self.state.bookmarks
+
+
+
+
+filter :: forall r. { showHidden :: Boolean | r } -> Array FH -> Array FH
+filter p = A.filter (\e -> isHidden e == p.showHidden)
+  where isHidden = unwrap >>> _.name >>> S.take 1 >>> (==) "."
+
+
+
+
+
+
+
+null :: forall a. a
+null = unsafeCoerce {}
+
+
+
+rebuildBreadcrumb :: Self -> FH -> Effect Unit
+rebuildBreadcrumb self fh = launchAff_ do
+  let root = fromMaybe self.props.ds.mountPoint self.props.altRoot
+      pathElements = unwrap >>> _.path >>> S.split (S.Pattern "/") >>> T.scanl (</>) "" $ fh
+      p = A.dropWhile ((/=) (unwrap >>>_.path $ root)) pathElements
+  FH.stat' p >>= either Messages.appError (\bms -> self.setState _ { breadcrumb = bms }) >>> liftEffect

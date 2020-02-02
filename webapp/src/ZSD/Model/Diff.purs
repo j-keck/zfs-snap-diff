@@ -6,13 +6,15 @@ import Affjax.ResponseFormat as ARF
 import Data.Either (Either(..))
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
+import Data.Newtype (unwrap)
 import Effect.Aff (Aff)
 import Foreign (ForeignError(..))
 import Foreign as Foreign
 import Simple.JSON (class ReadForeign)
-import ZSD.HTTP as HTTP
+
+import ZSD.Utils.HTTP as HTTP
 import ZSD.Model.AppError (AppError(..))
-import ZSD.Model.FSEntry (FSEntry(..))
+import ZSD.Model.FH (FH(..))
 import ZSD.Model.FileVersion (FileVersion(..))
 
 
@@ -54,14 +56,18 @@ type Delta =
 type Deltas = Array Delta
 
 
-fetch :: FSEntry -> FileVersion -> Aff (Either AppError Diff)
-fetch (FSEntry { path: actualPath }) (BackupVersion { file: (FSEntry { path: backupPath })}) =
-  HTTP.post' "/api/diff" { actualPath, backupPath }
-fetch _ (ActualVersion _ ) = pure $ Left $ Bug "diff with the same version not possible"
+fetch :: FileVersion -> Aff (Either AppError Diff)
+fetch (BackupVersion { actual, backup }) =
+  let actualPath = (unwrap >>> _.path) actual
+      backupPath = (unwrap >>> _.path) backup
+  in HTTP.post' "/api/diff" { actualPath, backupPath }
+fetch (ActualVersion _ ) = pure $ Left $ Bug "diff with the same version not possible"
 
 
 
-revert :: FSEntry -> FileVersion -> Int -> Aff (Either AppError String)
-revert (FSEntry { path: actualPath }) (BackupVersion { file: (FSEntry { path: backupPath })}) deltaIdx =
-  HTTP.post ARF.string "/api/revert-change" { actualPath, backupPath, deltaIdx }
-revert _ (ActualVersion _) _ = pure $ Left $ Bug "revert for the actual version not possible"
+revert :: FileVersion -> Int -> Aff (Either AppError String)
+revert (BackupVersion { actual, backup}) deltaIdx =
+  let actualPath = (unwrap >>> _.path) actual
+      backupPath = (unwrap >>> _.path) backup
+  in HTTP.post ARF.string "/api/revert-change" { actualPath, backupPath, deltaIdx }
+revert (ActualVersion _) _ = pure $ Left $ Bug "revert for the actual version not possible"

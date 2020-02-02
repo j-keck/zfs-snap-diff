@@ -29,7 +29,8 @@ type ScanResult struct {
 }
 
 type FileVersion struct {
-	File     fs.FileHandle `json:"file"`
+	Actual   fs.FileHandle `json:"actual"`
+	Backup   fs.FileHandle `json:"backup"`
 	Snapshot zfs.Snapshot  `json:"snapshot"`
 }
 
@@ -41,6 +42,11 @@ func (self *Scanner) FindFileVersions(pathActualVersion string) (ScanResult, err
 	sr := ScanResult{FileVersions: make([]FileVersion, 0), DateRange: self.dateRange}
 	startTs := time.Now()
 
+	actualVersionFh, err := fs.NewFileHandle(pathActualVersion)
+	if err != nil {
+		return ScanResult{}, err
+	}
+	
 	snaps, err := self.dataset.ScanSnapshots()
 	if err != nil {
 		return ScanResult{}, err
@@ -119,7 +125,7 @@ func (self *Scanner) FindFileVersions(pathActualVersion string) (ScanResult, err
 		log.Tracef("check if file was changed under path: %s", fh.Path)
 		if cmp.HasChanged(fh) {
 			log.Debugf("file was changed in snapshot: %s", fh.Path)
-			sr.FileVersions = append(sr.FileVersions, FileVersion{fh, snap})
+			sr.FileVersions = append(sr.FileVersions, FileVersion{actualVersionFh, fh, snap})
 		}
 
 		// update stats
@@ -137,7 +143,7 @@ func (self *Scanner) FindFileVersions(pathActualVersion string) (ScanResult, err
 
 func (self *Scanner) pathInSnapshot(pathActualVersion string, snap zfs.Snapshot) string {
 	p := strings.TrimPrefix(pathActualVersion, self.dataset.MountPoint.Path)
-	return path.Join(snap.Dir.Path, p)
+	return path.Join(snap.MountPoint.Path, p)
 }
 
 func (self *Scanner) findLastPathInSnap(p string, idx int, snaps []zfs.Snapshot) (string, bool) {

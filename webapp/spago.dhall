@@ -2,6 +2,7 @@
 , dependencies =
     [ "affjax"
     , "console"
+    , "debug"
     , "effect"
     , "formatters"
     , "js-timers"

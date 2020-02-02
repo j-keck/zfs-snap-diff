@@ -7,6 +7,7 @@ import (
 	"path"
 	"path/filepath"
 	"time"
+	"strings"
 )
 
 // FSHandle represents a handle to a filesystem entry
@@ -17,7 +18,7 @@ type FSHandle struct {
 	Path    string    `json:"path"`
 	Kind    Kind      `json:"kind"`
 	Size    int64     `json:"size"`
-	ModTime time.Time `json:"modTime"`
+	MTime   time.Time `json:"mtime"`
 }
 
 func NewFSHandle(path string) (FSHandle, error) {
@@ -30,6 +31,13 @@ func NewFSHandle(path string) (FSHandle, error) {
 		return FSHandle{}, err
 	}
 
+	if len(path) > 1 {
+		// trim the last '/' from the path
+		// 'filepath.Dir(..)' does not return the parent dir,
+		// if the path has a slash at the end
+		path = strings.TrimSuffix(path, "/")
+	}
+
 	return newFSHandle(filepath.Dir(path), fileInfo), nil
 }
 
@@ -38,11 +46,11 @@ func newFSHandle(dirname string, fileInfo os.FileInfo) FSHandle {
 	kind := KindFromFileInfo(fileInfo)
 
 	return FSHandle{
-		Name:    fileInfo.Name(),
-		Path:    path,
-		Kind:    kind,
-		Size:    fileInfo.Size(),
-		ModTime: fileInfo.ModTime(),
+		Name:  fileInfo.Name(),
+		Path:  path,
+		Kind:  kind,
+		Size:  fileInfo.Size(),
+		MTime: fileInfo.ModTime(),
 	}
 }
 

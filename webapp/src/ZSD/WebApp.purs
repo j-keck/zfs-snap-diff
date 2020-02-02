@@ -1,17 +1,21 @@
 -- | WebApp entry point
 -- |
+-- | Contains the navigation bar and the side content
+-- |
 module ZSD.WebApp where
 
+import Prelude (map, ($), (/=))
 import Data.Array as A
 import Data.Monoid (guard)
 import Data.Tuple (Tuple(..))
-import Prelude (map, ($), (/=))
 import React.Basic (Component, JSX, createComponent, fragment, make)
 import React.Basic.DOM as R
-import ZSD.Components.Messages as Messages
+
 import ZSD.Components.Navbar (navbar)
+import ZSD.Components.Spinner as Spinner
 import ZSD.Model.Config (Config)
-import ZSD.View.BrowseSnapshots (browseSnapshots)
+import ZSD.Views.Messages as Messages
+import ZSD.Views.BrowseSnapshots (browseSnapshots)
 import ZSD.Views.BrowseFilesystem (browseFilesystem)
 
 
@@ -53,6 +57,7 @@ webApp props = make component { initialState, render } props
         , Messages.toasts
         ]
         , map (embedView self) self.state.views
+        , [Spinner.spinner]
       ]
 
     embedView self (Tuple title view) =

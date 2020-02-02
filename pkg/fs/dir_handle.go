@@ -10,6 +10,7 @@ type DirHandle struct {
 
 func NewDirHandle(path string) (DirHandle, error) {
 	handle, err := NewFSHandle(path)
+
 	if err != nil {
 		return DirHandle{}, err
 	}
@@ -18,7 +19,7 @@ func NewDirHandle(path string) (DirHandle, error) {
 }
 
 func (self *DirHandle) Ls() ([]FSHandle, error) {
-	log.Debugf("scan directory under: %s", self.Path)
+	log.Debugf("list directory content under: %s", self.Path)
 	ls, err := ioutil.ReadDir(self.Path)
 	if err != nil {
 		return nil, err

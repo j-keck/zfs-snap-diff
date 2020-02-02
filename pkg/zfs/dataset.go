@@ -51,11 +51,11 @@ func (self *Dataset) ScanSnapshots() (Snapshots, error) {
 			// this prevents a unnecessary 'os.Stat' call for each snapshot
 			// (which takes some time with thousands snapshots on spinning disks)
 			dir := fs.DirHandle{fs.FSHandle{
-				Name:    name,
-				Path:    self.MountPoint.Path + "/.zfs/snapshot/" + name,
-				Kind:    fs.DIR,
-				Size:    0,
-				ModTime: creation,
+				Name:  name,
+				Path:  self.MountPoint.Path + "/.zfs/snapshot/" + name,
+				Kind:  fs.DIR,
+				Size:  0,
+				MTime: creation,
 			}}
 
 			// append new snap to snapshots

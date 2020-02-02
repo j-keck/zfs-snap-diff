@@ -161,6 +161,18 @@ let
         installPhase = "ln -s $src $out";
       };
 
+    "debug" = pkgs.stdenv.mkDerivation {
+        name = "debug";
+        version = "v4.0.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/garyb/purescript-debug.git";
+          rev = "b1484b8aac685dc83c1d938d71407495ae2a2259";
+          sha256 = "0gwjj80akys0h111i74n429fmny992gx0r4rk1n98gqlqm5cmi21";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
     "distributive" = pkgs.stdenv.mkDerivation {
         name = "distributive";
         version = "v4.0.0";
@@ -888,6 +900,18 @@ let
           url = "https://github.com/purescript-contrib/purescript-unicode.git";
           rev = "bb70f5a17aa9bcad05104c5a3f191fd75bb3d2ce";
           sha256 = "1a53jv7pzyjk5v6kmwwy50d3l8d26k0id59sn8g3lzkih24nalhp";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
+    "unordered-collections" = pkgs.stdenv.mkDerivation {
+        name = "unordered-collections";
+        version = "v1.8.2";
+        src = pkgs.fetchgit {
+          url = "https://github.com/fehrenbach/purescript-unordered-collections.git";
+          rev = "15bf60f1490ed15b81ff0436bcc3cc7f17a1eeef";
+          sha256 = "12ni0sqrp594zwrb6y0ckhdfpgci84z4cqaqkfib4d3zqpnizvml";
         };
         phases = "installPhase";
         installPhase = "ln -s $src $out";

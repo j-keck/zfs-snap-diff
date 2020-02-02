@@ -1,4 +1,4 @@
-module ZSD.Component.Table where
+module ZSD.Components.Table where
 
 import Prelude
 

@@ -1,4 +1,4 @@
-module ZSD.LocalStorage
+module ZSD.Utils.LocalStorage
        ( getItem
        , setItem
        ) where

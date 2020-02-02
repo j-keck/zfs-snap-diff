@@ -1,41 +1,62 @@
 module ZSD.Views.BrowseSnapshots.SnapshotSelector where
 
+import Prelude
+
+import Data.Array as A
 import Data.Either (either)
-import Data.Maybe (Maybe(..))
+import Data.Foldable (foldMap)
+import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Data.Monoid (guard)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
-import Prelude (Unit, bind, discard, ($), (/=))
 import React.Basic (Component, JSX, createComponent, empty, fragment, make)
 import React.Basic as React
 import React.Basic.DOM as R
-import ZSD.Components.Messages as Messages
+import React.Basic.DOM.Events (capture_)
+
+import ZSD.Views.Messages as Messages
 import ZSD.Components.Panel (panel)
 import ZSD.Components.Spinner as Spinner
 import ZSD.Components.TableX (tableX)
-import ZSD.Formatter as Formatter
+import ZSD.Utils.Formatter as Formatter
 import ZSD.Model.Dataset (Dataset)
 import ZSD.Model.Snapshot (Snapshots, Snapshot)
 import ZSD.Model.Snapshot as Snapshots
 
 type Props =
-  { dataset :: Dataset, onSnapshotSelected :: Snapshot -> Effect Unit }
+  { dataset :: Dataset
+  , onSnapshotSelected :: Snapshot -> Effect Unit
+  }
 
 type State =
-  { snapshots :: Snapshots, selectedIdx :: Maybe Int, spinner :: JSX}
+  { snapshots :: Snapshots
+  , selectedIdx :: Maybe Int
+  }
 
 
 data Command =
-  FetchSnapshots
+    FetchSnapshots
+  | SelectSnapshotByIdx Int
 
 update :: React.Self Props State -> Command -> Effect Unit
 update self = case _ of
+
   FetchSnapshots ->
-    self.setStateThen _ { spinner = Spinner.spinner } $ launchAff_ $ do
-      res <- Snapshots.fetchForDataset self.props.dataset
-      liftEffect $ either Messages.appError (\snaps -> self.setState _ { snapshots = snaps, spinner = empty }) res
+       Spinner.display
+    *> launchAff_ (    Snapshots.fetchForDataset self.props.dataset
+                   >>= either Messages.appError (\snaps -> self.setState _ { snapshots = snaps })
+                   >>> liftEffect)
+    *> Spinner.remove
+
+
+  SelectSnapshotByIdx idx ->
+       Spinner.display
+    *> self.setState _ { selectedIdx = Just idx }
+    *> foldMap self.props.onSnapshotSelected (A.index self.state.snapshots idx)
+    *> Spinner.remove
+
 
 snapshotSelector :: Props -> JSX
 snapshotSelector = make component { initialState, didMount, didUpdate, render }
@@ -44,7 +65,7 @@ snapshotSelector = make component { initialState, didMount, didUpdate, render }
     component :: Component Props
     component = createComponent "SelectSnapshot"
 
-    initialState = { snapshots: [], selectedIdx: Nothing, spinner: empty }
+    initialState = { snapshots: [], selectedIdx: Nothing }
 
     didMount self = update self FetchSnapshots
 
@@ -54,7 +75,39 @@ snapshotSelector = make component { initialState, didMount, didUpdate, render }
 
     render self = fragment
       [ panel
-        { header: R.text "Snapshots"
+        { header: fragment
+          [ R.text "Snapshots"
+           , R.span
+             { className: "float-right"
+             , children:
+               [ R.div
+                 { className: "btn-group"
+                 , children:
+                   [ R.button
+                     { className: "btn btn-secondary" <> guard  (not $ hasOlderSnapshots self.state) " disabled"
+                     , title: "Select the previous snapshot"
+                     , onClick: capture_ $ guard (hasOlderSnapshots self.state)
+                                         $ update self (SelectSnapshotByIdx (maybe 0 (_ + 1) self.state.selectedIdx))
+                     , children:
+                       [ R.span { className: "fas fa-backward p-1" }
+                       , R.text "Older"
+                       ]
+                     }
+                   , R.button
+                     { className: "btn btn-secondary" <> guard (not $ hasNewerSnapshots self.state) " disabled"
+                     , title: "Select the successor snapshot"
+                     , onClick: capture_ $ guard (hasNewerSnapshots self.state)
+                                         $ update self (SelectSnapshotByIdx (maybe 0 (_ - 1) self.state.selectedIdx))
+                     , children:
+                       [ R.text "Newer"
+                       , R.span { className: "fas fa-forward p-1" }
+                       ]
+                     }
+                   ]
+                 }
+               ]
+             }
+           ]
         , body: \hidePanelBodyFn ->
           tableX
            { header: ["Snapshot Name", "Snapshot Created"]
@@ -68,6 +121,12 @@ snapshotSelector = make component { initialState, didMount, didUpdate, render }
            }
         , footer: empty
         }
-      , self.state.spinner
       ]
 
+
+
+hasNewerSnapshots :: State -> Boolean
+hasNewerSnapshots state = state.selectedIdx /= Just 0
+
+hasOlderSnapshots :: State -> Boolean
+hasOlderSnapshots state = fromMaybe 0 state.selectedIdx < A.length state.snapshots

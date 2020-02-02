@@ -8,10 +8,10 @@ import (
 
 // Snapshot - zfs snapshot
 type Snapshot struct {
-	Name     string       `json:"name"`
-	FullName string       `json:"fullName"`
-	Created  time.Time    `json:"created"`
-	Dir      fs.DirHandle `json:"dir"`
+	Name        string       `json:"name"`
+	FullName    string       `json:"fullName"`
+	Created     time.Time    `json:"created"`
+	MountPoint  fs.DirHandle `json:"mountPoint"`
 }
 
 // Check if the snaphot is mounted
@@ -21,8 +21,7 @@ func (s *Snapshot) IsMounted() (bool, error) {
 	// to check if the snapshot is mounted, list
 	// the directory content. use 'File.Readdirnames'
 	// for the directrory listing, because it has less overhead
-
-	fh, err := os.Open(s.Dir.Path)
+	fh, err := os.Open(s.MountPoint.Path)
 	if err != nil {
 		return false, err
 	}

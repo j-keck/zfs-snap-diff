@@ -14,19 +14,20 @@ import React.Basic (Component, JSX, createComponent, fragment, make)
 import React.Basic as React
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture_)
+
 import ZSD.Components.ActionButton (actionButton)
-import ZSD.Components.Messages as Messages
+import ZSD.Views.Messages as Messages
 import ZSD.Model.Diff (Diff)
 import ZSD.Model.Diff as Diff
-import ZSD.Model.FSEntry (FSEntry)
+import ZSD.Model.FH (FH)
 import ZSD.Model.FileVersion (FileVersion(..))
-import ZSD.Ops (zipWithIndex)
+import ZSD.Utils.Ops (zipWithIndex)
 
 
 type Self = React.Self Props State
 
 type Props =
-  { file :: FSEntry
+  { file :: FH
   , version :: FileVersion
   }
 
@@ -53,11 +54,11 @@ update self = case _ of
   Diff -> case self.props.version of
     ActualVersion _ -> self.setState _ { diff = Nothing }
     BackupVersion _ -> launchAff_ $ do
-      res <- Diff.fetch self.props.file self.props.version
+      res <- Diff.fetch self.props.version
       liftEffect $ either Messages.appError (\diff -> self.setState _ { diff = Just diff}) res
 
   Revert idx -> launchAff_ $ do
-    res <- Diff.revert self.props.file self.props.version idx
+    res <- Diff.revert self.props.version idx
     liftEffect $ do
       either Messages.appError Messages.info res
       update self Diff

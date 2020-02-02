@@ -8,10 +8,11 @@ import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import React.Basic (Component, JSX, createComponent, empty, make)
 import React.Basic.DOM as R
+
 import ZSD.Components.Panel (panel)
 import ZSD.Components.Scroll as Scroll
 import ZSD.Components.TableX (tableX)
-import ZSD.Formatter as Formatter
+import ZSD.Utils.Formatter as Formatter
 import ZSD.Model.Dataset (Datasets, Dataset)
 
 

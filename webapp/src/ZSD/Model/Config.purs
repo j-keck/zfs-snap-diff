@@ -4,7 +4,7 @@ import ZSD.Model.Dataset
 
 import Data.Either (Either)
 import Effect.Aff (Aff)
-import ZSD.HTTP as HTTP
+import ZSD.Utils.HTTP as HTTP
 import ZSD.Model.AppError (AppError)
 
 type Config =

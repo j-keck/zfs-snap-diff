@@ -14,22 +14,23 @@ import ZSD.Fragments.DirBrowser (dirBrowser)
 import ZSD.Fragments.FileActions (fileAction)
 import ZSD.Model.Config (Config)
 import ZSD.Model.Dataset (Dataset)
-import ZSD.Model.FSEntry (FSEntry)
+import ZSD.Model.FH (FH)
 import ZSD.Model.FileVersion (FileVersion)
 import ZSD.Views.BrowseFilesystem.FileVersionSelector (fileVersionSelector)
+
 
 type Props = { config :: Config }
 
 type State = { selectedDataset      :: Maybe Dataset
-             , selectedFile         :: Maybe FSEntry
+             , selectedFile         :: Maybe FH
              , selectedVersion      :: Maybe FileVersion
              }
 
 
 data Command =
     DatasetSelected Dataset
-  | FileSelected FSEntry
-  | DirSelected FSEntry
+  | FileSelected FH
+  | DirSelected FH
   | VersionSelected FileVersion
 
 
@@ -70,24 +71,29 @@ browseFilesystem = make component { initialState, render }
 
     render self =
       R.div_
-      [ datasetSelector { datasets: self.props.config.datasets
+      [
+        -- dataset selector
+        datasetSelector { datasets: self.props.config.datasets
                         , onDatasetSelected: update self <<< DatasetSelected
                         }
 
+        -- dir browser
       , foldMap (\ds -> dirBrowser
                        { ds
-                       , root: ds.mountPoint
+                       , altRoot: Nothing
                        , onFileSelected: update self <<< FileSelected
                        , onDirSelected: update self <<< DirSelected
                        } ) self.state.selectedDataset
- 
 
+
+        -- file version selector
       , foldMap (\file -> fileVersionSelector
                          { file
-                         , onVersionSelected: update self <<< VersionSelected 
+                         , onVersionSelected: update self <<< VersionSelected
                          }) self.state.selectedFile
 
-        
+
+        -- file actions
       , foldMap (uncurry2 (\file version -> fileAction { file, version }))
                 $ (tuple2 <$> self.state.selectedFile
                           <*> self.state.selectedVersion)

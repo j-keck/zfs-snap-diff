@@ -16,21 +16,22 @@ import React.Basic.DOM.Events (capture_)
 import Web.HTML (window)
 import Web.HTML.Location (assign)
 import Web.HTML.Window (location)
+
 import ZSD.Components.ActionButton (actionButton)
-import ZSD.Components.Messages as Messages
+import ZSD.Views.Messages as Messages
 import ZSD.Fragments.FileAction.ViewDiff (viewDiff)
 import ZSD.Fragments.FileActions.ViewBlob (viewBlob)
 import ZSD.Fragments.FileActions.ViewText (viewText)
-import ZSD.Model.FSEntry (FSEntry)
-import ZSD.Model.FSEntry as FSEntry
+import ZSD.Model.FH (FH, fetchMimeType)
+import ZSD.Model.FH as FH
 import ZSD.Model.FileVersion (FileVersion(..))
 import ZSD.Model.FileVersion as FileVersion
 import ZSD.Model.MimeType (MimeType(..))
 import ZSD.Model.MimeType as MimeType
-import ZSD.Ops (checkAny)
+import ZSD.Utils.Ops (checkAny)
 
 
-type Props = { file :: FSEntry, version :: FileVersion }
+type Props = { file :: FH, version :: FileVersion }
 type State = { view :: JSX, cmd :: Command, mimeType :: MimeType }
 
 data Command =
@@ -55,8 +56,7 @@ update self = case _ of
 
 
   ViewText -> launchAff_ $ do
-    let file = FileVersion.unwrapFSEntry self.props.version
-    res <- FSEntry.downloadText file
+    res <- FH.downloadText (file self.props.version)
     liftEffect $ either Messages.appError (\content -> self.setState _ { view = viewText { content } }) res
 
 
@@ -64,28 +64,27 @@ update self = case _ of
     mimeType <- _.mimeType <$> readState self
     if (checkAny [MimeType.isPDF, MimeType.isImage] mimeType)
     then launchAff_  do
-      let file = FileVersion.unwrapFSEntry self.props.version
-      res <- FSEntry.downloadBlob file
+      res <- FH.downloadBlob (file self.props.version)
       liftEffect $ either Messages.appError (\content -> self.setState _ { view = viewBlob { content } }) res
     else
       self.setState _ { view = R.text $ show mimeType <> " not embeddable" }
 
 
   Diff -> do
-    let file = self.props.file
-        version = self.props.version
-    self.setState _ { view = viewDiff { file, version }, cmd = Diff }
+    self.setState _ { view = viewDiff { file: self.props.file
+                                      , version: self.props.version
+                                      }, cmd = Diff }
 
 
   Download -> do
-    let path = FileVersion.unwrapPath self.props.version
+    let p = (unwrap >>> _.path) (file self.props.version)
         asName = FileVersion.uniqueName self.props.version
 
     location <- window >>= location
-    assign ("/api/download?path=" <> path <> "&as-name=" <> asName) location
+    assign ("/api/download?path=" <> p <> "&as-name=" <> asName) location
 
   Restore -> launchAff_ $ do
-    res <- FileVersion.restore self.props.file self.props.version
+    res <- FileVersion.restore self.props.version
     liftEffect $ do
       either Messages.appError Messages.info res
       update self View
@@ -102,7 +101,7 @@ fileAction = make component { initialState, render, didMount, didUpdate }
     initialState = { view: empty, cmd: View, mimeType: MimeType "" }
 
     didMount self = launchAff_ $ do
-      res <- MimeType.fetch self.props.file
+      res <- fetchMimeType self.props.file
       liftEffect $ either Messages.appError (\mt -> self.setStateThen _ { mimeType = mt } (update self View)) res
 
     didUpdate self { prevProps } = do
@@ -120,14 +119,14 @@ fileAction = make component { initialState, render, didMount, didUpdate }
                 A.any (\f -> f self.state.mimeType) [MimeType.isText, MimeType.isImage, MimeType.isPDF]
 
             , btn "Diff" "fas fa-random" Diff $
-                (MimeType.isText self.state.mimeType) && (FileVersion.isBackupVersion self.props.version)
+                (MimeType.isText self.state.mimeType) && (isBackupVersion self.props.version)
 
             , btn "Download" "fas fa-download" Download true
             , actionButton { text: "Restore"
                            , icon: "fas fa-archive"
                            , textConfirm: "Restore the old version of " <> (unwrap self.props.file).name
                            , action: update self Restore
-                           , enabled: FileVersion.isBackupVersion self.props.version
+                           , enabled: isBackupVersion self.props.version
                            }
             ]
           }
@@ -137,11 +136,11 @@ fileAction = make component { initialState, render, didMount, didUpdate }
             [ R.div
               { className: "card-header"
               , children: case self.props.version of
-                             ActualVersion file -> [ R.text "Actual content from: "
-                                                   , R.b_ [ R.text $ (unwrap >>> _.name) file ]
-                                                   ] 
-                             BackupVersion { file, snapshot } -> [ R.text "Content from: "
-                                                                 , R.b_ [ R.text $ (unwrap >>> _.name) file ]
+                             ActualVersion actual -> [ R.text "Actual content from: "
+                                                     , R.b_ [ R.text $ (unwrap >>> _.name) actual ]
+                                                     ] 
+                             BackupVersion { backup, snapshot } -> [ R.text "Content from: "
+                                                                 , R.b_ [ R.text $ (unwrap >>> _.name) backup ]
                                                                  , R.text " from snapshot: "
                                                                  , R.b_ [ R.text snapshot.name ]
                                                                 ]
@@ -169,3 +168,14 @@ fileAction = make component { initialState, render, didMount, didUpdate }
             , R.text title
             ]
           }
+
+
+        isBackupVersion = case _ of
+          BackupVersion _ -> true
+          ActualVersion _ -> false
+          
+
+file :: FileVersion -> FH
+file = case _ of
+  ActualVersion actual -> actual
+  BackupVersion { backup } -> backup

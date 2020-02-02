@@ -1,14 +1,16 @@
 module ZSD.Components.Navbar where
 
+import Prelude 
+
 import Data.Array as A
 import Data.Monoid (guard)
 import Data.Tuple (Tuple(..), fst)
 import Effect (Effect)
-import Prelude (Unit, map, ($), (<>), (==))
 import React.Basic (Component, JSX, createComponent, make)
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture_)
-import ZSD.Ops (unsafeFromJust)
+
+import ZSD.Utils.Ops (unsafeFromJust)
 
 
 type Title = String

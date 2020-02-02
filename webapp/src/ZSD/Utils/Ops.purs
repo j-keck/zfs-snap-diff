@@ -1,15 +1,17 @@
 -- | Module `ZSD.Ops` contains missing Purescript operators / functions
-module ZSD.Ops where
+module ZSD.Utils.Ops where
+
+import Prelude
 
 import Data.Array as A
 import Data.Either (Either, fromRight)
 import Data.Foldable (class Foldable)
 import Data.Foldable as F
-import Data.Maybe (Maybe(..), fromJust, maybe)
+import Data.Maybe (Maybe(..), fromJust, fromMaybe, maybe)
 import Data.Semigroup (class Semigroup)
+import Data.String as S
 import Data.Tuple (Tuple(..))
 import Partial.Unsafe (unsafePartial)
-import Prelude (class Applicative, class Bind, class Functor, map, ($), (&&), (-), (<$>), (<*>), (<>), (>>>), (||))
 
 
 mapmap :: forall f1 f2 a b. Functor f1 => Functor f2 => (a -> b) -> f1 (f2 a) -> f1 (f2 b)
@@ -55,6 +57,8 @@ checkAny fs a = F.foldl (\b f -> f a || b) false fs
 
 
 pathAppend :: String -> String -> String
-pathAppend a b = a <> "/" <> b
+pathAppend a b = let a' = fromMaybe a $ S.stripSuffix (S.Pattern "/") a
+                     b' = fromMaybe b $ S.stripPrefix (S.Pattern "/") b
+                 in a' <> "/" <> b'
 infix 4 pathAppend as </>
 

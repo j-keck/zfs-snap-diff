@@ -1,5 +1,5 @@
 -- | Simple HTTP module - supports `get` and `post` requests.
-module ZSD.HTTP
+module ZSD.Utils.HTTP
        ( get
        , get'
        , post
@@ -22,6 +22,7 @@ import Effect.Aff (Aff)
 import Foreign as F
 import Simple.JSON (class ReadForeign, class WriteForeign, readJSON, writeJSON)
 import Unsafe.Coerce (unsafeCoerce)
+
 import ZSD.Model.AppError (AppError(..), HTTPErrors(..))
 
 

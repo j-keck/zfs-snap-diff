@@ -1,6 +1,7 @@
 module Main where
 
 import Prelude
+
 import Data.Either (either)
 import Data.Maybe (maybe)
 import Effect (Effect)

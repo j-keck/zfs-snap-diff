@@ -1,5 +1,5 @@
 -- | Formatter utilities
-module ZSD.Formatter where
+module ZSD.Utils.Formatter where
 
 import Data.Array as A
 import Data.Date (Date)
@@ -11,6 +11,7 @@ import Data.Newtype (unwrap)
 import Data.Number.Format (fixed, toStringWith)
 import Partial.Unsafe (unsafePartial)
 import Prelude (bottom, otherwise, ($), (/), (<), (<<<), (<>), (>))
+
 import ZSD.Model.DateTime (DateTime)
 
 

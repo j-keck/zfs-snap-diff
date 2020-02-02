@@ -56,9 +56,9 @@ func TestNewComparator(t *testing.T) {
 }
 
 func TestCompareByMTime(t *testing.T) {
-	fileHandleWithMTime := func(modTime time.Time) fs.FileHandle {
+	fileHandleWithMTime := func(mtime time.Time) fs.FileHandle {
 		fsHandle := fs.FSHandle{}
-		fsHandle.ModTime = modTime
+		fsHandle.MTime = mtime
 		return fs.FileHandle{fsHandle}
 	}
 
