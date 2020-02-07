@@ -28,12 +28,12 @@ let
 
   version =
     let lookup-version = pkgs.stdenv.mkDerivation {
-          src = pkgs.nix-gitignore.gitignoreSource [ ".gitignore" "/webapp/" ] ./.;
+          src = builtins.path { name = "git"; path = ./.git; };
           name = "lookup-version";
           phases = "buildPhase";
           buildPhase = ''
             mkdir -p $out
-            ${pkgs.git}/bin/git -C $src describe --always --tags > $out/version
+            ${pkgs.git}/bin/git --git-dir=$src describe --always --tags > $out/version
           '';
         };
     in pkgs.lib.removeSuffix "\n" (builtins.readFile "${lookup-version}/version");
@@ -43,8 +43,8 @@ let
 
       # regenerate spago packages per: (nix-shell --run 'cd webapp; spago2nix generate')
       webapp_ps = (import (./webapp/spago-packages.nix) { inherit pkgs; }).mkBuildProjectOutput {
-        # include only directories and purescript source files
-        src = with builtins; filterSource (p: t: t == "directory" || match ".*\.purs|.*\.js" p != null) ./webapp;
+        src = pkgs.nix-gitignore.gitignoreSourcePure
+                [ "/.cache/" "/.spago/" "/node_modules" "/output/" "/dist/" ".psci_modules"] ./webapp;
         purs = easy-ps.purs;
       };
 
