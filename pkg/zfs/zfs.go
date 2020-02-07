@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"errors"
 )
 
 var log = plog.GlobalLogger()
@@ -29,12 +30,36 @@ func NewZFS(name string, cfg config.Config) (ZFS, error) {
 
 	datasets, err := self.scanDatasets(name)
 	if err != nil {
+
+		if _, ok := err.(ExecutableNotFound); ok {
+			return self, errors.New("'zfs' executable not found. Try again with the '-use-sudo' flag")
+		}
+
+		if _, ok := err.(ExecZFSError); ok {
+			// lookup all dataset names and print them as a hint for the user
+			if datasetNames, e := AvailableDatasetNames(cfg.ZFS.UseSudo); e == nil {
+				names := strings.Join(datasetNames, ", ")
+				return self, fmt.Errorf("%v\n\n  Possible dataset names: %s", err, names)
+			}
+		}
 		return self, err
 	}
+
 	self.datasets = datasets
 	self.cfg = cfg
 	return self, nil
 }
+
+func AvailableDatasetNames(useSudo bool) ([]string, error) {
+	cmd := NewZFSCmd(useSudo)
+	if stdout, _, err := cmd.Exec("list", "-H", "-t", "filesystem", "-o", "name"); err == nil {
+		datasetNames := strings.Split(stdout, "\n")
+		return datasetNames, nil
+	} else {
+		return nil, err
+	}
+}
+
 
 func (self *ZFS) Name() string {
 	return self.name
@@ -78,7 +103,7 @@ func (self *ZFS) scanDatasets(name string) (Datasets, error) {
 
 	stdout, stderr, err := self.cmd.Exec("list -Hp -o name,used,avail,refer,mountpoint -r -t filesystem", name)
 	if err != nil {
-		log.Debugf("unable to search datasets: %s", stderr)
+		log.Debugf("unable to search datasets: %s - %v", stderr, err)
 		return nil, err
 	}
 
@@ -150,7 +175,6 @@ func (self *ZFS) scanDatasets(name string) (Datasets, error) {
 	log.Debugf("%d datasets found", len(datasets))
 	return datasets, nil
 }
-
 
 func (self *ZFS) MountSnapshots() bool {
 	return self.cfg.ZFS.MountSnapshots

@@ -37,8 +37,14 @@ func main() {
 
 	datasetName := flag.Arg(0)
 	if len(datasetName) == 0 {
-		fmt.Fprintf(os.Stderr, "\nABORT:\n   paramter <ZFS_DATASET_NAME> missing\n")
-		fmt.Fprintf(os.Stderr, "\nUSAGE:\n  %s [OPTIONS] <ZFS_DATASET_NAME>\n\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "\nABORT:\n  paramter <ZFS_DATASET_NAME> missing\n")
+		if datasetNames, err := zfs.AvailableDatasetNames(zsdCfg.ZFS.UseSudo); err == nil {
+			names := strings.Join(datasetNames, " | ")
+			fmt.Fprintf(os.Stderr, "\nUSAGE:\n  %s [OPTIONS] <ZFS_DATASET_NAME>\n\n",  os.Args[0])
+			fmt.Fprintf(os.Stderr, "  <ZFS_DATASET_NAMES>: %s\n\n", names)
+		} else {
+			fmt.Fprintf(os.Stderr, "\nUSAGE:\n  %s [OPTIONS] <ZFS_DATASET_NAME>\n\n", os.Args[0])
+		}
 		fmt.Fprintf(os.Stderr, "For more information use `%s -h`", os.Args[0])
 		return
 	}
@@ -49,15 +55,10 @@ func main() {
 			fmt.Fprintf(os.Stderr, "\nUnable to start webapp: %v", err)
 		}
 	} else {
-		fmt.Fprintf(os.Stderr, "\nABORT:\n  no dataset with name: '%s' found\n", datasetName)
-
-		// lookup all dataset names and print them as a hint for the user
-		zfsCmd := zfs.NewZFSCmd(zsdCfg.ZFS.UseSudo)
-		if stdout, _, err := zfsCmd.Exec("list", "-H", "-t", "filesystem", "-o", "name"); err == nil {
-			datasetNames := strings.Join(strings.Split(stdout, "\n"), ", ")
-			fmt.Fprintf(os.Stderr, "\nPossible dataset names: %s", datasetNames)
-		}
+		fmt.Fprintf(os.Stderr, "\nABORT:\n  ")
+		fmt.Fprintf(os.Stderr, err.Error())
 	}
+
 
 }
 

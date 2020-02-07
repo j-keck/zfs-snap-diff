@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os/exec"
 	"strings"
+	"errors"
 )
 
 type Stdout = string
@@ -46,8 +47,13 @@ func (self *zfsCmdImpl) Exec(first string, rest ...string) (Stdout, Stderr, erro
 
 	if err := cmd.Run(); err != nil {
 		stderr := strings.TrimRight(stderrBuf.String(), "\n")
-		log.Debugf("executing zfs cmd: %v: %s", err, stderr)
-		return "", stderr, err
+		log.Debugf("zfs cmd failed - err: '%v', stderr: '%s'", err, stderr)
+
+		if _, ok := err.(*exec.ExitError); ok {
+			return "", stderr, ExecZFSError{errors.New(stderr)}
+		}
+
+		return "", stderr, ExecutableNotFound{err}
 	}
 
 	stdout := strings.TrimRight(stdoutBuf.String(), "\n")
