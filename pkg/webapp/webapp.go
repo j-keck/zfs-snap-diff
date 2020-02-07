@@ -27,6 +27,12 @@ func NewWebApp(zfs zfs.ZFS, cfg config.Config) WebApp {
 
 func (self *WebApp) Start() error {
 	log.Infof("listen on %s", self.cfg.Webserver.ListenAddress())
+	scheme := "http"
+	if self.cfg.Webserver.UseTLS {
+		scheme = "https"
+	}
+
+	log.Infof("listen on %s://%s", scheme, self.cfg.Webserver.ListenAddress())
 	return http.ListenAndServe(self.cfg.Webserver.ListenAddress(), nil)
 }
 
