@@ -14,7 +14,6 @@ import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
-import Foreign.Object as O
 import React.Basic (Component, JSX, createComponent, fragment, make, readState)
 import React.Basic as React
 import React.Basic.DOM as R
@@ -26,10 +25,12 @@ import ZSD.Components.Spinner as Spinner
 import ZSD.Components.TableX (tableX)
 import ZSD.Model.DateRange (DateRange(..))
 import ZSD.Model.DateRange as DateRange
-import ZSD.Model.FH (FH)
+import ZSD.Model.FH (FH(..))
 import ZSD.Model.FileVersion (FileVersion(..), ScanResult(..), scanBackups)
+import ZSD.Model.Snapshot (Snapshot)
 import ZSD.Utils.Formatter as Formatter
 import ZSD.Utils.Ops (foldlSemigroup)
+import ZSD.Views.BrowseFilesystem.Stats (stats)
 import ZSD.Views.Messages as Messages
 
 
@@ -41,6 +42,7 @@ type Props =
 
 type State = { versions :: Array FileVersion
              , selectedIdx :: Int
+             , selectedVersion :: Maybe FileVersion
              , scanResults :: Array ScanResult
              , scanDays :: Int
              }
@@ -81,7 +83,8 @@ update self = case _ of
   SelectVersionByIdx idx -> do
     state <- readState self
     case A.index state.versions idx of
-      Just next -> self.setStateThen _ { selectedIdx = idx } $ self.props.onVersionSelected next
+      Just next ->    self.setState _ { selectedIdx = idx, selectedVersion = Just next }
+                   *> self.props.onVersionSelected next
       Nothing -> guard (hasOlderSnapshots state) $
                         update self $ Scan (Days $ -1.0) (SelectVersionByIdx idx)
 
@@ -96,14 +99,18 @@ fileVersionSelector = make component { initialState, didMount, render }
      component :: Component Props
      component = createComponent "FileVersionSelector"
 
-     initialState = { versions: [], selectedIdx: 0 , scanResults: [], scanDays: 1 }
+     initialState = { versions: [], selectedIdx: 0, selectedVersion: Nothing
+                    , scanResults: [], scanDays: 1 }
 
      didMount self = update self DidMount
 
      render self = fragment
        [ panel
          { header: fragment
-           [ R.text $ "Versions for file: " <> (unwrap self.props.file).name
+           [ R.text $ "Versions" <> case self.state.selectedVersion of
+                Just (ActualVersion (FH {name})) -> " for " <> name
+                Just (BackupVersion {actual: FH {name}, snapshot: {name: snap}}) -> " - selected version: " <> name <> "@" <> snap
+                _ -> mempty
            , R.span
              { className: "float-right"
              , children:
@@ -112,9 +119,9 @@ fileVersionSelector = make component { initialState, didMount, render }
                  , children:
                    [ R.button
                      { className: "btn btn-secondary" <> guard  (not $ hasOlderVersions self.state) " disabled"
-                     , title: "Select the previous version"
+                     , title: "Select / Serach the previous version"
                      , onClick: capture_ $ guard (hasOlderVersions self.state)
-                                         $ update self (SelectVersionByIdx (self.state.selectedIdx + 1)) 
+                                         $ update self (SelectVersionByIdx (self.state.selectedIdx + 1))
                      , children:
                        [ R.span { className: "fas fa-backward p-1" }
                        , R.text "Older"
@@ -135,8 +142,7 @@ fileVersionSelector = make component { initialState, didMount, render }
                ]
              }
            ]
-         , body: \hidePanelBodyFn ->
-             fragment
+         , body: \hidePanelBodyFn -> fragment
              [ tableX
                { header: ["File modification time", "Snapshot Created", "Snapshot Name"]
                , rows: self.state.versions
@@ -149,11 +155,11 @@ fileVersionSelector = make component { initialState, didMount, render }
                      ]
                , onRowSelected: \(Tuple idx v) -> do
                    hidePanelBodyFn
-                   self.setState _ { selectedIdx = idx }
+                   self.setState _ { selectedIdx = idx, selectedVersion = Just v }
                    self.props.onVersionSelected v
                , activeIdx: Just self.state.selectedIdx
                }
-               
+
              , dropDownButton
                { content: R.text $ "Scan " <> show self.state.scanDays <> " days back"
                , title: "Scan for other file versions for " <> show self.state.scanDays <> " days on the server"
@@ -165,43 +171,8 @@ fileVersionSelector = make component { initialState, didMount, render }
                , entriesTitle: "Change how many days should be scanned"
                }
              ]
-
-         , footer:
-             R.div
-             { className: "text-muted small text-center"
-             , children:
-               [ flip foldMap (A.last self.state.scanResults)
-                   \(ScanResult { snapsScanned, dateRange: (DateRange range), scanDuration }) ->
-                     R.div_
-                     [ TF.textf
-                       [ TF.text { style: TF.textUnderline } "This scan: "
-                       , TF.text' "Scanned ", TF.int { style: TF.fontBolder } snapsScanned, TF.text' " snapshots in "
-                       , TF.text { style: TF.fontBolder } (Formatter.duration scanDuration), TF.text' ". "
-                       , TF.text' "Date range: "
-                       , TF.date { format: [TF.dd, TF.s " ", TF.mmmm, TF.s " ", TF.yyyy] } range.from, TF.text' " - "
-                       , TF.date { format: [TF.dd, TF.s " ", TF.mmmm, TF.s " ", TF.yyyy] } range.to, TF.text' "."
-                       ]
-                     ]
-               , flip foldMap (foldlSemigroup self.state.scanResults)
-                   \(ScanResult { snapsScanned, snapsToScan, snapsFileMissing, dateRange: (DateRange range), scanDuration }) ->
-                     R.div_
-                     [ TF.textf
-                       [ TF.text { style: TF.textUnderline } "Overall: "
-                       , TF.text' "Scanned ", TF.int { style: TF.fontBolder } snapsScanned, TF.text' " snapshots in "
-                       , TF.text { style: TF.fontBolder } (Formatter.duration scanDuration), TF.text' ". "
-                       , TF.text' "Date range: "
-                       , TF.date { format: [TF.dd, TF.s " ", TF.mmmm, TF.s " ", TF.yyyy] } range.from, TF.text' " - "
-                       , TF.date { format: [TF.dd, TF.s " ", TF.mmmm, TF.s " ", TF.yyyy] } range.to, TF.text' "."
-                       ]
-                    ] <>
-                    R.div_
-                    [ TF.textf
-                      [ TF.int { style: TF.fontBolder } snapsToScan, TF.text' " snapshots to scan."
-                      , TF.text' " In ", TF.int { style: TF.fontBolder } snapsFileMissing, TF.text' " snapshots was the file not found."
-                      ]
-                    ]
-                ]
-             }
+         , showBody: false
+         , footer: stats self.state.scanResults
          }
        ]
 

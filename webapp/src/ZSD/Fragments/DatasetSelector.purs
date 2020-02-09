@@ -37,7 +37,7 @@ datasetSelector = make component { initialState, render }
     initialState = { selectedDataset: Nothing, activeIdx: Nothing }
 
     render self =
-      panel 
+      panel
       { header: R.text "Datasets"
       , body: \hidePanelBodyFn ->
           tableX
@@ -55,5 +55,6 @@ datasetSelector = make component { initialState, render }
                     self.props.onDatasetSelected ds
             , activeIdx: self.state.activeIdx
             }
+      , showBody: true
       , footer: empty
       }

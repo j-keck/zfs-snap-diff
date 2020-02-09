@@ -119,6 +119,7 @@ snapshotSelector = make component { initialState, didMount, didUpdate, render }
                self.props.onSnapshotSelected snapshot
            , activeIdx: self.state.selectedIdx
            }
+        , showBody: true
         , footer: empty
         }
       ]

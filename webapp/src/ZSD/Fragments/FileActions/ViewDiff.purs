@@ -142,5 +142,3 @@ viewDiff = make component { initialState, render, didMount, didUpdate }
               }
             ]
           }
-
-

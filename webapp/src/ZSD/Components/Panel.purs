@@ -20,6 +20,7 @@ type HideBodyFn = Effect Unit
 type Props =
   { header :: JSX
   , body :: HideBodyFn -> JSX
+  , showBody :: Boolean
   , footer :: JSX
   }
 
@@ -27,7 +28,7 @@ type State = { showBody :: Boolean }
 
 
 panel :: Props -> JSX
-panel = make component { initialState, render }
+panel = make component { initialState, didMount, render }
 
   where
 
@@ -36,7 +37,9 @@ panel = make component { initialState, render }
 
     initialState = { showBody: true }
 
-    render self = 
+    didMount self = self.setState _ { showBody = self.props.showBody }
+
+    render self =
       let hideBodyFn = self.setState _ { showBody = false } in
       R.div
       { className: "card mt-3"
@@ -60,4 +63,3 @@ panel = make component { initialState, render }
         , self.props.footer
         ]
       }
-
