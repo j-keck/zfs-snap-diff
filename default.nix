@@ -21,7 +21,7 @@ let
 
 
   buildInputs =
-    (with pkgs; [ dhall nodejs utillinux]) ++
+    (with pkgs; [ hugo dhall nodejs utillinux]) ++
     (with pkgs.nodePackages; [ parcel-bundler node2nix ]) ++
     (with easy-ps; [ purs spago spago2nix ]);
 
@@ -116,6 +116,27 @@ let
       cp $BIN_PATH/zfs-snap-diff $out/bin
     '';
   };
+
+  site =
+    let theme = pkgs.fetchFromGitHub {
+          owner = "alex-shpak";
+          repo = "hugo-book";
+          rev = "dae803fa442973561821a44b08e3a964614d07df";
+          sha256 = "0dpb860kddclsqnr4ls356jn4d1l8ymw5rs9wfz2xq4kkrgls4dl";
+        };
+    in pkgs.stdenv.mkDerivation rec {
+         name = "zfs-snap-diff-site";
+         inherit version;
+         src = ./doc/site;
+         buildPhase = ''
+           cp -a ${theme}/. themes/book
+           ${pkgs.hugo}/bin/hugo --minify
+         '';
+         installPhase = ''
+           cp -r public $out
+         '';
+       };
+
 in
 
 if pkgs.lib.inNixShell then pkgs.mkShell {
@@ -132,5 +153,5 @@ if pkgs.lib.inNixShell then pkgs.mkShell {
   '';
 }
 else {
-  inherit webapp bindata zfs-snap-diff;
+  inherit webapp bindata zfs-snap-diff site;
 }

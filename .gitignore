@@ -8,5 +8,6 @@ webapp/.psci_modules/
 webapp/node_modules
 webapp/output
 webapp/dist
+doc/site/public
 *~
 

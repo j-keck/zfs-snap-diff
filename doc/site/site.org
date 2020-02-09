@@ -1,0 +1,126 @@
+#+title: zfs-snap-diff
+#+hugo_base_dir: .
+#+options: creator:t author:nil
+
+* Index
+:PROPERTIES:
+:export_title: zfs-snap-diff
+:export_file_name: _index
+:export_hugo_section: /
+:export_hugo_weight: 10
+:export_hugo_type: docs
+:END:
+** Intro
+
+~zfs-snap-diff~ searches different file versions in your zfs snapshots for you.
+
+If you have hundreds or thousands of zfs snapshots, ~zfs-snap-diff~ searched
+the snapshots and shows you only the snapshots where a given file was modified.
+
+To speedup this process, it performs the search incremental when you request a older file version.
+
+You can inspect a diff from the actual file version to the older file version in the
+snapshot, revert a single change or restore a whole file.
+
+** Usage
+
+  - install ~zfs-snap-diff~ see: [[/docs/install][Installation]]
+
+  - startup the daemon
+#+BEGIN_SRC sh
+./zfs-snap-diff <ZFS_DATASET_NAME>
+#+END_SRC
+
+  - open your webbrowser at
+#+BEGIN_SRC sh
+http://127.0.0.1:12345
+#+END_SRC
+
+
+
+ #+attr_html: :alt Screenshot from 'Browse filesystem'
+ [[/images/browse-filesystem.png][file:/images/browse-filesystem.png]]
+
+
+
+* Installation
+  :PROPERTIES:
+  :export_file_name: install
+  :export_hugo_weight: 20
+  :export_hugo_section: docs
+  :END:
+
+
+*** Linux
+ TODO
+
+*** FreeBSD
+ TODO
+
+
+*** Build from source
+
+**** ~go~
+
+  - clone this repo: ~git clone -b dev https://github.com/j-keck/zfs-snap-diff~
+  - change to the checkout directory: ~cd zfs-snap-diff~
+  - build it: ~go build -ldflags="-X main.version=$(git describe)" ./cmd/zfs-snap-diff~
+
+The optional ~-ldflags="-X main.version=$(git describe)"~ flag updates the ~version~ string in the binary.
+
+**** ~nix~
+
+The ~nix~ build also compiles the frontend to javascript and decode it in ~pkg/webapp/bindata.go~.
+
+  - clone this repo: ~git clone -b dev https://github.com/j-keck/zfs-snap-diff~
+  - change to the checkout directory: ~cd zfs-snap-diff~
+  - build it: ~nix-build -A zfs-snap-diff~
+
+To crosscompile the binary for
+
+  - FreeBSD: ~nix-build -A zfs-snap-diff --argstr goos freebsd~
+  - MacOS: ~nix-build -A zfs-snap-diff --argstr goos darwin~
+  - Solaris: ~nix-build -A zfs-snap-diff --argstr goos solaris~
+
+
+
+* User Guide
+  :PROPERTIES:
+  :export_file_name: guide
+  :export_hugo_weight: 30
+  :export_hugo_section: docs
+  :END:
+
+** Browse the actual filesytem
+
+ #+attr_html: :alt Screenshot from 'Browse filesystem'
+ [[/images/browse-filesystem.png][file:/images/browse-filesystem.png]]
+
+
+** Browse snapshots
+
+ #+attr_html: :alt Screenshot from 'Browse snapshots
+ [[/images/browse-snapshots.png][file:/images/browse-snapshots.png]]
+
+
+* Changelog
+:PROPERTIES:
+:export_file_name: changelog
+:export_hugo_weight: 40
+:export_hugo_section: docs
+:END:
+
+
+** 1.0.0 (unreleased)
+
+This version is a complete rewrite
+
+  - date-range based search for file versions
+    - this speeds up the scan dramatically if
+      there are thousands snapshots on spinning disk
+
+  - bookmarks
+
+  - works now also with 'legacy' mountpoints
+
+  - new backend and frontend code

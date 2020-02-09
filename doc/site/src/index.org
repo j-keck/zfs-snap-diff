@@ -1,0 +1,14 @@
+#+TITLE: Installation
+#+HUGO_BASE_DIR: ~/prj/priv/zfs-snap-diff/doc/site
+
+* FreeBSD
+
+#+BEGIN_SRC sh
+pkg install zfs-snap-diff
+#+END_SRC
+
+
+* Linux
+
+
+* Solaris

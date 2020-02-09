@@ -1,0 +1,4 @@
+baseURL = "http://j-keck.github.io/"
+languageCode = "en-us"
+title = "ZFS Snap Diff"
+theme = "book"
