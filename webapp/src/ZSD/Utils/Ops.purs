@@ -8,7 +8,6 @@ import Data.Either (Either, fromRight)
 import Data.Foldable (class Foldable)
 import Data.Foldable as F
 import Data.Maybe (Maybe(..), fromJust, fromMaybe, maybe)
-import Data.Semigroup (class Semigroup)
 import Data.String as S
 import Data.Tuple (Tuple(..))
 import Partial.Unsafe (unsafePartial)

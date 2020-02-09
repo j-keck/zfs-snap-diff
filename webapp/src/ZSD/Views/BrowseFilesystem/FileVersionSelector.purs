@@ -4,7 +4,6 @@ import Prelude
 
 import Data.Array as A
 import Data.Either (either)
-import Data.Foldable (foldMap)
 import Data.Int (toNumber)
 import Data.Maybe (Maybe(..), maybe)
 import Data.Monoid (guard)
@@ -18,18 +17,14 @@ import React.Basic (Component, JSX, createComponent, fragment, make, readState)
 import React.Basic as React
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture_)
-import React.Basic.DOM.Textf as TF
 import ZSD.Components.DropDownButton (dropDownButton)
 import ZSD.Components.Panel (panel)
 import ZSD.Components.Spinner as Spinner
 import ZSD.Components.TableX (tableX)
-import ZSD.Model.DateRange (DateRange(..))
 import ZSD.Model.DateRange as DateRange
 import ZSD.Model.FH (FH(..))
-import ZSD.Model.FileVersion (FileVersion(..), ScanResult(..), scanBackups)
-import ZSD.Model.Snapshot (Snapshot)
+import ZSD.Model.FileVersion (FileVersion(..), ScanResult, scanBackups)
 import ZSD.Utils.Formatter as Formatter
-import ZSD.Utils.Ops (foldlSemigroup)
 import ZSD.Views.BrowseFilesystem.Stats (stats)
 import ZSD.Views.Messages as Messages
 

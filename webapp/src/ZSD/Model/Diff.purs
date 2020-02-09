@@ -14,7 +14,6 @@ import Simple.JSON (class ReadForeign)
 
 import ZSD.Utils.HTTP as HTTP
 import ZSD.Model.AppError (AppError(..))
-import ZSD.Model.FH (FH(..))
 import ZSD.Model.FileVersion (FileVersion(..))
 
 

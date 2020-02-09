@@ -6,26 +6,21 @@ import Affjax.ResponseFormat as ARF
 import Data.Either (Either)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
-import Data.Maybe (Maybe, fromMaybe, maybe)
+import Data.Maybe (maybe)
 import Data.Newtype (class Newtype, over, unwrap)
 import Data.String as S
 import Data.Traversable as T
 import Effect.Aff (Aff)
-import Foreign (ForeignError(..))
-import Foreign as Foreign
 import Record as Record
 import Simple.JSON (class ReadForeign, class WriteForeign)
-import Simple.JSON as F
 import Web.File.Blob (Blob)
 import ZSD.Model.AppError (AppError)
-import ZSD.Model.DateRange (DateRange(..))
 import ZSD.Model.DateTime (DateTime)
 import ZSD.Model.Kind (Kind(..))
-import ZSD.Model.MimeType (MimeType(..))
+import ZSD.Model.MimeType (MimeType)
 import ZSD.Model.MountPoint (MountPoint(..))
-import ZSD.Utils.Formatter as Formatter
 import ZSD.Utils.HTTP as HTTP
-import ZSD.Utils.Ops (unsafeFromJust, (<$$$>), (<$$>), (</>))
+import ZSD.Utils.Ops ((<$$>), (</>))
 
 
 newtype FH = FH

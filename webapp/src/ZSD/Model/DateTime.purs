@@ -3,7 +3,6 @@ module ZSD.Model.DateTime where
 import Prelude
 
 import Data.DateTime as DT
-import Data.Enum (class Enum)
 import Data.JSDate as JSDate
 import Data.Maybe (fromJust)
 import Data.Newtype (class Newtype)
@@ -23,7 +22,7 @@ derive newtype instance ordDateTime :: Ord DateTime
 instance boundedDateTime :: Bounded DateTime where
   top = DateTime top
   bottom = DateTime bottom
-  
+
 instance readForeignDateTime :: ReadForeign DateTime where
   readImpl f = DateTime <<< toDateTime <$> readJSDate f
     where
