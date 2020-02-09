@@ -9,6 +9,7 @@ module ZSD.Model.DateRange
        where
 
 import Data.Date
+
 import Control.Monad.Except (except)
 import Data.Bifunctor (lmap)
 import Data.Date as Date
@@ -19,13 +20,17 @@ import Data.List as L
 import Data.List.NonEmpty as LNE
 import Data.Maybe (fromMaybe)
 import Data.Newtype (class Newtype, over, unwrap)
+import Data.Ord ((<))
+import Data.Enum (fromEnum, class BoundedEnum)
+import Data.Show (show)
 import Data.Time.Duration (Days(..), Milliseconds)
 import Effect (Effect)
 import Effect.Now as Effect
 import Foreign (F, ForeignError(..))
-import Prelude (class Eq, class Semigroup, class Show, bind, bottom, const, identity, negate, pure, ($), (/), (<$>), (>>=), (>>>))
+import Prelude (class Eq, class Semigroup, class Show, bind, bottom, const, identity, negate, otherwise, pure, ($), (/), (<$>), (>>=), (>>>))
 import Simple.JSON (class ReadForeign, class WriteForeign)
 import Simple.JSON as F
+import Data.Semigroup ((<>))
 
 newtype DateRange = DateRange
   { from :: Date
@@ -69,7 +74,14 @@ mapDates updFrom updTo = over DateRange (\rec -> rec { from = updFrom rec.from
 
 
 
-derive newtype instance showDateRange :: Show DateRange
+instance showDateRange :: Show DateRange where
+  show (DateRange { from, to }) =
+    "DateRange { from: " <> showDate from <> ", to: " <> showDate to <> "}"
+    where showDate d = s DT.year d  <> "-" <> s DT.month d <> "-" <> s DT.day d
+          s :: forall a b. BoundedEnum b => (a -> b) -> a -> String
+          s get = get >>> fromEnum >>> show
+
+
 derive newtype instance eqDateRange :: Eq DateRange
 derive instance newtypeDateRange :: Newtype DateRange _
 
@@ -94,5 +106,6 @@ instance writeForeignDateRange :: WriteForeign DateRange where
                      in format fmt dt
 
 instance semigroupDateRange :: Semigroup DateRange where
-  append (DateRange { from }) (DateRange { to }) =
-    DateRange { from, to }
+  append (DateRange { from: f1, to: t1 }) (DateRange { from: f2, to: t2 })
+    | f1 < f2   = DateRange { from: f1, to: t2 }
+    | otherwise = DateRange { from: f2, to: t1 }
