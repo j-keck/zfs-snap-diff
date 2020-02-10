@@ -10,6 +10,7 @@ type Diff struct {
 	Patches                    []string `json:"patches"`
 	SideBySideDiffHTMLFragment []string `json:"sideBySideDiffHTMLFragment"`
 	InlineDiffHTMLFragment     []string `json:"inlineDiffHTMLFragment"`
+	PrettyTextDiff             string
 }
 
 func NewDiff(from, target string, contextSize int) Diff {
@@ -24,7 +25,7 @@ func NewDiff(from, target string, contextSize int) Diff {
 
 	if len(lineBasedDiffs) == 1 && lineBasedDiffs[0].Type == 0 {
 		// cancel if no differences found
-		return Diff{[]Deltas{}, []string{}, []string{}, []string{}}
+		return Diff{[]Deltas{}, []string{}, []string{}, []string{}, ""}
 	}
 
 	lineBasedDiffs = dmp.DiffCleanupSemantic(lineBasedDiffs)
@@ -50,6 +51,7 @@ func NewDiff(from, target string, contextSize int) Diff {
 		patches,
 		createSideBySideDiffHTMLFragment(lineBasedDeltas),
 		createInlineDiffHTMLFragment(charBasedDeltas),
+		dmp.DiffPrettyText(lineBasedDiffs),
 	}
 }
 

@@ -1,5 +1,7 @@
 zfs-snap-diff
 !/cmd/zfs-snap-diff/
+zsd
+!/cmd/zsd/
 result*
 webapp/.cache
 webapp/.spago
@@ -10,4 +12,3 @@ webapp/output
 webapp/dist
 doc/site/public
 *~
-

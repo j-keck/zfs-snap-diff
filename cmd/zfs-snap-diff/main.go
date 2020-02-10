@@ -49,7 +49,7 @@ func main() {
 		return
 	}
 
-	if z, err := zfs.NewZFS(datasetName, zsdCfg); err == nil {
+	if z, err := zfs.NewZFS(datasetName, zsdCfg.ZFS); err == nil {
 		webapp := webapp.NewWebApp(z, zsdCfg)
 		if err := webapp.Start(); err != nil {
 			fmt.Fprintf(os.Stderr, "\nUnable to start webapp: %v", err)

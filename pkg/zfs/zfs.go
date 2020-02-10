@@ -19,14 +19,14 @@ type ZFS struct {
 	name     string
 	datasets Datasets
 	cmd      ZFSCmd
-	cfg      config.Config
+	cfg      config.ZFSConfig
 }
 
 // NewZFS returns a handler for a zfs filesystem
-func NewZFS(name string, cfg config.Config) (ZFS, error) {
+func NewZFS(name string, cfg config.ZFSConfig) (ZFS, error) {
 	self := ZFS{}
-	self.cmd = NewZFSCmd(cfg.ZFS.UseSudo)
 	self.name = name
+	self.cmd = NewZFSCmd(cfg.UseSudo)
 
 	datasets, err := self.scanDatasets(name)
 	if err != nil {
@@ -37,7 +37,7 @@ func NewZFS(name string, cfg config.Config) (ZFS, error) {
 
 		if _, ok := err.(ExecZFSError); ok {
 			// lookup all dataset names and print them as a hint for the user
-			if datasetNames, e := AvailableDatasetNames(cfg.ZFS.UseSudo); e == nil {
+			if datasetNames, e := AvailableDatasetNames(cfg.UseSudo); e == nil {
 				names := strings.Join(datasetNames, ", ")
 				return self, fmt.Errorf("%v\n\n  Possible dataset names: %s", err, names)
 			}
@@ -60,6 +60,26 @@ func AvailableDatasetNames(useSudo bool) ([]string, error) {
 	}
 }
 
+func NewZFSForFilePath(path string, cfg config.ZFSConfig) (ZFS, Dataset, error) {
+	cmd := NewZFSCmd(cfg.UseSudo)
+	stdout, _, err := cmd.Exec("list", "-Ho", "name")
+	if err != nil {
+		return ZFS{}, Dataset{}, err
+	}
+	for _, pool := range strings.Split(stdout, "\n") {
+		z, err := NewZFS(pool, cfg)
+		if err != nil {
+			continue
+		}
+		ds, err := z.FindDatasetForPath(path)
+		if err != nil {
+			continue
+		}
+
+		return z, ds, nil
+	}
+	return ZFS{}, Dataset{}, fmt.Errorf("dataset for file-path: %s not found", path)
+}
 
 func (self *ZFS) Name() string {
 	return self.name
@@ -177,7 +197,7 @@ func (self *ZFS) scanDatasets(name string) (Datasets, error) {
 }
 
 func (self *ZFS) MountSnapshots() bool {
-	return self.cfg.ZFS.MountSnapshots
+	return self.cfg.MountSnapshots
 }
 
 func (self *ZFS) MountSnapshot(snap Snapshot) error {
