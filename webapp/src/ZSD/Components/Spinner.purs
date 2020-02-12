@@ -30,7 +30,7 @@ spinner = unit # make component { initialState, didMount, render }
 
     initialState = { visible: false }
 
-    didMount self = void $ setInterval 500 do
+    didMount self = void $ setInterval 250 do
       flag <- Ref.read visibleFlag
       self.setState _ { visible = flag }
 
