@@ -14,7 +14,7 @@ import (
 	"math"
 	"strings"
 	"strconv"
-	"github.com/j-keck/zfs-snap-diff/pkg/fs"
+	"errors"
 )
 
 var version string = "SNAPSHOT"
@@ -32,7 +32,8 @@ func main() {
 		fmt.Fprintf(os.Stderr, "\nACTIONS:\n")
 		fmt.Fprintf(os.Stderr, "  list: list snapshots with different file-versions for the given file\n")
 		fmt.Fprintf(os.Stderr, "  diff <#|SNAPSHOT>: show differences\n")
-		//fmt.Fprintf(os.Stderr, "  restore <#|SNAPSHOT>: restore the file to the given version\n")
+		fmt.Fprintf(os.Stderr, "  restore <#|SNAPSHOT>: restore the file to the given version\n")
+		fmt.Fprintf(os.Stderr, "\nzsd is a part of zfs-snap-diff\n")
 	}
 
 	cliCfg, zfsCfg := parseFlags()
@@ -81,16 +82,19 @@ func main() {
 			return
 		}
 
+
+		cacheFileVersions(scanResult.FileVersions)
+
 		width := 0
 		for _, v := range scanResult.FileVersions {
 			width = int(math.Max(float64(width), float64(len(v.Snapshot.Name))))
 
 		}
 
-		header := fmt.Sprintf("%3s | %-[2]*s | %s", "#", width, "Snapshot", "File age")
+		header := fmt.Sprintf("%3s | %-[2]*s | %s", "#", width, "Snapshot", "Snapshot age")
 		fmt.Printf("%s\n%s\n", header, strings.Repeat("-", len(header)))
 		for idx, v := range scanResult.FileVersions {
-			age := humanDuration(time.Since(v.Backup.MTime))
+			age := humanDuration(time.Since(v.Snapshot.Created))
 			fmt.Printf("%3d | %-[2]*s | %s\n", idx, width, v.Snapshot.Name, age)
 		}
 
@@ -100,44 +104,75 @@ func main() {
 			return
 		}
 
-		dr := scanner.NewDateRange(time.Now(), cliCfg.scanDays)
-		sc := scanner.NewScanner(dr, "auto", ds, zfs)
-		scanResult, err := sc.FindFileVersions(filePath)
+		version, err := lookupRequestedVersion(flag.Arg(2))
 		if err != nil {
-			log.Errorf("scan failed - %v", err)
+			log.Error(err)
 			return
 		}
 
-
-		var backup fs.FileHandle
-		requestedVersion := flag.Arg(2)
-		if idx, err := strconv.Atoi(requestedVersion); err == nil {
-			// FIXME: bounds check
-			backup = scanResult.FileVersions[idx].Backup
-		} else {
-			for _, v := range scanResult.FileVersions {
-				if v.Snapshot.Name == requestedVersion {
-					backup = v.Backup
-					break
-				}
-			}
-			log.Error("requested version not found")
-			return
-		}
-
-
-		diffs, err := diff.NewDiffFromPath(backup.Path, filePath, 5)
+		diffs, err := diff.NewDiffFromPath(version.Backup.Path, filePath, 5)
 		if err != nil {
 			log.Errorf("unable to create diff - %v", err)
 			return
 		}
 
+		fmt.Printf("Diff from the actual version to the version from: %s\n", version.Backup.MTime)
 		fmt.Printf("%s", diffs.PrettyTextDiff)
+
+	case "revert":
+		if len(flag.Args()) != 3 {
+			fmt.Fprintf(os.Stderr, "Argument <#|SNAPSHOT> missing - use '%s -h'\n", os.Args[0])
+			return
+		}
+
+		version, err := lookupRequestedVersion(flag.Arg(2))
+		if err != nil {
+			log.Error(err)
+			return
+		}
+
+
+		backupPath, err := version.Actual.Backup()
+		if err != nil {
+			log.Errorf("unable to backup the acutal version - %v", err)
+			return
+		}
+		fmt.Printf("backup from the actual version created at: %s", backupPath)
+
+		// restore the backup version
+		version.Backup.Copy(version.Actual.Path)
 
 	default:
 		fmt.Fprintf(os.Stderr, "invalid action: %s\n", action)
 		return
 	}
+}
+
+
+func lookupRequestedVersion(arg string) (*scanner.FileVersion, error) {
+
+	// load file-versions from cache file
+	fileVersions, err := loadCachedFileVersions()
+	if err != nil {
+		return nil, err
+	}
+
+
+	if idx, err := strconv.Atoi(arg); err == nil {
+		if idx >= 0 && idx < len(fileVersions) {
+			return &fileVersions[idx], nil
+		}
+		return nil, errors.New("invalid version index given")
+	} else {
+		for _, v := range fileVersions {
+			if v.Snapshot.Name == arg {
+				return &v, nil
+			}
+		}
+	}
+
+
+	return nil, errors.New("requested version not found")
 }
 
 
@@ -176,7 +211,7 @@ func parseFlags() (CliConfig, config.ZFSConfig) {
 	zfsCfg := config.NewDefaultZFSConfig()
 	flag.BoolVar(&zfsCfg.UseSudo, "use-sudo", zfsCfg.UseSudo, "use sudo when executing 'zfs' commands")
 	flag.BoolVar(&zfsCfg.MountSnapshots, "mount-snapshots", zfsCfg.MountSnapshots,
-		"mount snapshot (only necessary if it's not mounted by zfs automatically")
+		"mount snapshot (only necessary if it's not mounted by zfs automatically)")
 
 	flag.Parse()
 	return *cliCfg, zfsCfg

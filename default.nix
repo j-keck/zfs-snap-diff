@@ -114,6 +114,7 @@ let
                  then "$GOPATH/bin"
                  else "$GOPATH/bin/${goos}_$GOARCH"}
       cp $BIN_PATH/zfs-snap-diff $out/bin
+      cp $BIN_PATH/zsd $out/bin
     '';
   };
 

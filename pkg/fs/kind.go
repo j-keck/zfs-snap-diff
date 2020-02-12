@@ -3,6 +3,7 @@ package fs
 import (
 	"encoding/json"
 	"os"
+	"fmt"
 )
 
 type Kind int
@@ -42,6 +43,30 @@ func KindFromFileInfo(fileInfo os.FileInfo) Kind {
 
 func (self Kind) MarshalJSON() ([]byte, error) {
 	return json.Marshal(self.String())
+}
+
+func (self *Kind) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return err
+	}
+	switch s {
+	case "DIR":
+		*self = DIR
+	case "LINK":
+		*self = LINK
+	case "PIPE":
+		*self = PIPE
+	case "SOCKET":
+		*self = SOCKET
+	case "DEV":
+		*self = DEV
+	case "FILE":
+		*self = FILE
+	default:
+		return fmt.Errorf("invalid Kind: '%s'", s)
+	}
+	return nil
 }
 
 func (self Kind) String() string {
