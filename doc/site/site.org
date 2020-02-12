@@ -12,6 +12,10 @@
 :END:
 ** Intro
 
+{{< hint danger >}}
+This describes the currently **unreleased alpha version**.
+{{< /hint >}}
+
 ~zfs-snap-diff~ searches different file versions in your zfs snapshots for you.
 
 If you have hundreds or thousands of zfs snapshots, ~zfs-snap-diff~ searched
@@ -24,22 +28,25 @@ snapshot, revert a single change or restore a whole file.
 
 ** Usage
 
-  - install ~zfs-snap-diff~ see: [[/docs/install][Installation]]
+  - install ~zfs-snap-diff~
 
-  - startup the daemon
+see: [[/docs/install][Installation]]
+
+  - startup a server instance
 #+BEGIN_SRC sh
-./zfs-snap-diff <ZFS_DATASET_NAME>
+./zfs-snap-diff [OPTIONS] <ZFS_DATASET_NAME>
 #+END_SRC
+
+This starts a embedded webserver and serves the included web-app.
 
   - open your webbrowser at
 #+BEGIN_SRC sh
 http://127.0.0.1:12345
 #+END_SRC
 
-
-
- #+attr_html: :alt Screenshot from 'Browse filesystem'
- [[/images/browse-filesystem.png][file:/images/browse-filesystem.png]]
+  - inspect a diff and revert to a older version
+ #+attr_html: :alt Example session from zfs-snap-diff
+ [[/images/zfs-snap-diff.gif][file:/images/zfs-snap-diff.gif]]
 
 
 
@@ -50,17 +57,40 @@ http://127.0.0.1:12345
   :export_hugo_section: docs
   :END:
 
+{{< hint danger >}}
+This describes the currently **unreleased alpha version**.
+{{< /hint >}}
+
+If you need a 32bit version, or a binary for a different
+platform, feel free to contact me!
 
 *** Linux
- TODO
+
+Download the alpha version for Linux amd64 from:
+
+[[/zfs-snap-diff-linux-v1.0.0-alpha-9-gcdce9fb.gz][zfs-snap-diff-linux-v1.0.0-alpha-9-gcdce9fb.gz]]
+
+If the ~zfs~ executable is not in your $PATH, try ~-use-sudo~.
 
 *** FreeBSD
- TODO
 
+Download the alpha version for FreeBSD amd64 from:
+
+[[/zfs-snap-diff-freebsd-v1.0.0-alpha-9-gcdce9fb.gz][zfs-snap-diff-freebsd-v1.0.0-alpha-9-gcdce9fb.gz]]
+
+*** macOS
+
+Download the alpha version from:
+
+[[/zfs-snap-diff-macos-v1.0.0-alpha-9-gcdce9fb.gz][zfs-snap-diff-macos-v1.0.0-alpha-9-gcdce9fb.gz]]
+
+/Try whith ~-use-sudo~ if it's not working - and please give feedbak if it works (or not)/
 
 *** Build from source
-The minimum supported go version is =go1.12=.
+
 **** ~go~
+
+The minimum supported go version is =go1.12=.
 
   - clone this repo: ~git clone -b dev https://github.com/j-keck/zfs-snap-diff~
   - change to the checkout directory: ~cd zfs-snap-diff~
@@ -76,12 +106,13 @@ The ~nix~ build also compiles the frontend to javascript and decode it in ~pkg/w
   - change to the checkout directory: ~cd zfs-snap-diff~
   - build it: ~nix-build -A zfs-snap-diff~
 
-To crosscompile the binary for
+The build artifacts ~zfs-snap-diff~ and ~zsd~ are in ~./result/bin/~.
+
+To crosscompile the binary use:
 
   - FreeBSD: ~nix-build -A zfs-snap-diff --argstr goos freebsd~
   - MacOS: ~nix-build -A zfs-snap-diff --argstr goos darwin~
   - Solaris: ~nix-build -A zfs-snap-diff --argstr goos solaris~
-
 
 
 * User Guide
@@ -91,16 +122,65 @@ To crosscompile the binary for
   :export_hugo_section: docs
   :END:
 
-** Browse the actual filesytem
+{{< hint danger >}}
+This describes the currently **unreleased alpha version**.
+{{< /hint >}}
 
- #+attr_html: :alt Screenshot from 'Browse filesystem'
- [[/images/browse-filesystem.png][file:/images/browse-filesystem.png]]
+** ~zfs-snap-diff~
+
+*** Browse the actual filesytem
+
+You can browse the actual filesystem an inspect a diff from the actual file version to the older
+file version in the selected snapshot, revert a single change or restore a whole file.
+
+   #+attr_html: :alt Screenshot from 'Browse filesystem'
+   [[/images/browse-filesystem.png][file:/images/browse-filesystem.png]]
 
 
-** Browse snapshots
+*** Browse snapshots
 
- #+attr_html: :alt Screenshot from 'Browse snapshots
- [[/images/browse-snapshots.png][file:/images/browse-snapshots.png]]
+In this view you can view the content of your snapshots.
+
+  #+attr_html: :alt Screenshot from 'Browse snapshots
+  [[/images/browse-snapshots.png][file:/images/browse-snapshots.png]]
+
+
+
+** ~zsd~
+
+~zsd~ is a little cli tool to revert a file on the command line.
+
+  - list zfs-snapshots where the given file was modified
+#+BEGIN_SRC sh
+main⟩ ./zsd go.mod list
+  # | Snapshot                               | Snapshot age
+-----------------------------------------------------------
+  0 | zfs-auto-snap_hourly-2020-02-12-12h00U | 5 hours
+  1 | zfs-auto-snap_hourly-2020-02-12-09h00U | 8 hours
+#+END_SRC
+
+  - show the differences between the actual version and from the given snapshot
+#+BEGIN_SRC sh
+main⟩ ./zsd go.mod diff 0
+Diff from the actual version to the version from: 2020-02-12 10:07:44.434355182 +0100 CET
+module github.com/j-keck/zfs-snap-diff
+
+require (
+	github.com/BurntSushi/toml v0.3.1
+	github.com/j-keck/go-diff v1.0.0
+-	github.com/j-keck/plog v0.5.0
++	github.com/j-keck/plog v0.6.0
+	github.com/stretchr/testify v1.4.0 // indirect
+)
+
+go 1.12
+#+END_SRC
+
+  - restore the given file with an older version
+#+BEGIN_SRC sh
+main: ..priv/zfs-snap-diff⟩ ./zsd go.mod revert 0
+backup from the actual version created at: /home/j/.cache/zfs-snap-diff/backups/home/j/prj/priv/zfs-snap-diff/go.mod_20200212_182709%
+#+END_SRC
 
 
 * Changelog
@@ -111,9 +191,11 @@ To crosscompile the binary for
 :END:
 
 
-** 1.0.0 (unreleased)
+** 1.0.0-alpha (unreleased)
 
+{{< hint note >}}
 This version is a complete rewrite
+{{< /hint >}}
 
   - date-range based search for file versions
     - this speeds up the scan dramatically if
@@ -124,3 +206,99 @@ This version is a complete rewrite
   - works now also with 'legacy' mountpoints
 
   - new backend and frontend code
+
+[[https://github.com/j-keck/zfs-snap-diff/compare/0.0.10...dev][all commits from 0.0.10...dev]]
+
+** 0.0.10
+
+  - use relative url for service endpoints
+    - to use zfs-snap-diff behind a reverse proxy
+    - minimal example config snipped for nginx:
+
+          location /zfs-snap-diff/ {
+              proxy_pass http://localhost:12345/;
+          }
+
+  - optional tls encryption
+  - listen address per '-l' flag configurable
+
+[[https://github.com/j-keck/zfs-snap-diff/compare/0.0.9...0.0.10][all commits from 0.0.9...0.0.10]]
+
+** 0.0.9
+
+  - show file size and modify timestamp in the file-browser
+  - list directories at first in the file-browser
+  - sortable columns in the file-browser
+  - only regular files / directories are clickable
+
+[[https://github.com/j-keck/zfs-snap-diff/compare/0.0.8...0.0.9][all commits from 0.0.8...0.0.9]]
+
+** 0.0.8
+
+  * dataset selectable in 'browse-actual' view
+  * add size informations to dataset (to match 'zfs list' output)
+  * small fixes
+  * code cleanup
+
+[[https://github.com/j-keck/zfs-snap-diff/compare/0.0.7...0.0.8][all commits from 0.0.7...0.0.8]]
+
+** 0.0.7
+
+  - support sub zfs filesystems (datasets)
+  - optional use sudo when execute zfs commands
+    - necessary under linux when running as non root
+    - needs sudo rules
+    - start `zfs-snap-diff` with-'-use-sudo'
+  - new view for server messages
+
+[[https://github.com/j-keck/zfs-snap-diff/compare/0.0.6...0.0.7][all commits from 0.0.6...0.0.7]]
+
+** 0.0.6
+
+  - check if file in snapshot has changed filetype depend:
+    - text files: md5
+    - others: size+modTime
+  - diffs created in the backend (per [[https://github.com/sergi/go-diff][go-diff]])
+    - different presentation: intext / sid- by side
+    - possibility to revert single changes
+
+[[https://github.com/j-keck/zfs-snap-diff/compare/0.0.5...0.0.6][all commits from 0.0.5...0.0.6]]
+
+
+** 0.0.5
+
+  - file compare method configurable: size+modTime (default) or md5
+  - optional limit how many snapshots are scan to search older file version
+  - autohide notifications in frontend
+  - show message if no snapshots found
+
+[[https://github.com/j-keck/zfs-snap-diff/compare/0.0.4...0.0.5][all commits from 0.0.4...0.0.5]]
+
+** 0.0.4
+
+  - view, diff, download or restore file from a snapshot
+  - view file with syntax highlight
+  - browse old snapshot versions
+  - easy switch "versions" per 'Older' / 'Newer' buttons
+  - cleanup frontend
+  - refactor backend
+
+[[https://github.com/j-keck/zfs-snap-diff/compare/0.0.3...0.0.4][all commits 0.0.3...0.0.4]]
+
+** 0.0.3
+
+  - show server errors on frontend
+  - show waiting spinner when loading
+
+[[https://github.com/j-keck/zfs-snap-diff/compare/0.0.2...0.0.3][all commits 0.0.2...0.0.3]]
+
+** 0.0.2
+
+  - partial frontend configuration from server
+  - fix firefox ui
+
+[[https://github.com/j-keck/zfs-snap-diff/compare/0.0.1...0.0.2][all commits 0.0.1...0.0.2]]
+
+** 0.0.1
+
+  - prototype

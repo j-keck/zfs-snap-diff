@@ -8,6 +8,10 @@ weight = 10
 
 ## Intro {#intro}
 
+{{< hint danger >}}
+This describes the currently ****unreleased alpha version****.
+{{< /hint >}}
+
 `zfs-snap-diff` searches different file versions in your zfs snapshots for you.
 
 If you have hundreds or thousands of zfs snapshots, `zfs-snap-diff` searched
@@ -21,15 +25,19 @@ snapshot, revert a single change or restore a whole file.
 
 ## Usage {#usage}
 
--   install `zfs-snap-diff` see: [Installation](/docs/install)
+-   install `zfs-snap-diff`
 
--   startup the daemon
+see: [Installation](/docs/install)
+
+-   startup a server instance
 
 <!--listend-->
 
 ```sh
-./zfs-snap-diff <ZFS_DATASET_NAME>
+./zfs-snap-diff [OPTIONS] <ZFS_DATASET_NAME>
 ```
+
+This starts a embedded webserver and serves the included web-app.
 
 -   open your webbrowser at
 
@@ -39,4 +47,6 @@ snapshot, revert a single change or restore a whole file.
 http://127.0.0.1:12345
 ```
 
-{{< figure src="/images/browse-filesystem.png" alt="Screenshot from 'Browse filesystem'" link="/images/browse-filesystem.png" >}}
+-   inspect a diff and revert to a older version
+
+{{< figure src="/images/zfs-snap-diff.gif" alt="Example session from zfs-snap-diff" link="/images/zfs-snap-diff.gif" >}}
