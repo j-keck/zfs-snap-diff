@@ -1,19 +1,19 @@
-/*
-Package fs implements filesystem operations.
-
-To get a handle, you can use:
-
-  - `fs.NewFSHandle` for anything in a filesystem
-  - `fs.NewFileHandle` for a file handle
-  - `fs.NewDirHandle` for a directory handle
-
-
-You can convert a `fs.FSHandle` to a:
-
-  - `FileHandle` per `fh, err := fsHandle.AsFileHandle()`
-  - `DirHandle` per `dh, err := fsHandle.AsDirHandle()`
-
-*/
+//
+// Package fs provides filesystem operations.
+//
+// To get a handle to existing fs-entry, you can use:
+//
+//   - `fs.GetFileHandle(path string)` for a file handle
+//   - `fs.GetDirHandle(path string)` for a directory handle
+//
+// this operations fail if the request entry does not exists.
+//
+//
+// To get or create a directory handle use
+//
+//   - `fs.GetOrCreateDirHandle(path string, perm os.FilePerm)`
+//   - `fs.GetOrCreateSubDirHandle(name string, perm os.FilePerm)`
+//
 package fs
 
 import (

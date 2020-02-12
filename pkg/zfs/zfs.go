@@ -169,7 +169,7 @@ func (self *ZFS) scanDatasets(name string) (Datasets, error) {
 					log.Tracef("%s ist not mounted - ignore", name)
 				} else {
 					log.Debugf("mountpoint found for dataset: '%s', mountpoint: '%s'", name, legacyMountPoint)
-					if dirHandle, err := fs.NewDirHandle(legacyMountPoint); err != nil {
+					if dirHandle, err := fs.GetDirHandle(legacyMountPoint); err != nil {
 						return nil, err
 					} else {
 						datasets = append(datasets, Dataset{name, used, avail, refer, dirHandle, self.cmd})
@@ -182,7 +182,7 @@ func (self *ZFS) scanDatasets(name string) (Datasets, error) {
 
 			default:
 				log.Debugf("dataset found - name: '%s', mountpoint: '%s'", name, mountPoint)
-				if dirHandle, err := fs.NewDirHandle(mountPoint); err != nil {
+				if dirHandle, err := fs.GetDirHandle(mountPoint); err != nil {
 					log.Warnf("unable to stat directory for dataset: %s - err: %s", name, err)
 				} else {
 					datasets = append(datasets, Dataset{name, used, avail, refer, dirHandle, self.cmd})

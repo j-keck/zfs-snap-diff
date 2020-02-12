@@ -36,7 +36,7 @@ func (self *WebApp) statHndl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fh, err := fs.NewFSHandle(payload.Path)
+	fh, err := fs.GetFSHandle(payload.Path)
 	if err != nil {
 		log.Errorf("Unable to stat path: %s - %v", payload.Path, err)
 		http.Error(w, "Unable to stat path", 400)
@@ -66,7 +66,7 @@ func (self *WebApp) dirListingHndl(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get the directory handle
-	dh, err := fs.NewDirHandle(payload.Path)
+	dh, err := fs.GetDirHandle(payload.Path)
 	if err != nil {
 		log.Errorf("Unable to get directory handle for: %s - %v", payload.Path, err)
 		http.Error(w, "Unable to get directory handle", 400)
@@ -180,7 +180,7 @@ func (self *WebApp) mimeTypeHndl(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// open the file handle
-	fh, err := fs.NewFileHandle(payload.Path)
+	fh, err := fs.GetFileHandle(payload.Path)
 	if err != nil {
 		log.Errorf("Unable to open the file: %s - %v", payload.Path, err)
 		http.Error(w, "Unable to open the requested file", 500)
@@ -252,7 +252,7 @@ func (self *WebApp) downloadHndl(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// open the file handle
-	fh, err := fs.NewFileHandle(payload.Path)
+	fh, err := fs.GetFileHandle(payload.Path)
 	if err != nil {
 		log.Errorf("Unable to open the file: %s - %v", payload.Path, err)
 		http.Error(w, "Unable to open the requested file", 500)
@@ -360,7 +360,7 @@ func (self *WebApp) revertChangeHndl(w http.ResponseWriter, r *http.Request) {
 
 	// create a backup from the actual file
 	var backup string
-	fh, _ := fs.NewFileHandle(payload.ActualPath)
+	fh, _ := fs.GetFileHandle(payload.ActualPath)
 	if backup, err = fh.Backup(); err != nil {
 		msg := "Unable to backup the file"
 		log.Errorf("%s - acutal-path: %s - %v", msg, payload.ActualPath, err)
@@ -412,7 +412,7 @@ func (self *WebApp) restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get the actual file
-	actualFh, err := fs.NewFileHandle(payload.ActualPath)
+	actualFh, err := fs.GetFileHandle(payload.ActualPath)
 	if err != nil {
 		msg := "Unable to open actual file"
 		log.Errorf("%s, path: %s - %v", msg, payload.ActualPath, err)
@@ -421,7 +421,7 @@ func (self *WebApp) restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get the backup file
-	backupFh, err := fs.NewFileHandle(payload.BackupPath)
+	backupFh, err := fs.GetFileHandle(payload.BackupPath)
 	if err != nil {
 		msg := "Unable to open backup file"
 		log.Errorf("%s, path: %s - %v", msg, payload.BackupPath, err)

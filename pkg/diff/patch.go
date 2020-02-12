@@ -10,7 +10,7 @@ import (
 )
 
 func PatchPath(path string, deltas Deltas) error {
-	fh, err := fs.NewFileHandle(path)
+	fh, err := fs.GetFileHandle(path)
 	if err != nil {
 		return err
 	}

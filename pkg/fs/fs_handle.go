@@ -21,7 +21,8 @@ type FSHandle struct {
 	MTime   time.Time `json:"mtime"`
 }
 
-func NewFSHandle(path string) (FSHandle, error) {
+// GetFSHandle
+func GetFSHandle(path string) (FSHandle, error) {
 	if len(path) == 0 {
 		return FSHandle{}, errors.New("the given path was empty")
 	}
@@ -31,17 +32,15 @@ func NewFSHandle(path string) (FSHandle, error) {
 		return FSHandle{}, err
 	}
 
-	if len(path) > 1 {
-		// trim the last '/' from the path
-		// 'filepath.Dir(..)' does not return the parent dir,
-		// if the path has a slash at the end
-		path = strings.TrimSuffix(path, "/")
-	}
+	// trim the last '/' from the path
+	// 'filepath.Dir(..)' does not return the parent dir,
+	// if the path has a slash at the end
+	path = strings.TrimSuffix(path, "/")
 
-	return newFSHandle(filepath.Dir(path), fileInfo), nil
+	return getFSHandle(filepath.Dir(path), fileInfo), nil
 }
 
-func newFSHandle(dirname string, fileInfo os.FileInfo) FSHandle {
+func getFSHandle(dirname string, fileInfo os.FileInfo) FSHandle {
 	path := path.Join(dirname, fileInfo.Name())
 	kind := KindFromFileInfo(fileInfo)
 

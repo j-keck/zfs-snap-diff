@@ -70,7 +70,7 @@ func NewDiffFromPath(from, target string, contextSize int) (Diff, error) {
 }
 
 func readTextFile(path string) (string, error) {
-	fh, err := fs.NewFileHandle(path)
+	fh, err := fs.GetFileHandle(path)
 	if err != nil {
 		return "", err
 	}
