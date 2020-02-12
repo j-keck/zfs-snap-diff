@@ -32,6 +32,7 @@ import ZSD.Views.Messages as Messages
 
 type Props =
   { file :: FH
+  , daysToScan :: Int
   , onVersionSelected :: FileVersion -> Effect Unit
   }
 
@@ -57,7 +58,7 @@ update :: React.Self Props State -> Action -> Effect Unit
 update self = case _ of
   DidMount -> do
     self.setState _ { versions = [ ActualVersion self.props.file ] }
-    update self $ Scan (Days $ -1.0) (SelectVersionByIdx 0)
+    update self $ Scan (Days <<< toNumber <<< negate $ self.props.daysToScan) (SelectVersionByIdx 0)
 
   Scan days next -> Spinner.display *> do
     range <- readState self >>= \state ->
@@ -81,7 +82,7 @@ update self = case _ of
       Just next ->    self.setState _ { selectedIdx = idx, selectedVersion = Just next }
                    *> self.props.onVersionSelected next
       Nothing -> guard (hasOlderSnapshots state) $
-                        update self $ Scan (Days $ -1.0) (SelectVersionByIdx idx)
+                        update self $ Scan (Days <<< toNumber <<< negate $ self.props.daysToScan) (SelectVersionByIdx idx)
 
   NoOp -> pure unit
 

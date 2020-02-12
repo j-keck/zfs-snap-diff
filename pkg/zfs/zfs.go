@@ -19,14 +19,13 @@ type ZFS struct {
 	name     string
 	datasets Datasets
 	cmd      ZFSCmd
-	cfg      config.ZFSConfig
 }
 
 // NewZFS returns a handler for a zfs filesystem
-func NewZFS(name string, cfg config.ZFSConfig) (ZFS, error) {
+func NewZFS(name string) (ZFS, error) {
 	self := ZFS{}
 	self.name = name
-	self.cmd = NewZFSCmd(cfg.UseSudo)
+	self.cmd = NewZFSCmd(config.Get.ZFS.UseSudo)
 
 	datasets, err := self.scanDatasets(name)
 	if err != nil {
@@ -37,7 +36,7 @@ func NewZFS(name string, cfg config.ZFSConfig) (ZFS, error) {
 
 		if _, ok := err.(ExecZFSError); ok {
 			// lookup all dataset names and print them as a hint for the user
-			if datasetNames, e := AvailableDatasetNames(cfg.UseSudo); e == nil {
+			if datasetNames, e := AvailableDatasetNames(); e == nil {
 				names := strings.Join(datasetNames, ", ")
 				return self, fmt.Errorf("%v\n\n  Possible dataset names: %s", err, names)
 			}
@@ -46,12 +45,11 @@ func NewZFS(name string, cfg config.ZFSConfig) (ZFS, error) {
 	}
 
 	self.datasets = datasets
-	self.cfg = cfg
 	return self, nil
 }
 
-func AvailableDatasetNames(useSudo bool) ([]string, error) {
-	cmd := NewZFSCmd(useSudo)
+func AvailableDatasetNames() ([]string, error) {
+	cmd := NewZFSCmd(config.Get.ZFS.UseSudo)
 	if stdout, _, err := cmd.Exec("list", "-H", "-t", "filesystem", "-o", "name"); err == nil {
 		datasetNames := strings.Split(stdout, "\n")
 		return datasetNames, nil
@@ -60,14 +58,14 @@ func AvailableDatasetNames(useSudo bool) ([]string, error) {
 	}
 }
 
-func NewZFSForFilePath(path string, cfg config.ZFSConfig) (ZFS, Dataset, error) {
-	cmd := NewZFSCmd(cfg.UseSudo)
+func NewZFSForFilePath(path string) (ZFS, Dataset, error) {
+	cmd := NewZFSCmd(config.Get.ZFS.UseSudo)
 	stdout, _, err := cmd.Exec("list", "-Ho", "name")
 	if err != nil {
 		return ZFS{}, Dataset{}, err
 	}
 	for _, pool := range strings.Split(stdout, "\n") {
-		z, err := NewZFS(pool, cfg)
+		z, err := NewZFS(pool)
 		if err != nil {
 			continue
 		}
@@ -196,9 +194,6 @@ func (self *ZFS) scanDatasets(name string) (Datasets, error) {
 	return datasets, nil
 }
 
-func (self *ZFS) MountSnapshots() bool {
-	return self.cfg.MountSnapshots
-}
 
 func (self *ZFS) MountSnapshot(snap Snapshot) error {
 	log.Debugf("mount snapshot: %s", snap.Name)

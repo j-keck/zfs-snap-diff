@@ -1,3 +1,5 @@
+github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
+github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/j-keck/go-diff v1.0.0 h1:Zj7+X+dXTBontETHMfR01T1zHoGnJhfCTcA9VGby/wY=
@@ -10,6 +12,8 @@ github.com/j-keck/plog v0.4.0 h1:Zs7eM3WLDzAs6I51NQTRnvPsufahDinaBrkbzGoWi6c=
 github.com/j-keck/plog v0.4.0/go.mod h1:iGLlLlvHFSIeoRTzy8pcq26/04m2r+446IoFkxWrWfs=
 github.com/j-keck/plog v0.5.0 h1:dJbjFGOAwE2RobyEWR9mIVN9TxKjilNM6tbxZP//gmA=
 github.com/j-keck/plog v0.5.0/go.mod h1:iGLlLlvHFSIeoRTzy8pcq26/04m2r+446IoFkxWrWfs=
+github.com/j-keck/plog v0.6.0 h1:0kDWeaEf1pvELdsovzN1ppT6a94n91atp3GC9ON7VMo=
+github.com/j-keck/plog v0.6.0/go.mod h1:iGLlLlvHFSIeoRTzy8pcq26/04m2r+446IoFkxWrWfs=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/sergi/go-diff v1.0.0 h1:Kpca3qRNrduNnOQeazBd0ysaKrUJiIuISHxogkT9RPQ=

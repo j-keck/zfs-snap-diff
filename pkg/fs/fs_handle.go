@@ -71,6 +71,11 @@ func (self *FSHandle) Dirname() string {
 	return filepath.Dir(self.Path)
 }
 
+func (self *FSHandle) Dir() (DirHandle, error) {
+	dir := filepath.Dir(self.Path)
+	return GetDirHandle(dir)
+}
+
 func (self *FSHandle) Move(path string) error {
 	if err := os.Rename(self.Path, path); err != nil {
 		return err

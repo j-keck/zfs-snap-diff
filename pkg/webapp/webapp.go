@@ -13,27 +13,24 @@ var log = plog.GlobalLogger()
 
 type WebApp struct {
 	zfs zfs.ZFS
-	cfg config.Config
 }
 
-func NewWebApp(zfs zfs.ZFS, cfg config.Config) WebApp {
+func NewWebApp(zfs zfs.ZFS) WebApp {
 	self := new(WebApp)
 	self.zfs = zfs
-	self.cfg = cfg
 	self.registerAssetsEndpoint()
 	self.registerApiEndpoints()
 	return *self
 }
 
 func (self *WebApp) Start() error {
-	log.Infof("listen on %s", self.cfg.Webserver.ListenAddress())
 	scheme := "http"
-	if self.cfg.Webserver.UseTLS {
+	if config.Get.Webserver.UseTLS {
 		scheme = "https"
 	}
 
-	log.Infof("listen on %s://%s", scheme, self.cfg.Webserver.ListenAddress())
-	return http.ListenAndServe(self.cfg.Webserver.ListenAddress(), nil)
+	log.Infof("listen on %s://%s", scheme, config.Get.Webserver.ListenAddress())
+	return http.ListenAndServe(config.Get.Webserver.ListenAddress(), nil)
 }
 
 func (self *WebApp) registerAssetsEndpoint() {
@@ -44,8 +41,8 @@ func (self *WebApp) registerAssetsEndpoint() {
 		".svg":  "image/svg+xml",
 	}
 
-	if self.cfg.Webserver.WebappDir != "" {
-		webappDir := self.cfg.Webserver.WebappDir
+	if config.Get.Webserver.WebappDir != "" {
+		webappDir := config.Get.Webserver.WebappDir
 		log.Infof("serve webapp from directory: %s", webappDir)
 		http.Handle("/", http.FileServer(http.Dir(webappDir)))
 	} else {

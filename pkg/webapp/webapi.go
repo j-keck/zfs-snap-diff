@@ -10,15 +10,18 @@ import (
 	"path/filepath"
 	"strconv"
 	"time"
+	"github.com/j-keck/zfs-snap-diff/pkg/config"
 )
 
 /// responds the configuration
 func (self *WebApp) configHndl(w http.ResponseWriter, r *http.Request) {
-	var payload struct {
-		Datasets zfs.Datasets `json:"datasets"`
-	}
-	payload.Datasets = self.zfs.Datasets()
-	respond(w, r, payload)
+	respond(w, r, struct{
+		Datasets   zfs.Datasets  `json:"datasets"`
+		DaysToScan int           `json:"daysToScan"`
+	}{
+		Datasets: self.zfs.Datasets(),
+		DaysToScan: config.Get.DaysToScan,
+	})
 }
 
 /// responds with a list of all available datasets
@@ -99,8 +102,8 @@ func (self *WebApp) findFileVersionsHndl(w http.ResponseWriter, r *http.Request)
 		DateRange     scanner.DateRange `json:"dateRange"`
 	}
 
-	// FIXME: remove hard coded default days
-	defaults := Payload{CompareMethod: "auto", DateRange: scanner.NewDateRange(time.Now(), 1)}
+	dateRange := scanner.NewDateRange(time.Now(), config.Get.DaysToScan)
+	defaults := Payload{CompareMethod: "auto", DateRange: dateRange }
 	payload, ok := decodeJsonPayload(w, r, &defaults).(*Payload)
 	if !ok {
 		return

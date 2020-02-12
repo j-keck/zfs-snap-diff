@@ -7,6 +7,7 @@ import (
 	"path"
 	"strings"
 	"time"
+	"github.com/j-keck/zfs-snap-diff/pkg/config"
 )
 
 var log = plog.GlobalLogger()
@@ -75,7 +76,7 @@ func (self *Scanner) FindFileVersions(pathActualVersion string) (ScanResult, err
 		}
 
 		// mount the snapshot if necessary
-		if self.zfs.MountSnapshots() {
+		if config.Get.ZFS.MountSnapshots {
 			isMounted, err := snap.IsMounted()
 			if err != nil {
 				log.Errorf("unable to check if snapshot: %s is mounted - %v", snap.Name, err)

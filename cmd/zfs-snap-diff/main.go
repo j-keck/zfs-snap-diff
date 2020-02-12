@@ -9,6 +9,7 @@ import (
 	"github.com/j-keck/zfs-snap-diff/pkg/zfs"
 	"os"
 	"strings"
+	"github.com/j-keck/zfs-snap-diff/pkg/fs"
 )
 
 var version string = "SNAPSHOT"
@@ -27,7 +28,7 @@ func main() {
 		flag.PrintDefaults()
 	}
 
-	cliCfg, zsdCfg := parseFlags()
+	cliCfg := parseFlags()
 	setupLogger(cliCfg)
 
 	if cliCfg.printVersion {
@@ -38,7 +39,7 @@ func main() {
 	datasetName := flag.Arg(0)
 	if len(datasetName) == 0 {
 		fmt.Fprintf(os.Stderr, "\nABORT:\n  paramter <ZFS_DATASET_NAME> missing\n")
-		if datasetNames, err := zfs.AvailableDatasetNames(zsdCfg.ZFS.UseSudo); err == nil {
+		if datasetNames, err := zfs.AvailableDatasetNames(); err == nil {
 			names := strings.Join(datasetNames, " | ")
 			fmt.Fprintf(os.Stderr, "\nUSAGE:\n  %s [OPTIONS] <ZFS_DATASET_NAME>\n\n",  os.Args[0])
 			fmt.Fprintf(os.Stderr, "  <ZFS_DATASET_NAMES>: %s\n\n", names)
@@ -49,8 +50,9 @@ func main() {
 		return
 	}
 
-	if z, err := zfs.NewZFS(datasetName, zsdCfg.ZFS); err == nil {
-		webapp := webapp.NewWebApp(z, zsdCfg)
+
+	if z, err := zfs.NewZFS(datasetName); err == nil {
+		webapp := webapp.NewWebApp(z)
 		if err := webapp.Start(); err != nil {
 			fmt.Fprintf(os.Stderr, "\nUnable to start webapp: %v", err)
 		}
@@ -62,9 +64,10 @@ func main() {
 
 }
 
-func parseFlags() (CliConfig, config.Config) {
+func parseFlags() CliConfig {
+	loadConfig()
+
 	cliCfg := new(CliConfig)
-	zsdCfg := config.NewDefaultConfig()
 
 	// cli
 	flag.BoolVar(&cliCfg.printVersion, "V", false, "print version and exit")
@@ -76,8 +79,14 @@ func parseFlags() (CliConfig, config.Config) {
 	flag.BoolVar((&cliCfg.logTimestamps), "log-timestamps", false, "log messages with timestamps in unix format")
 	flag.BoolVar((&cliCfg.logLocations), "log-locations", false, "log messages with caller location")
 
+	// app
+	cfg := &config.Get
+	flag.BoolVar(&cfg.UseCacheDirForBackups, "use-cache-dir-for-backups", cfg.UseCacheDirForBackups,
+		"use platform depend user local cache directory for backups")
+	flag.IntVar(&config.Get.DaysToScan, "d", config.Get.DaysToScan, "days to scan")
+
 	// webserver
-	webCfg := &zsdCfg.Webserver
+	webCfg := &config.Get.Webserver
 	flag.StringVar(&webCfg.ListenIp, "l", webCfg.ListenIp, "webserver listen address")
 	flag.IntVar(&webCfg.ListenPort, "p", webCfg.ListenPort, "webserver port")
 	flag.BoolVar(&webCfg.ListenOnAllInterfaces, "a", webCfg.ListenOnAllInterfaces, "listen on all interfaces")
@@ -89,13 +98,20 @@ func parseFlags() (CliConfig, config.Config) {
 		"when given, serve the webapp from the given directory")
 
 	// zfs
-	zfsCfg := &zsdCfg.ZFS
+	zfsCfg := &config.Get.ZFS
 	flag.BoolVar(&zfsCfg.UseSudo, "use-sudo", zfsCfg.UseSudo, "use sudo when executing 'zfs' commands")
 	flag.BoolVar(&zfsCfg.MountSnapshots, "mount-snapshots", zfsCfg.MountSnapshots,
 		"mount snapshot (only necessary if it's not mounted by zfs automatically")
 
 	flag.Parse()
-	return *cliCfg, zsdCfg
+	return *cliCfg
+}
+
+func loadConfig() {
+	plog.DropUnhandledMessages()
+	configDir, _ := fs.ConfigDir()
+	configPath := configDir.Path + "/zfs-snap-diff.toml"
+	config.LoadConfig(configPath)
 }
 
 func setupLogger(cliCfg CliConfig) plog.Logger {

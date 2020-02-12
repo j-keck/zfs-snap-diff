@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/j-keck/zfs-snap-diff/pkg/zfs"
 	"github.com/j-keck/zfs-snap-diff/pkg/diff"
-	"github.com/j-keck/zfs-snap-diff/pkg/config"
 	"github.com/j-keck/zfs-snap-diff/pkg/scanner"
 	"github.com/j-keck/plog"
 	"os"
@@ -15,6 +14,8 @@ import (
 	"strings"
 	"strconv"
 	"errors"
+	"github.com/j-keck/zfs-snap-diff/pkg/config"
+	"github.com/j-keck/zfs-snap-diff/pkg/fs"
 )
 
 var version string = "SNAPSHOT"
@@ -22,8 +23,8 @@ var version string = "SNAPSHOT"
 type CliConfig struct {
 	logLevel     plog.LogLevel
 	printVersion bool
-	scanDays     int
 }
+
 func main() {
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "\nUSAGE:\n %s [OPTIONS] <FILE> <ACTION>\n\n", os.Args[0])
@@ -36,7 +37,8 @@ func main() {
 		fmt.Fprintf(os.Stderr, "\nzsd is a part of zfs-snap-diff\n")
 	}
 
-	cliCfg, zfsCfg := parseFlags()
+
+	cliCfg := parseFlags()
 
 	if cliCfg.printVersion {
 		fmt.Printf("zsd: %s\n", version)
@@ -61,7 +63,7 @@ func main() {
 
 
 	// init zfs handler
-	zfs, ds, err := zfs.NewZFSForFilePath(filePath, zfsCfg)
+	zfs, ds, err := zfs.NewZFSForFilePath(filePath)
 	if err != nil {
 		log.Errorf("unable to get zfs handler for path: '%s' - %v", filePath, err)
 		return
@@ -73,8 +75,8 @@ func main() {
 	action := flag.Arg(1)
 	switch action {
 	case "list":
-		log.Debugf("scan the last %d days for other file versions", cliCfg.scanDays)
-		dr := scanner.NewDateRange(time.Now(), cliCfg.scanDays)
+		log.Debugf("scan the last %d days for other file versions", config.Get.DaysToScan)
+		dr := scanner.NewDateRange(time.Now(), config.Get.DaysToScan)
 		sc := scanner.NewScanner(dr, "auto", ds, zfs)
 		scanResult, err := sc.FindFileVersions(filePath)
 		if err != nil {
@@ -195,26 +197,29 @@ func humanDuration(dur time.Duration) string {
 	return fmt.Sprintf("%d days", d)
 }
 
-func parseFlags() (CliConfig, config.ZFSConfig) {
+func parseFlags() CliConfig {
+	loadConfig()
+
 	cliCfg := new(CliConfig)
 
 	// cli
 	flag.BoolVar(&cliCfg.printVersion, "V", false, "print version and exit")
-	flag.IntVar(&cliCfg.scanDays, "d", 7, "days to scan")
+	flag.IntVar(&config.Get.DaysToScan, "d", config.Get.DaysToScan, "days to scan")
 
 	// logging
 	cliCfg.logLevel = plog.Note
 	plog.FlagDebugVar(&cliCfg.logLevel, "v", "debug output")
 	plog.FlagTraceVar(&cliCfg.logLevel, "vv", "trace output with caller location")
 
-	// zfs
-	zfsCfg := config.NewDefaultZFSConfig()
-	flag.BoolVar(&zfsCfg.UseSudo, "use-sudo", zfsCfg.UseSudo, "use sudo when executing 'zfs' commands")
-	flag.BoolVar(&zfsCfg.MountSnapshots, "mount-snapshots", zfsCfg.MountSnapshots,
-		"mount snapshot (only necessary if it's not mounted by zfs automatically)")
-
 	flag.Parse()
-	return *cliCfg, zfsCfg
+	return *cliCfg
+}
+
+func loadConfig() {
+	plog.DropUnhandledMessages()
+	configDir, _ := fs.ConfigDir()
+	configPath := configDir.Path + "/zfs-snap-diff.toml"
+	config.LoadConfig(configPath)
 }
 
 

@@ -8,6 +8,7 @@ import (
 	"os"
 	"time"
 	"path/filepath"
+	"github.com/j-keck/zfs-snap-diff/pkg/config"
 )
 
 // FileHandle represents a file
@@ -105,24 +106,39 @@ func (fh *FileHandle) Copy(path string) (err error) {
 // Backup create a backup of the file in the backup location.
 func (self *FileHandle) Backup() (string, error) {
 
-	// FIXME: make the base-path configurable
-	cacheDir, err := CacheDir()
-	if err != nil {
-		return "", err
+	var backupPath string
+	if config.Get.UseCacheDirForBackups {
+		cacheDir, err := CacheDir()
+		if err != nil {
+			return "", err
+		}
+
+		backupDir, err := cacheDir.GetOrCreateSubDirHandle("backups", 0700)
+		if err != nil {
+			return "", err
+		}
+		backupPath = filepath.Join(backupDir.Path, self.Dirname())
+
+		// create the backup directory hierarchy
+		os.MkdirAll(backupPath, 0700)
+
+	} else {
+		dir, err := self.Dir()
+		if err != nil {
+			return "", err
+		}
+
+		backupDir, err := dir.GetOrCreateSubDirHandle(".zsd", 0770)
+		if err != nil {
+			return "", err
+		}
+		backupPath = backupDir.Path
 	}
 
-	backupDir, err := cacheDir.GetOrCreateSubDirHandle("backups", 0700)
-	if err != nil {
-		return "", err
-	}
-
-	// create the backup directory hierarchy
-	path := filepath.Join(backupDir.Path, self.Dirname())
-	os.MkdirAll(path, 0700)
 
 	// copy the file in the backup location
 	now := time.Now().Format("20060102_150405")
-	backupFilePath := fmt.Sprintf("%s%s_%s", backupDir.Path, self.Path, now)
+	backupFilePath := fmt.Sprintf("%s/%s_%s", backupPath, self.Name, now)
 	log.Debugf("copy actual file: %s in backup directory: %s", self.Name, backupFilePath)
 	return backupFilePath, self.Copy(backupFilePath)
 }

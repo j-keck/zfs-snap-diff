@@ -90,6 +90,7 @@ browseFilesystem = make component { initialState, render }
       , foldMap (\file -> fileVersionSelector
                          { file
                          , onVersionSelected: update self <<< VersionSelected
+                         , daysToScan: self.props.config.daysToScan
                          }) self.state.selectedFile
 
 
