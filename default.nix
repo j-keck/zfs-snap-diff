@@ -89,7 +89,7 @@ let
       ${go-bindata}/bin/go-bindata -pkg webapp -o $out/bindata.go .
     '';
 
-  zfs-snap-diff = pkgs.buildGoModule rec {
+  zfs-snap-diff = pkgs.buildGo112Module rec {
     pname = "zfs-snap-diff";
     inherit version;
     src = pkgs.nix-gitignore.gitignoreSource [ ".gitignore" "/webapp/" ] ./.;
@@ -129,7 +129,7 @@ let
          inherit version;
          src = ./doc/site;
          buildPhase = ''
-           cp -a ${theme}/. themes/book
+          cp -a ${theme}/. themes/book
            ${pkgs.hugo}/bin/hugo --minify
          '';
          installPhase = ''
@@ -142,7 +142,7 @@ in
 if pkgs.lib.inNixShell then pkgs.mkShell {
 
   buildInputs = buildInputs ++ (with pkgs;
-                [ go_1_13
+                [ go_1_12
                   ((emacsPackagesGen emacs).emacsWithPackages (epkgs:
                     (with epkgs.melpaStablePackages; [ magit go-mode nix-mode ivy swiper ]) ++
                     (with epkgs.melpaPackages; [ purescript-mode psc-ide ])))

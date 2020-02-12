@@ -17,6 +17,8 @@ TODO
 
 ## Build from source {#build-from-source}
 
+The minimum supported go version is `go1.12`.
+
 
 ### `go` {#go}
 

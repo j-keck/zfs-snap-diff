@@ -59,7 +59,7 @@ http://127.0.0.1:12345
 
 
 *** Build from source
-
+The minimum supported go version is =go1.12=.
 **** ~go~
 
   - clone this repo: ~git clone -b dev https://github.com/j-keck/zfs-snap-diff~
