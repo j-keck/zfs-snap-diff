@@ -2,3 +2,4 @@ baseURL = "http://j-keck.github.io/zfs-snap-diff"
 languageCode = "en-us"
 title = "ZFS Snap Diff"
 theme = "book"
+canonifyURLs = true
