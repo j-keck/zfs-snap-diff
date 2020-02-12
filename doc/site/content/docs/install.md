@@ -17,7 +17,7 @@ platform, feel free to contact me!
 
 Download the alpha version for Linux amd64 from:
 
-[zfs-snap-diff-linux-v1.0.0-alpha-11-g5d232d0.gz](/zfs-snap-diff-linux-v1.0.0-alpha-11-g5d232d0.gz)
+[zfs-snap-diff-linux-v1.0.0-alpha-12-gb0bebf1.tgz](./zfs-snap-diff-linux-v1.0.0-alpha-12-gb0bebf1.tgz)
 
 If the `zfs` executable is not in your $PATH, try `-use-sudo`.
 
@@ -26,14 +26,14 @@ If the `zfs` executable is not in your $PATH, try `-use-sudo`.
 
 Download the alpha version for FreeBSD amd64 from:
 
-[zfs-snap-diff-freebsd-v1.0.0-alpha-11-g5d232d0.gz](/zfs-snap-diff-freebsd-v1.0.0-alpha-11-g5d232d0.gz)
+[zfs-snap-diff-freebsd-v1.0.0-alpha-12-gb0bebf1.tgz](/zfs-snap-diff-freebsd-v1.0.0-alpha-12-gb0bebf1.tgz)
 
 
 ## macOS {#macos}
 
 Download the alpha version from:
 
-[zfs-snap-diff-macos-v1.0.0-alpha-11-g5d232d0.gz](/zfs-snap-diff-macos-v1.0.0-alpha-11-g5d232d0.gz)
+[zfs-snap-diff-darwin-v1.0.0-alpha-12-gb0bebf1.tgz](/zfs-snap-diff-darwin-v1.0.0-alpha-12-gb0bebf1.tgz)
 
 _Try whith `-use-sudo` if it's not working - and please give feedbak if it works (or not)_
 
