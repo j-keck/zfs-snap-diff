@@ -100,9 +100,8 @@ update self = case _ of
        Spinner.display
     *> self.setState _ { currentDir = fh }
     *> launchAff_ (    FH.ls fh
-                   >>= either Messages.appError (\ls -> self.setState _ { dirListing = ls, currentDir = fh })
+                   >>= either Messages.appError (\ls -> self.setState _ { dirListing = ls, currentDir = fh } *> Spinner.remove)
                    >>> liftEffect)
-    *> Spinner.remove
 
 
 

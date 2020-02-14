@@ -46,9 +46,8 @@ update self = case _ of
   FetchSnapshots ->
        Spinner.display
     *> launchAff_ (    Snapshots.fetchForDataset self.props.dataset
-                   >>= either Messages.appError (\snaps -> self.setState _ { snapshots = snaps })
+                   >>= either Messages.appError (\snaps -> self.setState _ { snapshots = snaps } *> Spinner.remove)
                    >>> liftEffect)
-    *> Spinner.remove
 
 
   SelectSnapshotByIdx idx ->
