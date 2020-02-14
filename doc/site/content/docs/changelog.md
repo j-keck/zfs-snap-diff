@@ -8,14 +8,19 @@ weight = 40
 ## 1.0.0-alpha (unreleased) {#1-dot-0-dot-0-alpha--unreleased}
 
 {{< hint note >}}
-This version is a complete rewrite
+This version is a complete rewrite.
+
+The backend is implemented in [Go](https://golang.org) (as before) and the frontend in [PureScript](http://purescript.org).
 {{< /hint >}}
+
+-   download a complete directory as zip-archive
 
 -   date-range based search for file versions
     -   this speeds up the scan dramatically if
         there are thousands snapshots on spinning disk
 
--   bookmarks
+-   bookmark support
+    -   bookmarks are per dataset and stored in the browser ([Web storage](https://en.wikipedia.org/wiki/Web%5Fstorage)).
 
 -   works now also with 'legacy' mountpoints
 

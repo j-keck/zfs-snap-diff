@@ -12,3 +12,4 @@ webapp/output
 webapp/dist
 doc/site/public
 *~
+/gh-pages/

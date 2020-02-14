@@ -64,27 +64,81 @@ This describes the currently **unreleased alpha version**.
 If you need a 32bit version, or a binary for a different
 platform, feel free to contact me!
 
+The tgz archive contains [[/docs/guide/#zfs-snap-diff][zfs-snap-diff]] and [[/docs/guide/#zsd][zsd]].
+
+#+BEGIN_SRC elisp :results output raw :exports results
+  (defun exec-to-string (cmd)
+    "Execute the given CMD and return stdout."
+    (s-trim-right
+     (with-output-to-string
+       (with-current-buffer
+           standard-output
+         (process-file shell-file-name nil '(t nil)  nil shell-command-switch cmd)))))
+
+  (defun version-string ()
+    "Lookup the actual `zfs-snap-diff' version."
+    (exec-to-string "git describe --always"))
+
+  (defun archive-name-string (platform)
+    "Generate the archive name for the given PLATFORM."
+    (format "zfs-snap-diff-%s-%s.tgz" platform (version-string)))
+
+
+  (defun section-for (platform artifact)
+    (format (concat "*** %s\n\n"
+                    "Download the alpha version for %s amd64 here:\n\n"
+                    "[[/%s][%s]]\n\n"
+                    "_Try with the `-use-sudo` if it's not working - and please give feedbak if somethink is not working_\n\n"
+            ) platform platform artifact artifact))
+
+  (princ (section-for "Linux" (archive-name-string "linux")))
+  (princ (section-for "FreeBSD" (archive-name-string "freebsd")))
+  (princ (section-for "macOS" (archive-name-string "darwin")))
+  (princ (section-for "Solaris" (archive-name-string "solaris")))
+#+END_SRC
+
+#+RESULTS:
 *** Linux
 
-Download the alpha version for Linux amd64 from:
+Download the alpha version for Linux amd64 here:
 
-[[./zfs-snap-diff-linux-v1.0.0-alpha-12-gb0bebf1.tgz][zfs-snap-diff-linux-v1.0.0-alpha-12-gb0bebf1.tgz]]
+[[/zfs-snap-diff-linux-v1.0.0-alpha-13-gaeec2f1.tgz][zfs-snap-diff-linux-v1.0.0-alpha-13-gaeec2f1.tgz]]
 
-If the ~zfs~ executable is not in your $PATH, try ~-use-sudo~.
+_Try with the `-use-sudo` if it's not working - and please give feedbak if somethink is not working_
 
 *** FreeBSD
 
-Download the alpha version for FreeBSD amd64 from:
+Download the alpha version for FreeBSD amd64 here:
 
-[[/zfs-snap-diff-freebsd-v1.0.0-alpha-12-gb0bebf1.tgz][zfs-snap-diff-freebsd-v1.0.0-alpha-12-gb0bebf1.tgz]]
+[[/zfs-snap-diff-freebsd-v1.0.0-alpha-13-gaeec2f1.tgz][zfs-snap-diff-freebsd-v1.0.0-alpha-13-gaeec2f1.tgz]]
+
+_Try with the `-use-sudo` if it's not working - and please give feedbak if somethink is not working_
 
 *** macOS
 
-Download the alpha version from:
+Download the alpha version for macOS amd64 here:
 
-[[/zfs-snap-diff-darwin-v1.0.0-alpha-12-gb0bebf1.tgz][zfs-snap-diff-darwin-v1.0.0-alpha-12-gb0bebf1.tgz]]
+[[/zfs-snap-diff-darwin-v1.0.0-alpha-13-gaeec2f1.tgz][zfs-snap-diff-darwin-v1.0.0-alpha-13-gaeec2f1.tgz]]
 
-/Try whith ~-use-sudo~ if it's not working - and please give feedbak if it works (or not)/
+_Try with the `-use-sudo` if it's not working - and please give feedbak if somethink is not working_
+
+*** Solaris
+
+Download the alpha version for Solaris amd64 here:
+
+[[/zfs-snap-diff-solaris-v1.0.0-alpha-13-gaeec2f1.tgz][zfs-snap-diff-solaris-v1.0.0-alpha-13-gaeec2f1.tgz]]
+
+_Try with the `-use-sudo` if it's not working - and please give feedbak if somethink is not working_
+
+
+
+
+
+
+
+
+
+
 
 *** Build from source
 
@@ -178,7 +232,7 @@ go 1.12
 
   - restore the given file with an older version
 #+BEGIN_SRC sh
-main: ..priv/zfs-snap-diff⟩ ./zsd go.mod revert 0
+main⟩ ./zsd go.mod revert 0
 backup from the actual version created at: /home/j/.cache/zfs-snap-diff/backups/home/j/prj/priv/zfs-snap-diff/go.mod_20200212_182709%
 #+END_SRC
 
@@ -194,14 +248,19 @@ backup from the actual version created at: /home/j/.cache/zfs-snap-diff/backups/
 ** 1.0.0-alpha (unreleased)
 
 {{< hint note >}}
-This version is a complete rewrite
+This version is a complete rewrite.
+
+The backend is implemented in [[https://golang.org][Go]] (as before) and the frontend in [[http://purescript.org][PureScript]].
 {{< /hint >}}
+
+  - download a complete directory as zip-archive
 
   - date-range based search for file versions
     - this speeds up the scan dramatically if
       there are thousands snapshots on spinning disk
 
-  - bookmarks
+  - bookmark support
+    - bookmarks are per dataset and stored in the browser ([[https://en.wikipedia.org/wiki/Web_storage][Web storage]]).
 
   - works now also with 'legacy' mountpoints
 

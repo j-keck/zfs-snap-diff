@@ -69,6 +69,6 @@ go 1.12
 <!--listend-->
 
 ```sh
-main: ..priv/zfs-snap-diff⟩ ./zsd go.mod revert 0
+main⟩ ./zsd go.mod revert 0
 backup from the actual version created at: /home/j/.cache/zfs-snap-diff/backups/home/j/prj/priv/zfs-snap-diff/go.mod_20200212_182709%
 ```
