@@ -124,7 +124,7 @@ messages = unit # make component { initialState, didMount, render }
 
     render self =
       table
-      { header: ["Level", "Message"]
+      { header: [R.text "Level", R.text "Message"]
       , rows: self.state
       , mkRow: \{ts, level, msg}  ->
           [ R.span { className: "badge badge-" <> level2bs level

@@ -455,3 +455,108 @@ func (self *WebApp) restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 	log.Info(msg)
 	w.Write([]byte(msg))
 }
+
+
+/// create a archive
+///
+/// expected request parameters: /api/archive?path=/path/to/dir[&name=other-name.zip]
+///
+func (self *WebApp) prepareArchiveHndl(w http.ResponseWriter, r *http.Request) {
+	type Payload struct {
+		Path string `json:"path"`
+		Name string `json:"name"`
+	}
+
+	// payload can be given per
+	//   - request paramters in the url
+	//   - in the post payload as json
+	//
+	// determine the request type and extract the payload
+	payload := Payload{}
+	if r.Method == "GET" {
+		if values, ok := r.URL.Query()["path"]; ok {
+			payload.Path = values[0]
+		}
+		if values, ok := r.URL.Query()["name"]; ok {
+			payload.Name = values[0]
+		}
+	} else {
+		p, ok := decodeJsonPayload(w, r, &Payload{}).(*Payload)
+		if !ok {
+			return
+		}
+		payload = *p
+	}
+
+
+	// validate the payload
+	if len(payload.Path) == 0 {
+		msg := "Paramater 'path' missing"
+		log.Errorf("Unable to prepare archive - %s", msg)
+		http.Error(w, msg, 400)
+		return
+	}
+
+
+	// valiate path
+	if err := self.checkPathIsAllowed(payload.Path); err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
+
+
+	dir, err := fs.GetDirHandle(payload.Path)
+	if err != nil {
+		log.Errorf("Requested path not found - %v", err)
+		http.Error(w, "Requested path not found", 500)
+		return
+	}
+
+	if len(payload.Name) == 0 {
+		payload.Name = dir.Name + ".zip"
+	}
+
+
+	// create archive
+	_, err = dir.CreateArchive(payload.Name)
+	if err != nil {
+		log.Errorf("Unable to create the archive - %v", err)
+		http.Error(w, "Unable to create the archive", 500)
+		return
+	}
+
+	w.Write([]byte(payload.Name))
+}
+
+func (self *WebApp) downloadArchiveHndl(w http.ResponseWriter, r *http.Request) {
+	var name string
+	if values, ok := r.URL.Query()["name"]; ok {
+		name = values[0]
+	} else {
+		msg := "Paramater 'name' missing"
+		log.Errorf("Unable to serve archive - %s", msg)
+		http.Error(w, msg, 400)
+		return
+	}
+
+	tempDir, err := fs.TempDir()
+	archive, err := tempDir.GetFileHandle(name)
+	if err != nil {
+		log.Errorf("Unable to find the archive - %v", err)
+		http.Error(w, "Unable to find the archive", 500)
+		return
+	}
+	log.Infof("serve archive: %s",archive.Path)
+
+	contentLength := strconv.FormatInt(archive.Size, 10)
+	contentDisposition := "attachment; filename=" + name
+
+	w.Header().Set("Content-Disposition", contentDisposition)
+	w.Header().Set("Content-Type", "application/zip")
+	w.Header().Set("Content-Length", contentLength)
+	archive.CopyTo(w)
+	defer func() {
+		log.Debugf("remove served archive: %s", archive.Path)
+		archive.Remove()
+	}()
+}

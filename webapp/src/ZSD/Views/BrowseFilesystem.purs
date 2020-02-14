@@ -80,7 +80,7 @@ browseFilesystem = make component { initialState, render }
         -- dir browser
       , foldMap (\ds -> dirBrowser
                        { ds
-                       , altRoot: Nothing
+                       , snapshot: Nothing
                        , onFileSelected: update self <<< FileSelected
                        , onDirSelected: update self <<< DirSelected
                        } ) self.state.selectedDataset

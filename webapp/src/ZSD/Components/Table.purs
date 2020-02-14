@@ -10,7 +10,7 @@ import React.Basic.DOM.Events (capture_)
 
 
 type Props a =
-  { header :: Array String
+  { header :: Array JSX
   , rows :: Array a
   , mkRow :: a -> Array JSX
   , onRowSelected :: a -> Effect Unit
@@ -21,7 +21,7 @@ table = makeStateless component \props ->
       R.table
       { className: "table table-hover table-sm"
       , children:
-        [ R.thead_ [ R.tr_ $ map (R.text >>> A.singleton >>> R.th_) props.header ]
+        [ R.thead_ [ R.tr_ $ map (A.singleton >>> R.th_) props.header ]
         , R.tbody_ $ flip map props.rows \r ->
            R.tr
            { style: R.css { cursor: "pointer" }
@@ -35,4 +35,3 @@ table = makeStateless component \props ->
 
     component :: Component (Props a)
     component = createComponent "Table"
-

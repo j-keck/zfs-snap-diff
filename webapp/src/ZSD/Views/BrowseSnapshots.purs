@@ -98,7 +98,7 @@ browseSnapshots = make component { initialState, render }
         -- dir browser
       , foldMap (uncurry2 (\ds snapshot -> dirBrowser
                               { ds
-                              , altRoot: Just snapshot.mountPoint
+                              , snapshot: Just snapshot
                               , onFileSelected: update self <<< FileSelected
                               , onDirSelected: update self <<< DirSelected
                               })) (tuple2 <$> self.state.selectedDataset <*> self.state.selectedSnapshot)

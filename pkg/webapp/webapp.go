@@ -81,4 +81,6 @@ func (self *WebApp) registerApiEndpoints() {
 	http.HandleFunc("/api/diff", self.diffHndl)
 	http.HandleFunc("/api/revert-change", self.revertChangeHndl)
 	http.HandleFunc("/api/restore-file", self.restoreFileHndl)
+	http.HandleFunc("/api/prepare-archive", self.prepareArchiveHndl)
+	http.HandleFunc("/api/download-archive", self.downloadArchiveHndl)
 }

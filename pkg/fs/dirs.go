@@ -49,3 +49,10 @@ func CacheDir() (DirHandle, error) {
 	path := filepath.Join(basePath, "zfs-snap-diff")
 	return GetOrCreateDirHandle(path, 0770)
 }
+
+
+// TempDir returns the directory for temporary files
+func TempDir() (DirHandle, error) {
+	tempPath := os.TempDir()
+	return GetDirHandle(tempPath)
+}

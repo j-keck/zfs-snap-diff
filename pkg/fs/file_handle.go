@@ -103,6 +103,11 @@ func (fh *FileHandle) Copy(path string) (err error) {
 	return
 }
 
+// Remove deletes the file
+func (self *FileHandle) Remove() error {
+	return os.Remove(self.Path)
+}
+
 // Backup create a backup of the file in the backup location.
 func (self *FileHandle) Backup() (string, error) {
 

@@ -4,9 +4,10 @@ import Prelude
 
 import Affjax.ResponseFormat as ARF
 import Data.Either (Either)
+import Data.Foldable (foldMap)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
-import Data.Maybe (maybe)
+import Data.Maybe (Maybe, maybe)
 import Data.Newtype (class Newtype, over, unwrap)
 import Data.String as S
 import Data.Traversable as T
@@ -19,6 +20,7 @@ import ZSD.Model.DateTime (DateTime)
 import ZSD.Model.Kind (Kind(..))
 import ZSD.Model.MimeType (MimeType)
 import ZSD.Model.MountPoint (MountPoint(..))
+import ZSD.Model.Snapshot (Snapshot)
 import ZSD.Utils.HTTP as HTTP
 import ZSD.Utils.Ops ((<$$>), (</>))
 
@@ -50,16 +52,21 @@ stat' = map T.sequence <<< T.traverse stat
 
 
 fetchMimeType :: FH -> Aff (Either AppError MimeType)
-fetchMimeType e = HTTP.post' "/api/mime-type" { path: (unwrap >>> _.path) e }
+fetchMimeType fh = HTTP.post' "/api/mime-type" { path: (unwrap >>> _.path) fh }
 
 
 downloadText :: FH -> Aff (Either AppError String)
-downloadText e = HTTP.post ARF.string "/api/download" { path: (unwrap >>> _.path) e }
+downloadText fh = HTTP.post ARF.string "/api/download" { path: (unwrap >>> _.path) fh }
 
 
 downloadBlob :: FH -> Aff (Either AppError Blob)
-downloadBlob e = HTTP.post ARF.blob "/api/download" { path: (unwrap >>> _.path) e }
+downloadBlob fh = HTTP.post ARF.blob "/api/download" { path: (unwrap >>> _.path) fh }
 
+
+prepareArchive :: FH -> Maybe Snapshot -> Aff (Either AppError String)
+prepareArchive (FH { path, name: fhName }) snap =
+  let name = foldMap (\s -> fhName <> "-" <> s.name <> ".zip") snap
+  in HTTP.post ARF.string "/api/prepare-archive" { path, name }
 
 
 newtype From = From MountPoint

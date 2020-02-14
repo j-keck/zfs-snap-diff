@@ -14,21 +14,22 @@ var Get Config = Config{
 	ZFS: NewDefaultZFSConfig(),
 	UseCacheDirForBackups: true,
 	DaysToScan: 7,
+	MaxArchiveUnpackedSizeMB: 200,
 }
 
-
 type Config struct {
-	Webserver             WebserverConfig
-	ZFS                   ZFSConfig
-	UseCacheDirForBackups bool
-	DaysToScan            int
+	Webserver                  WebserverConfig
+	ZFS                        ZFSConfig
+	UseCacheDirForBackups      bool
+	DaysToScan                 int
+	MaxArchiveUnpackedSizeMB   int
 }
 
 
 func LoadConfig(path string) {
 	log.Debugf("load configuration from %s", path)
 	if _, err := toml.DecodeFile(path, &Get); err != nil {
-		log.Notef("config not found - create a new: %s", path)
+		log.Notef("config not found / not parsable - create a new: %s", path)
 		SaveConfig(path)
 	}
 }

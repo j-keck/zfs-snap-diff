@@ -4,6 +4,10 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"archive/zip"
+	"strings"
+	"github.com/j-keck/zfs-snap-diff/pkg/config"
+	"fmt"
 )
 
 // DirHandle represents a directory
@@ -55,6 +59,12 @@ func (self *DirHandle) GetOrCreateSubDirHandle(name string, perm os.FileMode) (D
 	return GetOrCreateDirHandle(path, perm)
 }
 
+// GetFileHandle returns a handle to a existing file in the current dir-handle
+func (self *DirHandle) GetFileHandle(name string) (FileHandle, error) {
+	path := filepath.Join(self.Path, name)
+	return GetFileHandle(path)
+}
+
 
 // ReadFile reads a child-file of the current dir-handle.
 func (self *DirHandle) ReadFile(name string) ([]byte, error) {
@@ -79,7 +89,7 @@ func (self *DirHandle) WriteFile(name string, data []byte, perm os.FileMode) (Fi
 // Ls returns a directory listing of the current dir-handle.
 // Directory and filenames are grouped and sorted by names.
 func (self *DirHandle) Ls() ([]FSHandle, error) {
-	log.Debugf("list directory content under: %s", self.Path)
+	log.Tracef("list directory content under: %s", self.Path)
 	ls, err := ioutil.ReadDir(self.Path)
 	if err != nil {
 		return nil, err
@@ -97,3 +107,75 @@ func (self *DirHandle) Ls() ([]FSHandle, error) {
 	return append(dirs, files...), nil
 }
 
+func (self *DirHandle) CreateArchive(name string) (FileHandle, error) {
+	maxSizeMB := config.Get.MaxArchiveUnpackedSizeMB
+	log.Debugf("create archive from: %s as: %s (max unpacked size: %dMB)", self.Path, name, maxSizeMB)
+
+	var add func(*FSHandle, string, *zip.Writer, *int) error
+	add = func(h *FSHandle, basePath string, w *zip.Writer, archiveSize *int) error {
+		if maxSizeMB > 0 && *archiveSize / 1024 / 1024 > maxSizeMB {
+			return fmt.Errorf("abort - maximum configured archive size reached (%dMB > %dMB)",
+				*archiveSize / 1024 / 1024,
+				maxSizeMB)
+		}
+		switch h.Kind {
+		case FILE:
+			relPath := strings.TrimPrefix(h.Path, basePath + "/")
+			log.Tracef("add %s to archive", relPath)
+			f, err := w.Create(relPath)
+			if err != nil {
+				return err
+			}
+
+			b, err := (&FileHandle{*h}).Read()
+			if err != nil {
+				return err
+			}
+
+			n, err := f.Write(b)
+			if err != nil {
+				return err
+			}
+			*archiveSize += n
+		case DIR:
+			ls, err := (&DirHandle{*h}).Ls()
+			if err != nil {
+				return err
+			}
+			for _, e := range ls {
+				err = add(&e, basePath, w, archiveSize)
+				if err != nil {
+					return err
+				}
+			}
+
+		default:
+			log.Debugf("skip %s (kind: %s) from archive", h.Name, h.Kind)
+		}
+
+		return nil
+	}
+
+	archivePath := os.TempDir() + "/" + name
+	log.Debugf("create temporary archive at: %s", archivePath)
+	archive, err := os.Create(archivePath)
+	if err != nil {
+		return FileHandle{}, err
+	}
+	defer archive.Close()
+
+	w := zip.NewWriter(archive)
+
+	archiveSize := 0
+	err = add(&self.FSHandle, self.Dirname(), w, &archiveSize)
+	if err != nil {
+		return FileHandle{}, err
+	}
+
+	if err = w.Close(); err != nil {
+		return FileHandle{}, err
+	}
+	log.Debugf("archive written - size: %dbytes", archiveSize)
+
+	return GetFileHandle(archivePath)
+}
