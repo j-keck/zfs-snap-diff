@@ -32,10 +32,13 @@ func GetFSHandle(path string) (FSHandle, error) {
 		return FSHandle{}, err
 	}
 
-	// trim the last '/' from the path
-	// 'filepath.Dir(..)' does not return the parent dir,
-	// if the path has a slash at the end
-	path = strings.TrimSuffix(path, "/")
+	if path != "/" {
+		// if the path contains not only a slash,
+		// trim the last '/' from the path because
+		// 'filepath.Dir(..)' does not return the parent dir,
+		// if the path has a slash at the end
+		path = strings.TrimSuffix(path, "/")
+	}
 
 	return getFSHandle(filepath.Dir(path), fileInfo), nil
 }
