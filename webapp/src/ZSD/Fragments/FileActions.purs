@@ -81,7 +81,7 @@ update self = case _ of
         asName = FileVersion.uniqueName self.props.version
 
     location <- window >>= location
-    assign ("/api/download?path=" <> p <> "&as-name=" <> asName) location
+    assign ("api/download?path=" <> p <> "&as-name=" <> asName) location
 
   Restore -> launchAff_ $ do
     res <- FileVersion.restore self.props.version

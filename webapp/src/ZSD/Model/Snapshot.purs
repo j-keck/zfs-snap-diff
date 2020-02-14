@@ -21,4 +21,4 @@ type Snapshots = Array Snapshot
 
 
 fetchForDataset :: Dataset -> Aff (Either AppError Snapshots)
-fetchForDataset { name } = HTTP.post' "/api/snapshots-for-dataset" { datasetName: name }
+fetchForDataset { name } = HTTP.post' "api/snapshots-for-dataset" { datasetName: name }

@@ -15,4 +15,4 @@ type Config =
 
 -- | fetches the config from the server
 fetch :: Aff (Either AppError Config)
-fetch = HTTP.get' "/api/config"
+fetch = HTTP.get' "api/config"

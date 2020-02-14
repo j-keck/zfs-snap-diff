@@ -43,7 +43,7 @@ uniqueName = case _ of
 
 scanBackups :: FH -> DateRange -> Aff (Either AppError ScanResult)
 scanBackups e dateRange
-  = ScanResult <$$> HTTP.post' "/api/find-file-versions" { path: (unwrap >>> _.path) e, dateRange }
+  = ScanResult <$$> HTTP.post' "api/find-file-versions" { path: (unwrap >>> _.path) e, dateRange }
 
 
 newtype ScanResult = ScanResult
@@ -91,5 +91,5 @@ restore :: FileVersion -> Aff (Either AppError String)
 restore (BackupVersion { actual, backup } ) =
   let actualPath = (unwrap >>> _.path) actual
       backupPath = (unwrap >>> _.path) backup
-  in HTTP.post ARF.string "/api/restore-file" { actualPath, backupPath }
+  in HTTP.post ARF.string "api/restore-file" { actualPath, backupPath }
 restore (ActualVersion _) = pure $ Left $ Bug "restore the actual version not possible"

@@ -40,11 +40,11 @@ fromMountPoint (MountPoint rec) =
 
 
 ls :: FH -> Aff (Either AppError (Array FH))
-ls dir = HTTP.post' "/api/dir-listing" { path: (unwrap >>> _.path) dir }
+ls dir = HTTP.post' "api/dir-listing" { path: (unwrap >>> _.path) dir }
 
 
 stat :: String -> Aff (Either AppError FH)
-stat path = FH <$$> HTTP.post' "/api/stat" { path }
+stat path = FH <$$> HTTP.post' "api/stat" { path }
 
 stat' :: Array String -> Aff (Either AppError (Array FH))
 stat' = map T.sequence <<< T.traverse stat
@@ -52,21 +52,21 @@ stat' = map T.sequence <<< T.traverse stat
 
 
 fetchMimeType :: FH -> Aff (Either AppError MimeType)
-fetchMimeType fh = HTTP.post' "/api/mime-type" { path: (unwrap >>> _.path) fh }
+fetchMimeType fh = HTTP.post' "api/mime-type" { path: (unwrap >>> _.path) fh }
 
 
 downloadText :: FH -> Aff (Either AppError String)
-downloadText fh = HTTP.post ARF.string "/api/download" { path: (unwrap >>> _.path) fh }
+downloadText fh = HTTP.post ARF.string "api/download" { path: (unwrap >>> _.path) fh }
 
 
 downloadBlob :: FH -> Aff (Either AppError Blob)
-downloadBlob fh = HTTP.post ARF.blob "/api/download" { path: (unwrap >>> _.path) fh }
+downloadBlob fh = HTTP.post ARF.blob "api/download" { path: (unwrap >>> _.path) fh }
 
 
 prepareArchive :: FH -> Maybe Snapshot -> Aff (Either AppError String)
 prepareArchive (FH { path, name: fhName }) snap =
   let name = foldMap (\s -> fhName <> "-" <> s.name <> ".zip") snap
-  in HTTP.post ARF.string "/api/prepare-archive" { path, name }
+  in HTTP.post ARF.string "api/prepare-archive" { path, name }
 
 
 newtype From = From MountPoint

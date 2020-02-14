@@ -59,7 +59,7 @@ fetch :: FileVersion -> Aff (Either AppError Diff)
 fetch (BackupVersion { actual, backup }) =
   let actualPath = (unwrap >>> _.path) actual
       backupPath = (unwrap >>> _.path) backup
-  in HTTP.post' "/api/diff" { actualPath, backupPath }
+  in HTTP.post' "api/diff" { actualPath, backupPath }
 fetch (ActualVersion _ ) = pure $ Left $ Bug "diff with the same version not possible"
 
 
@@ -68,5 +68,5 @@ revert :: FileVersion -> Int -> Aff (Either AppError String)
 revert (BackupVersion { actual, backup}) deltaIdx =
   let actualPath = (unwrap >>> _.path) actual
       backupPath = (unwrap >>> _.path) backup
-  in HTTP.post ARF.string "/api/revert-change" { actualPath, backupPath, deltaIdx }
+  in HTTP.post ARF.string "api/revert-change" { actualPath, backupPath, deltaIdx }
 revert (ActualVersion _) _ = pure $ Left $ Bug "revert for the actual version not possible"
