@@ -27,14 +27,15 @@ type CliConfig struct {
 
 func main() {
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "\nUSAGE:\n %s [OPTIONS] <FILE> <ACTION>\n\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "zsd is a little cli tool to restore a file from a zfs-snapshot.\n\n")
+		fmt.Fprintf(os.Stderr, "USAGE:\n %s [OPTIONS] <FILE> <ACTION>\n\n", os.Args[0])
 		fmt.Fprintf(os.Stderr, "OPTIONS:\n")
 		flag.PrintDefaults()
 		fmt.Fprintf(os.Stderr, "\nACTIONS:\n")
-		fmt.Fprintf(os.Stderr, "  list: list snapshots with different file-versions for the given file\n")
-		fmt.Fprintf(os.Stderr, "  diff <#|SNAPSHOT>: show differences\n")
+		fmt.Fprintf(os.Stderr, "  list                : list zfs-snapshots with different file-versions for the given file\n")
+		fmt.Fprintf(os.Stderr, "  diff    <#|SNAPSHOT>: show differences between the actual version and the selected version\n")
 		fmt.Fprintf(os.Stderr, "  restore <#|SNAPSHOT>: restore the file to the given version\n")
-		fmt.Fprintf(os.Stderr, "\nzsd is a part of zfs-snap-diff\n")
+		fmt.Fprintf(os.Stderr, "\nzsd is a part of zfs-snap-diff (https://j-keck.github.io/zfs-snap-diff)\n")
 	}
 
 
@@ -48,7 +49,7 @@ func main() {
 	log := setupLogger(cliCfg)
 
 	if len(flag.Args()) < 2 {
-		fmt.Fprintf(os.Stderr, "Arguments missing - use '%s -h'\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Argument <FILE> <ACTION> missing (check %s -h)\n", os.Args[0])
 		return
 	}
 
@@ -75,7 +76,7 @@ func main() {
 	action := flag.Arg(1)
 	switch action {
 	case "list":
-		log.Debugf("scan the last %d days for other file versions", config.Get.DaysToScan)
+		fmt.Printf("scan the last %d days for other file versions\n", config.Get.DaysToScan)
 		dr := scanner.NewDateRange(time.Now(), config.Get.DaysToScan)
 		sc := scanner.NewScanner(dr, "auto", ds, zfs)
 		scanResult, err := sc.FindFileVersions(filePath)
@@ -84,15 +85,16 @@ func main() {
 			return
 		}
 
-
 		cacheFileVersions(scanResult.FileVersions)
 
+		// find the longest snapshot name
 		width := 0
 		for _, v := range scanResult.FileVersions {
 			width = int(math.Max(float64(width), float64(len(v.Snapshot.Name))))
 
 		}
 
+		// show snapshots where the file was modified
 		header := fmt.Sprintf("%3s | %-[2]*s | %s", "#", width, "Snapshot", "Snapshot age")
 		fmt.Printf("%s\n%s\n", header, strings.Repeat("-", len(header)))
 		for idx, v := range scanResult.FileVersions {
@@ -102,7 +104,7 @@ func main() {
 
 	case "diff":
 		if len(flag.Args()) != 3 {
-			fmt.Fprintf(os.Stderr, "Argument <#|SNAPSHOT> missing - use '%s -h'\n", os.Args[0])
+			fmt.Fprintf(os.Stderr, "Argument <#|SNAPSHOT> missing (check %s -h)\n", os.Args[0])
 			return
 		}
 
@@ -121,9 +123,9 @@ func main() {
 		fmt.Printf("Diff from the actual version to the version from: %s\n", version.Backup.MTime)
 		fmt.Printf("%s", diffs.PrettyTextDiff)
 
-	case "revert":
+	case "restore":
 		if len(flag.Args()) != 3 {
-			fmt.Fprintf(os.Stderr, "Argument <#|SNAPSHOT> missing - use '%s -h'\n", os.Args[0])
+			fmt.Fprintf(os.Stderr, "Argument <#|SNAPSHOT> missing (check %s -h)\n", os.Args[0])
 			return
 		}
 
@@ -139,10 +141,11 @@ func main() {
 			log.Errorf("unable to backup the acutal version - %v", err)
 			return
 		}
-		fmt.Printf("backup from the actual version created at: %s", backupPath)
+		fmt.Printf("backup from the actual version created at: %s\n", backupPath)
 
 		// restore the backup version
 		version.Backup.Copy(version.Actual.Path)
+		fmt.Printf("version restored from snapshot: %s\n", version.Snapshot.Name)
 
 	default:
 		fmt.Fprintf(os.Stderr, "invalid action: %s\n", action)
