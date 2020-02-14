@@ -19,7 +19,7 @@ The tgz archive contains [zfs-snap-diff](/docs/guide/#zfs-snap-diff) and [zsd](/
 
 Download the alpha version for Linux amd64 here:
 
-[zfs-snap-diff-linux-v1.0.0-alpha-14-g1510e84.tgz](/zfs-snap-diff-linux-v1.0.0-alpha-14-g1510e84.tgz)
+[zfs-snap-diff-linux-v1.0.0-alpha-22-g3b081b4.tgz](/zfs-snap-diff-linux-v1.0.0-alpha-22-g3b081b4.tgz)
 
 <span class="underline">Try with the \`-use-sudo\` if it's not working - and please give feedbak if somethink is not working</span>
 
@@ -28,7 +28,7 @@ Download the alpha version for Linux amd64 here:
 
 Download the alpha version for FreeBSD amd64 here:
 
-[zfs-snap-diff-freebsd-v1.0.0-alpha-14-g1510e84.tgz](/zfs-snap-diff-freebsd-v1.0.0-alpha-14-g1510e84.tgz)
+[zfs-snap-diff-freebsd-v1.0.0-alpha-22-g3b081b4.tgz](/zfs-snap-diff-freebsd-v1.0.0-alpha-22-g3b081b4.tgz)
 
 <span class="underline">Try with the \`-use-sudo\` if it's not working - and please give feedbak if somethink is not working</span>
 
@@ -37,7 +37,7 @@ Download the alpha version for FreeBSD amd64 here:
 
 Download the alpha version for macOS amd64 here:
 
-[zfs-snap-diff-darwin-v1.0.0-alpha-14-g1510e84.tgz](/zfs-snap-diff-darwin-v1.0.0-alpha-14-g1510e84.tgz)
+[zfs-snap-diff-darwin-v1.0.0-alpha-22-g3b081b4.tgz](/zfs-snap-diff-darwin-v1.0.0-alpha-22-g3b081b4.tgz)
 
 <span class="underline">Try with the \`-use-sudo\` if it's not working - and please give feedbak if somethink is not working</span>
 
@@ -46,43 +46,7 @@ Download the alpha version for macOS amd64 here:
 
 Download the alpha version for Solaris amd64 here:
 
-[zfs-snap-diff-solaris-v1.0.0-alpha-14-g1510e84.tgz](/zfs-snap-diff-solaris-v1.0.0-alpha-14-g1510e84.tgz)
-
-<span class="underline">Try with the \`-use-sudo\` if it's not working - and please give feedbak if somethink is not working</span>
-
-
-## Linux {#linux}
-
-Download the alpha version for Linux amd64 here:
-
-[zfs-snap-diff-linux-v1.0.0-alpha-13-gaeec2f1.tgz](/zfs-snap-diff-linux-v1.0.0-alpha-13-gaeec2f1.tgz)
-
-<span class="underline">Try with the \`-use-sudo\` if it's not working - and please give feedbak if somethink is not working</span>
-
-
-## FreeBSD {#freebsd}
-
-Download the alpha version for FreeBSD amd64 here:
-
-[zfs-snap-diff-freebsd-v1.0.0-alpha-13-gaeec2f1.tgz](/zfs-snap-diff-freebsd-v1.0.0-alpha-13-gaeec2f1.tgz)
-
-<span class="underline">Try with the \`-use-sudo\` if it's not working - and please give feedbak if somethink is not working</span>
-
-
-## macOS {#macos}
-
-Download the alpha version for macOS amd64 here:
-
-[zfs-snap-diff-darwin-v1.0.0-alpha-13-gaeec2f1.tgz](/zfs-snap-diff-darwin-v1.0.0-alpha-13-gaeec2f1.tgz)
-
-<span class="underline">Try with the \`-use-sudo\` if it's not working - and please give feedbak if somethink is not working</span>
-
-
-## Solaris {#solaris}
-
-Download the alpha version for Solaris amd64 here:
-
-[zfs-snap-diff-solaris-v1.0.0-alpha-13-gaeec2f1.tgz](/zfs-snap-diff-solaris-v1.0.0-alpha-13-gaeec2f1.tgz)
+[zfs-snap-diff-solaris-v1.0.0-alpha-22-g3b081b4.tgz](/zfs-snap-diff-solaris-v1.0.0-alpha-22-g3b081b4.tgz)
 
 <span class="underline">Try with the \`-use-sudo\` if it's not working - and please give feedbak if somethink is not working</span>
 

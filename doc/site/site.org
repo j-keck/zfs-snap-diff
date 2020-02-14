@@ -97,48 +97,6 @@ The tgz archive contains [[/docs/guide/#zfs-snap-diff][zfs-snap-diff]] and [[/do
   (princ (section-for "Solaris" (archive-name-string "solaris")))
 #+END_SRC
 
-#+RESULTS:
-*** Linux
-
-Download the alpha version for Linux amd64 here:
-
-[[/zfs-snap-diff-linux-v1.0.0-alpha-13-gaeec2f1.tgz][zfs-snap-diff-linux-v1.0.0-alpha-13-gaeec2f1.tgz]]
-
-_Try with the `-use-sudo` if it's not working - and please give feedbak if somethink is not working_
-
-*** FreeBSD
-
-Download the alpha version for FreeBSD amd64 here:
-
-[[/zfs-snap-diff-freebsd-v1.0.0-alpha-13-gaeec2f1.tgz][zfs-snap-diff-freebsd-v1.0.0-alpha-13-gaeec2f1.tgz]]
-
-_Try with the `-use-sudo` if it's not working - and please give feedbak if somethink is not working_
-
-*** macOS
-
-Download the alpha version for macOS amd64 here:
-
-[[/zfs-snap-diff-darwin-v1.0.0-alpha-13-gaeec2f1.tgz][zfs-snap-diff-darwin-v1.0.0-alpha-13-gaeec2f1.tgz]]
-
-_Try with the `-use-sudo` if it's not working - and please give feedbak if somethink is not working_
-
-*** Solaris
-
-Download the alpha version for Solaris amd64 here:
-
-[[/zfs-snap-diff-solaris-v1.0.0-alpha-13-gaeec2f1.tgz][zfs-snap-diff-solaris-v1.0.0-alpha-13-gaeec2f1.tgz]]
-
-_Try with the `-use-sudo` if it's not working - and please give feedbak if somethink is not working_
-
-
-
-
-
-
-
-
-
-
 
 *** Build from source
 
@@ -182,6 +140,42 @@ This describes the currently **unreleased alpha version**.
 
 ** ~zfs-snap-diff~
 
+#+BEGIN_EXAMPLE
+USAGE:
+  ./zfs-snap-diff [OPTIONS] <ZFS_DATASET_NAME>
+
+OPTIONS:
+  -V	print version and exit
+  -a	listen on all interfaces
+  -cert string
+        TLS certificate file
+  -d int
+        days to scan (default 7)
+  -key string
+        TLS private key file
+  -l string
+        webserver listen address (default "127.0.0.1")
+  -log-locations
+        log messages with caller location
+  -log-timestamps
+        log messages with timestamps in unix format
+  -mount-snapshots
+        mount snapshot (only necessary if it's not mounted by zfs automatically
+  -p int
+        webserver port (default 12345)
+  -tls
+        use TLS - NOTE: -cert <CERT_FILE> -key <KEY_FILE> are mandatory
+  -use-cache-dir-for-backups
+        use platform depend user local cache directory for backups (default true)
+  -use-sudo
+        use sudo when executing 'zfs' commands
+  -v	debug output
+  -vv
+        trace output with caller location
+  -webapp-dir string
+        when given, serve the webapp from the given directory
+#+END_EXAMPLE
+
 *** Browse the actual filesytem
 
 You can browse the actual filesystem an inspect a diff from the actual file version to the older
@@ -202,39 +196,62 @@ In this view you can view the content of your snapshots.
 
 ** ~zsd~
 
-~zsd~ is a little cli tool to revert a file on the command line.
+#+BEGIN_EXAMPLE
+zsd is a little cli tool to restore a file from a zfs-snapshot.
 
-  - list zfs-snapshots where the given file was modified
-#+BEGIN_SRC sh
-main⟩ ./zsd go.mod list
-  # | Snapshot                               | Snapshot age
------------------------------------------------------------
-  0 | zfs-auto-snap_hourly-2020-02-12-12h00U | 5 hours
-  1 | zfs-auto-snap_hourly-2020-02-12-09h00U | 8 hours
-#+END_SRC
+USAGE:
+ ./zsd [OPTIONS] <FILE> <ACTION>
 
-  - show the differences between the actual version and from the given snapshot
-#+BEGIN_SRC sh
-main⟩ ./zsd go.mod diff 0
-Diff from the actual version to the version from: 2020-02-12 10:07:44.434355182 +0100 CET
-module github.com/j-keck/zfs-snap-diff
+OPTIONS:
+  -V	print version and exit
+  -d int
+        days to scan (default 7)
+  -v	debug output
+  -vv
+        trace output with caller location
 
-require (
-	github.com/BurntSushi/toml v0.3.1
-	github.com/j-keck/go-diff v1.0.0
--	github.com/j-keck/plog v0.5.0
-+	github.com/j-keck/plog v0.6.0
-	github.com/stretchr/testify v1.4.0 // indirect
-)
+ACTIONS:
+  list                : list zfs-snapshots with different file-versions for the given file
+  diff    <#|SNAPSHOT>: show differences between the actual version and the selected version
+  restore <#|SNAPSHOT>: restore the file to the given version
 
-go 1.12
-#+END_SRC
+zsd is a part of zfs-snap-diff (https://j-keck.github.io/zfs-snap-diff)
+#+END_EXAMPLE
 
-  - restore the given file with an older version
-#+BEGIN_SRC sh
-main⟩ ./zsd go.mod revert 0
-backup from the actual version created at: /home/j/.cache/zfs-snap-diff/backups/home/j/prj/priv/zfs-snap-diff/go.mod_20200212_182709%
-#+END_SRC
+
+   - list zfs-snapshots where the given file was modified
+ #+BEGIN_SRC sh
+ main⟩ ./zsd go.mod list
+ scan the last 7 days for other file versions
+   # | Snapshot                               | Snapshot age
+ -----------------------------------------------------------
+   0 | zfs-auto-snap_hourly-2020-02-12-12h00U | 5 hours
+   1 | zfs-auto-snap_hourly-2020-02-12-09h00U | 8 hours
+ #+END_SRC
+
+   - show the differences between the actual version and from the given snapshot
+ #+BEGIN_SRC sh
+ main⟩ ./zsd go.mod diff 0
+ Diff from the actual version to the version from: 2020-02-12 10:07:44.434355182 +0100 CET
+ module github.com/j-keck/zfs-snap-diff
+
+ require (
+	 github.com/BurntSushi/toml v0.3.1
+	 github.com/j-keck/go-diff v1.0.0
+ -	github.com/j-keck/plog v0.5.0
+ +	github.com/j-keck/plog v0.6.0
+	 github.com/stretchr/testify v1.4.0 // indirect
+ )
+
+ go 1.12
+ #+END_SRC
+
+   - restore the given file with an older version
+ #+BEGIN_SRC sh
+ main⟩ ./zsd go.mod restore 0
+ backup from the actual version created at: /home/j/.cache/zfs-snap-diff/backups/home/j/prj/priv/zfs-snap-diff/go.mod_20200212_182709%
+ version restored from snapshot: zfs-auto-snap_hourly-2020-02-12-12h00U
+ #+END_SRC
 
 
 * Changelog

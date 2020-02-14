@@ -6,11 +6,16 @@ It's a complete rewrite:
   - backend is implemented in [[https://golang.org][Go]] (as before)
   - frontend in [[http://purescript.org][PureScript]] (with [[https://pursuit.purescript.org/packages/purescript-react-basic][react-basic]])
 
-You need only ~go~ to build this project.
-I compile the frontend code to javascript and decode it in ~pkg/webapp/bindata.go~.
+For more information see: [[https://j-keck.github.io/zfs-snap-diff/]]
 
+** Prebuild
+
+You can download a prebuild version from: [[https://j-keck.github.io/zfs-snap-diff/docs/install]]
 
 ** Build from source
+
+You need only ~go~ to build this project.
+I compile the frontend code to javascript and decode it in ~pkg/webapp/bindata.go~.
 
 *** Build with ~go~
 
@@ -40,17 +45,3 @@ To crosscompile the binary for
     ~./zfs-snap-diff <POOL>~
 
  [[./doc/site/static/images/browse-filesystem.png][file:./doc/site/static/images/browse-filesystem.png]]
-
-
-** Changes
-
-
-  - date-range based search for file versions
-    - this speeds up the scan dramatically if
-      there are thousands snapshots on spinning disk
-
-  - bookmarks
-
-  - works now also with 'legacy' mountpoints
-
-  - new backend and frontend code
