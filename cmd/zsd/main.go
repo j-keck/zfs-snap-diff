@@ -27,15 +27,15 @@ type CliConfig struct {
 
 func main() {
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "zsd is a little cli tool to restore a file from a zfs-snapshot.\n\n")
+		fmt.Fprintf(os.Stderr, "zsd is a little independent cli tool to find different versions for a given file in your zfs-snapshots.\n")
 		fmt.Fprintf(os.Stderr, "USAGE:\n %s [OPTIONS] <FILE> <ACTION>\n\n", os.Args[0])
 		fmt.Fprintf(os.Stderr, "OPTIONS:\n")
 		flag.PrintDefaults()
 		fmt.Fprintf(os.Stderr, "\nACTIONS:\n")
 		fmt.Fprintf(os.Stderr, "  list                : list zfs-snapshots with different file-versions for the given file\n")
-		fmt.Fprintf(os.Stderr, "  diff    <#|SNAPSHOT>: show differences between the actual version and the selected version\n")
-		fmt.Fprintf(os.Stderr, "  restore <#|SNAPSHOT>: restore the file to the given version\n")
-		fmt.Fprintf(os.Stderr, "\nzsd is a part of zfs-snap-diff (https://j-keck.github.io/zfs-snap-diff)\n")
+		fmt.Fprintf(os.Stderr, "  cat     <#|SNAPSHOT>: show the file-content from the given snapshot\n");
+		fmt.Fprintf(os.Stderr, "  diff    <#|SNAPSHOT>: show differences between the actual version and from the selected snapshot\n")
+		fmt.Fprintf(os.Stderr, "  restore <#|SNAPSHOT>: restore the file from the given snapshot\n")
 	}
 
 
@@ -101,6 +101,32 @@ func main() {
 			age := humanDuration(time.Since(v.Snapshot.Created))
 			fmt.Printf("%3d | %-[2]*s | %s\n", idx, width, v.Snapshot.Name, age)
 		}
+
+	case "cat":
+		if len(flag.Args()) != 3 {
+			fmt.Fprintf(os.Stderr, "Argument <#|SNAPSHOT> missing (check %s -h)\n", os.Args[0])
+			return
+		}
+
+		version, err := lookupRequestedVersion(flag.Arg(2))
+		if err != nil {
+			log.Error(err)
+			return
+		}
+
+		file, err := fs.GetFileHandle(version.Backup.Path)
+		if err !=nil {
+			log.Errorf("unable to find file in the snapshot - %v", err)
+			return
+		}
+
+		content, err := file.ReadString()
+		if err != nil {
+			log.Errorf("unable to get content from %s - %v", file.Name, err)
+			return
+		}
+
+		fmt.Println(content)
 
 	case "diff":
 		if len(flag.Args()) != 3 {
