@@ -6,20 +6,24 @@ weight = 20
 +++
 
 {{< hint danger >}}
-This describes the currently ****unreleased alpha version****.
+This describes the currently ****unreleased beta version****.
 {{< /hint >}}
 
 If you need a 32bit version, or a binary for a different
 platform, feel free to contact me!
 
-The tgz archive contains [zfs-snap-diff](/docs/guide/#zfs-snap-diff) and [zsd](/docs/guide/#zsd).
+The tgz archive contains
+
+-   [zfs-snap-diff](/docs/guide/#zfs-snap-diff): web based tool to find different file versions in your zfs-snapshots.
+
+-   [zsd](/docs/guide/#zsd): a little independent cli tool to find differnt file versions in your zfs-snapshots.
 
 
 ## Linux {#linux}
 
 Download the alpha version for Linux amd64 here:
 
-[zfs-snap-diff-linux-v1.0.0-alpha-22-g3b081b4.tgz](/zfs-snap-diff-linux-v1.0.0-alpha-22-g3b081b4.tgz)
+[zfs-snap-diff-linux-v1.0.0-beta.tgz](/zfs-snap-diff-linux-v1.0.0-beta.tgz)
 
 <span class="underline">Try with the \`-use-sudo\` if it's not working - and please give feedbak if somethink is not working</span>
 
@@ -28,7 +32,7 @@ Download the alpha version for Linux amd64 here:
 
 Download the alpha version for FreeBSD amd64 here:
 
-[zfs-snap-diff-freebsd-v1.0.0-alpha-22-g3b081b4.tgz](/zfs-snap-diff-freebsd-v1.0.0-alpha-22-g3b081b4.tgz)
+[zfs-snap-diff-freebsd-v1.0.0-beta.tgz](/zfs-snap-diff-freebsd-v1.0.0-beta.tgz)
 
 <span class="underline">Try with the \`-use-sudo\` if it's not working - and please give feedbak if somethink is not working</span>
 
@@ -37,7 +41,7 @@ Download the alpha version for FreeBSD amd64 here:
 
 Download the alpha version for macOS amd64 here:
 
-[zfs-snap-diff-darwin-v1.0.0-alpha-22-g3b081b4.tgz](/zfs-snap-diff-darwin-v1.0.0-alpha-22-g3b081b4.tgz)
+[zfs-snap-diff-darwin-v1.0.0-beta.tgz](/zfs-snap-diff-darwin-v1.0.0-beta.tgz)
 
 <span class="underline">Try with the \`-use-sudo\` if it's not working - and please give feedbak if somethink is not working</span>
 
@@ -46,7 +50,7 @@ Download the alpha version for macOS amd64 here:
 
 Download the alpha version for Solaris amd64 here:
 
-[zfs-snap-diff-solaris-v1.0.0-alpha-22-g3b081b4.tgz](/zfs-snap-diff-solaris-v1.0.0-alpha-22-g3b081b4.tgz)
+[zfs-snap-diff-solaris-v1.0.0-beta.tgz](/zfs-snap-diff-solaris-v1.0.0-beta.tgz)
 
 <span class="underline">Try with the \`-use-sudo\` if it's not working - and please give feedbak if somethink is not working</span>
 
@@ -66,6 +70,8 @@ The optional `-ldflags="-X main.version=$(git describe)"` flag updates the `vers
 
 
 ### `nix` {#nix}
+
+I use [nix](https://nixos.org/nix/) to build my projects.
 
 The `nix` build also compiles the frontend to javascript and decode it in `pkg/webapp/bindata.go`.
 

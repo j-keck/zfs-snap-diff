@@ -9,7 +9,7 @@ weight = 10
 ## Intro {#intro}
 
 {{< hint danger >}}
-This describes the currently ****unreleased alpha version****.
+This describes the currently ****unreleased beta version****.
 {{< /hint >}}
 
 `zfs-snap-diff` searches different file versions in your zfs snapshots for you.
@@ -21,6 +21,10 @@ To speedup this process, it performs the search incremental when you request a o
 
 You can inspect a diff from the actual file version to the older file version in the
 snapshot, revert a single change or restore a whole file.
+
+`zfs-snap-diff` has a web frontend, so it can run on your local work machine or on your
+remote file / backup server (no Xserver necesarry). To keep it portable it's made
+as a single static compiled executable.
 
 
 ## Usage {#usage}

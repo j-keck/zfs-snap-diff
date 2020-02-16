@@ -5,7 +5,7 @@ creator = "Emacs 26.3 (Org mode 9.1.9 + ox-hugo)"
 weight = 40
 +++
 
-## 1.0.0-alpha (unreleased) {#1-dot-0-dot-0-alpha--unreleased}
+## 1.0.0-beta (unreleased) {#1-dot-0-dot-0-beta--unreleased}
 
 {{< hint note >}}
 This version is a complete rewrite.
@@ -13,7 +13,12 @@ This version is a complete rewrite.
 The backend is implemented in [Go](https://golang.org) (as before) and the frontend in [PureScript](http://purescript.org).
 {{< /hint >}}
 
+-   create and destroy snapshots from the webapp
+
 -   download a complete directory as zip-archive
+
+-   [`zsd`](/docs/guide/#zsd) cli tool to find different file-versions in the command line
+    -   does not need a running `zfs-snap-diff` instance
 
 -   date-range based search for file versions
     -   this speeds up the scan dramatically if
