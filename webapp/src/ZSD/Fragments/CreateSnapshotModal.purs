@@ -202,7 +202,7 @@ decode = case _ of
                ]
   "%H" -> Right [ Hours24 ]
   "%I" -> Right [ Hours12 ]
-  "%M" -> Right [ Minutes ]
-  "%S" -> Right [ Seconds ]
+  "%M" -> Right [ MinutesTwoDigits ]
+  "%S" -> Right [ SecondsTwoDigits ]
   "%s" -> Right [ UnixTimestamp ]
   s    -> Left $ "Invalid format: " <> s
