@@ -11,7 +11,7 @@ data AppError =
 
 instance showAppError :: Show AppError where
   show = case _ of
-    HTTPError url err -> "client <-> server communication error at endpoint: '"
+    HTTPError url err -> "Error at endpoint: '"
                          <> url <> "' - "
                          <> show err
     GenericError msg -> msg

@@ -43,8 +43,9 @@ func (self *WebApp) statHndl(w http.ResponseWriter, r *http.Request) {
 
 	fh, err := fs.GetFSHandle(payload.Path)
 	if err != nil {
-		log.Errorf("Unable to stat path: %s - %v", payload.Path, err)
-		http.Error(w, "Unable to stat path", 400)
+		msg := fmt.Sprintf("Unable to stat path: %s - %v", payload.Path, err)
+		log.Error(msg)
+		http.Error(w, msg, 400)
 		return
 	}
 	respond(w, r, fh)
@@ -73,16 +74,18 @@ func (self *WebApp) dirListingHndl(w http.ResponseWriter, r *http.Request) {
 	// get the directory handle
 	dh, err := fs.GetDirHandle(payload.Path)
 	if err != nil {
-		log.Errorf("Unable to get directory handle for: %s - %v", payload.Path, err)
-		http.Error(w, "Unable to get directory handle", 400)
+		msg := fmt.Sprintf("Unable to get directory handle for: %s - %v", payload.Path, err)
+		log.Error(msg)
+		http.Error(w, msg, 400)
 		return
 	}
 
 	// get the directory listing
 	entries, err := dh.Ls()
 	if err != nil {
-		log.Errorf("Directory listing failed for directory: %s - %v", payload.Path, err)
-		http.Error(w, "Directory listing failed", 500)
+		msg := fmt.Sprintf("Directory listing failed for directory: %s - %v", payload.Path, err)
+		log.Error(msg)
+		http.Error(w, msg, 500)
 		return
 	}
 
@@ -114,8 +117,9 @@ func (self *WebApp) findFileVersionsHndl(w http.ResponseWriter, r *http.Request)
 	// get the dataset
 	ds, err := self.zfs.FindDatasetForPath(payload.Path)
 	if err != nil {
-		log.Errorf("Dataset for file: %s not found - %v", payload.Path, err)
-		http.Error(w, "Dataset for the given file-path not found", 400)
+		msg := fmt.Sprintf("Dataset for file: %s not found - %v", payload.Path, err)
+		log.Error(msg)
+		http.Error(w, msg, 400)
 		return
 	}
 
@@ -123,8 +127,9 @@ func (self *WebApp) findFileVersionsHndl(w http.ResponseWriter, r *http.Request)
 	sc := scanner.NewScanner(payload.DateRange, payload.CompareMethod, ds, self.zfs)
 	scanResult, err := sc.FindFileVersions(payload.Path)
 	if err != nil {
-		log.Errorf("File versions search failed - %v", err)
-		http.Error(w, "File versions search failed", 500)
+		msg := fmt.Sprintf("File versions search failed - %v", err)
+		log.Error(msg)
+		http.Error(w, msg, 500)
 		return
 	}
 
@@ -148,16 +153,18 @@ func (self *WebApp) snapshotsForDatasetHndl(w http.ResponseWriter, r *http.Reque
 	// get the dataset
 	ds, err := self.zfs.FindDatasetByName(payload.DatasetName)
 	if err != nil {
-		log.Errorf("Dataset with name: %s not found - %v", payload.DatasetName, err)
-		http.Error(w, "Dataset with the given name not found", 400)
+		msg := fmt.Sprintf("Dataset with name: %s not found - %v", payload.DatasetName, err)
+		log.Error(msg)
+		http.Error(w, msg, 400)
 		return
 	}
 
 	// snapshots
 	snaps, err := ds.ScanSnapshots()
 	if err != nil {
-		log.Errorf("Unable to scan snapshots for Dataset: %s - %v", payload.DatasetName, err)
-		http.Error(w, "Unable to scan snapshots for the Dataset", 400)
+		msg := fmt.Sprintf("Unable to scan snapshots for Dataset: %s - %v", payload.DatasetName, err)
+		log.Error(msg)
+		http.Error(w, msg, 400)
 		return
 	}
 
@@ -180,15 +187,17 @@ func (self *WebApp) createSnapshotHndl(w http.ResponseWriter, r *http.Request) {
 	// get the dataset
 	ds, err := self.zfs.FindDatasetByName(payload.DatasetName)
 	if err != nil {
-		log.Errorf("Dataset with name: %s not found - %v", payload.DatasetName, err)
-		http.Error(w, "Dataset with the given name not found", 400)
+		msg := fmt.Sprintf("Dataset with name: %s not found - %v", payload.DatasetName, err)
+		log.Error(msg)
+		http.Error(w, msg, 400)
 		return
 	}
 
 	name, err := ds.CreateSnapshot(payload.SnapshotName)
 	if err != nil {
-		log.Errorf("Unable to create snapshot: %s - %v", name, err)
-		http.Error(w, "Unable to create snapshot", 500)
+		msg := fmt.Sprintf("Unable to create snapshot: %s - %v", name, err)
+		log.Error(msg)
+		http.Error(w, msg, 500)
 		return
 	}
 
@@ -212,15 +221,17 @@ func (self *WebApp) destroySnapshotHndl(w http.ResponseWriter, r *http.Request) 
 	// get the dataset
 	ds, err := self.zfs.FindDatasetByName(payload.DatasetName)
 	if err != nil {
-		log.Errorf("Dataset with name: %s not found - %v", payload.DatasetName, err)
-		http.Error(w, "Dataset with the given name not found", 400)
+		msg := fmt.Sprintf("Dataset with name: %s not found - %v", payload.DatasetName, err)
+		log.Error(msg)
+		http.Error(w, msg, 400)
 		return
 	}
 
 	name, err := ds.DestroySnapshot(payload.SnapshotName)
 	if err != nil {
-		log.Errorf("Unable to destroy snapshot: %s - %v", name, err)
-		http.Error(w, "Unable to destroy snapshot", 500)
+		msg := fmt.Sprintf("Unable to destroy snapshot: %s - %v", name, err)
+		log.Error(msg)
+		http.Error(w, msg, 500)
 		return
 	}
 
@@ -252,16 +263,18 @@ func (self *WebApp) mimeTypeHndl(w http.ResponseWriter, r *http.Request) {
 	// open the file handle
 	fh, err := fs.GetFileHandle(payload.Path)
 	if err != nil {
-		log.Errorf("Unable to open the file: %s - %v", payload.Path, err)
-		http.Error(w, "Unable to open the requested file", 500)
+        msg := fmt.Sprintf("Unable to open the file: %s - %v", payload.Path, err)
+		log.Error(msg)
+		http.Error(w, msg, 500)
 		return
 	}
 
 	// build the response
 	mimeType, err := fh.MimeType()
 	if err != nil {
-		log.Errorf("Unable to determine the mime type for the file: %s - %v", payload.Path, err)
-		http.Error(w, "Unable to determine the mime type", 500)
+		msg := fmt.Sprintf("Unable to determine the mime type for the file: %s - %v", payload.Path, err)
+		log.Error(msg)
+		http.Error(w, msg, 500)
 		return
 	}
 
@@ -304,8 +317,8 @@ func (self *WebApp) downloadHndl(w http.ResponseWriter, r *http.Request) {
 
 	// validate the payload
 	if len(payload.Path) == 0 {
-		msg := "Paramater 'path' missing"
-		log.Errorf("Unable to handle download - %s", msg)
+		msg := fmt.Sprintf("Unable to handle download - paramater 'path' missing")
+		log.Error(msg)
 		http.Error(w, msg, 400)
 		return
 	}
@@ -324,16 +337,18 @@ func (self *WebApp) downloadHndl(w http.ResponseWriter, r *http.Request) {
 	// open the file handle
 	fh, err := fs.GetFileHandle(payload.Path)
 	if err != nil {
-		log.Errorf("Unable to open the file: %s - %v", payload.Path, err)
-		http.Error(w, "Unable to open the requested file", 500)
+		msg := fmt.Sprintf("Unable to open the file: %s - %v", payload.Path, err)
+		log.Error(msg)
+		http.Error(w, msg, 500)
 		return
 	}
 
 	// build the response
 	contentType, err := fh.MimeType()
 	if err != nil {
-		log.Errorf("Unable to determine the mime type for the file: %s - %v", payload.Path, err)
-		http.Error(w, "Unable to determine the mime type", 500)
+		msg := fmt.Sprintf("Unable to determine the mime type for the file: %s - %v", payload.Path, err)
+		log.Error(msg)
+		http.Error(w, msg, 500)
 		return
 	}
 
@@ -380,8 +395,8 @@ func (self *WebApp) diffHndl(w http.ResponseWriter, r *http.Request) {
 	// diff
 	diffs, err := diff.NewDiffFromPath(payload.BackupPath, payload.ActualPath, payload.DiffContextSize)
 	if err != nil {
-		msg := "Unable to create diff"
-		log.Errorf("%s: %v", msg, err)
+		msg := fmt.Sprintf("Unable to create diff - %v", err)
+		log.Error(msg)
 		http.Error(w, msg, 400)
 		return
 	}
@@ -422,8 +437,8 @@ func (self *WebApp) revertChangeHndl(w http.ResponseWriter, r *http.Request) {
 	// diff
 	diffs, err := diff.NewDiffFromPath(payload.BackupPath, payload.ActualPath, 3)
 	if err != nil {
-		msg := "Unable to create diff"
-		log.Errorf("%s: %v", msg, err)
+		msg := fmt.Sprintf("Unable to create diff - %v", err)
+		log.Error(msg)
 		http.Error(w, msg, 400)
 		return
 	}
@@ -432,8 +447,8 @@ func (self *WebApp) revertChangeHndl(w http.ResponseWriter, r *http.Request) {
 	var backup string
 	fh, _ := fs.GetFileHandle(payload.ActualPath)
 	if backup, err = fh.Backup(); err != nil {
-		msg := "Unable to backup the file"
-		log.Errorf("%s - acutal-path: %s - %v", msg, payload.ActualPath, err)
+		msg := fmt.Sprintf("Unable to backup the file - %v", err)
+		log.Error(msg)
 		http.Error(w, msg, 400)
 		return
 	}
@@ -441,8 +456,8 @@ func (self *WebApp) revertChangeHndl(w http.ResponseWriter, r *http.Request) {
 	// patch
 	err = diff.PatchPath(payload.ActualPath, diffs.Deltas[payload.DeltaIdx])
 	if err != nil {
-		msg := "Unable to revert change"
-		log.Errorf("%s: %v", msg, err)
+		msg := fmt.Sprintf("Unable to revert change - %v", err)
+		log.Error(msg)
 		http.Error(w, msg, 400)
 		return
 	}
@@ -484,8 +499,8 @@ func (self *WebApp) restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 	// get the actual file
 	actualFh, err := fs.GetFileHandle(payload.ActualPath)
 	if err != nil {
-		msg := "Unable to open actual file"
-		log.Errorf("%s, path: %s - %v", msg, payload.ActualPath, err)
+		msg := fmt.Sprintf("Unable to open actual file - %v", err)
+		log.Error(msg)
 		http.Error(w, msg, 400)
 		return
 	}
@@ -493,8 +508,8 @@ func (self *WebApp) restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 	// get the backup file
 	backupFh, err := fs.GetFileHandle(payload.BackupPath)
 	if err != nil {
-		msg := "Unable to open backup file"
-		log.Errorf("%s, path: %s - %v", msg, payload.BackupPath, err)
+		msg := fmt.Sprintf("Unable to open backup file - %v", err)
+		log.Error(msg)
 		http.Error(w, msg, 400)
 		return
 	}
@@ -502,17 +517,16 @@ func (self *WebApp) restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 	// create a backup from the actual file
 	var backup string
 	if backup, err = actualFh.Backup(); err != nil {
-		msg := "Unable to backup the file"
-		log.Errorf("%s, path: %s - %v", msg, payload.ActualPath, err)
+		msg := fmt.Sprintf("Unable to backup the file - %v", err)
+		log.Error(msg)
 		http.Error(w, msg, 400)
 		return
 	}
 
 	// restore the backup file
 	if err := backupFh.Copy(payload.ActualPath); err != nil {
-		msg := "Unable to restore the file"
-		log.Errorf("%s, actual: %s, backup: %s - %v",
-			msg, payload.ActualPath, payload.BackupPath, err)
+		msg := fmt.Sprintf("Unable to restore the file - %v", err)
+		log.Error(msg)
 		http.Error(w, msg, 400)
 		return
 	}
@@ -558,8 +572,8 @@ func (self *WebApp) prepareArchiveHndl(w http.ResponseWriter, r *http.Request) {
 
 	// validate the payload
 	if len(payload.Path) == 0 {
-		msg := "Paramater 'path' missing"
-		log.Errorf("Unable to prepare archive - %s", msg)
+		msg := fmt.Sprintf("Unable to prepare archive - Paramater 'path' missing")
+		log.Error(msg)
 		http.Error(w, msg, 400)
 		return
 	}
@@ -574,8 +588,9 @@ func (self *WebApp) prepareArchiveHndl(w http.ResponseWriter, r *http.Request) {
 
 	dir, err := fs.GetDirHandle(payload.Path)
 	if err != nil {
-		log.Errorf("Requested path not found - %v", err)
-		http.Error(w, "Requested path not found", 500)
+		msg := fmt.Sprintf("Requested path not found - %v", err)
+		log.Error(msg)
+		http.Error(w, msg, 500)
 		return
 	}
 
@@ -587,8 +602,9 @@ func (self *WebApp) prepareArchiveHndl(w http.ResponseWriter, r *http.Request) {
 	// create archive
 	_, err = dir.CreateArchive(payload.Name)
 	if err != nil {
-		log.Errorf("Unable to create the archive - %v", err)
-		http.Error(w, "Unable to create the archive", 500)
+		msg := fmt.Sprintf("Unable to create the archive - %v", err)
+		log.Error(msg)
+		http.Error(w, msg, 500)
 		return
 	}
 
@@ -600,8 +616,8 @@ func (self *WebApp) downloadArchiveHndl(w http.ResponseWriter, r *http.Request) 
 	if values, ok := r.URL.Query()["name"]; ok {
 		name = values[0]
 	} else {
-		msg := "Paramater 'name' missing"
-		log.Errorf("Unable to serve archive - %s", msg)
+		msg := "Unable to serve archive - Paramater 'name' missing"
+		log.Error(msg)
 		http.Error(w, msg, 400)
 		return
 	}
@@ -609,8 +625,9 @@ func (self *WebApp) downloadArchiveHndl(w http.ResponseWriter, r *http.Request) 
 	tempDir, err := fs.TempDir()
 	archive, err := tempDir.GetFileHandle(name)
 	if err != nil {
-		log.Errorf("Unable to find the archive - %v", err)
-		http.Error(w, "Unable to find the archive", 500)
+		msg := fmt.Sprintf("Unable to find the archive - %v", err)
+		log.Error(msg)
+		http.Error(w, msg, 500)
 		return
 	}
 	log.Infof("serve archive: %s",archive.Path)
