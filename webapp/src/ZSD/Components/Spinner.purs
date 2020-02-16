@@ -37,8 +37,7 @@ spinner = unit # make component { initialState, didMount, render }
     render self =
       guard self.state.visible $ fragment
       [ R.div
-        { className: "modal show"
-        , style: R.css { display: "block" }
+        { className: "modal modal-show"
         , _data: O.fromHomogeneous {backdrop: "static" }
         , tabIndex: -1
         , children:

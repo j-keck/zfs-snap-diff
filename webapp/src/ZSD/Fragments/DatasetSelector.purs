@@ -2,28 +2,32 @@ module ZSD.Fragments.DatasetSelector where
 
 import Prelude
 
+import Data.Foldable (foldMap)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
-import React.Basic (Component, JSX, createComponent, empty, make)
+import React.Basic (Component, JSX, createComponent, empty, fragment, make)
 import React.Basic.DOM as R
-
+import React.Basic.DOM.Events (capture_)
 import ZSD.Components.Panel (panel)
 import ZSD.Components.Scroll as Scroll
 import ZSD.Components.TableX (tableX)
-import ZSD.Utils.Formatter as Formatter
+import ZSD.Fragments.CreateSnapshotModal (createSnapshotModal)
 import ZSD.Model.Dataset (Datasets, Dataset)
+import ZSD.Utils.Formatter as Formatter
 
 
 type Props =
-  { datasets          :: Datasets
-  , onDatasetSelected :: Dataset -> Effect Unit
+  { datasets             :: Datasets
+  , snapshotNameTemplate :: String
+  , onDatasetSelected    :: Dataset -> Effect Unit
   }
 
 type State =
   { selectedDataset :: Maybe Dataset
   , activeIdx :: Maybe Int
+  , modal :: JSX
   }
 
 datasetSelector :: Props -> JSX
@@ -34,11 +38,38 @@ datasetSelector = make component { initialState, render }
     component :: Component Props
     component  = createComponent "DatasetSelector"
 
-    initialState = { selectedDataset: Nothing, activeIdx: Nothing }
+    initialState = { selectedDataset: Nothing, activeIdx: Nothing, modal: empty }
 
     render self =
       panel
-      { header: R.text "Datasets"
+      { header:
+          fragment
+          [ R.text "Datasets"
+          , foldMap (\ds -> R.span
+                            { className: "float-right fas fa-camera pointer p-1"
+                            , title: "Create a snapshot for " <> ds.name
+
+                            , onClick: capture_ $
+                                  self.setState _ { modal = createSnapshotModal
+                                                            { dataset: ds
+                                                            , defaultTemplate: self.props.snapshotNameTemplate
+                                                            , onRequestClose:
+                                                                   self.setState _ { modal = empty }
+                                                                *> self.props.onDatasetSelected ds
+                                                            }
+                                                  }
+                            -- , onClick: capture_ $ CreateSnapshotModal.show { dataset: ds
+                            --                                                , onSnapCreated: self.props.onDatasetSelected ds
+                            --                                                }
+                            -- , onClick: capture_ $ launchAff_ $
+                            --          Dataset.createSnapshot ds "erster aus der webapp3"
+                            --      >>= either Messages.appError (\msg -> Messages.info msg
+                            --                                         *> log "Snapshot created!"
+                            --                                         *> self.props.onDatasetSelected ds)
+                            --      >>> liftEffect
+                            }) self.state.selectedDataset
+          ]
+
       , body: \hidePanelBodyFn ->
           tableX
             { header: ["Name", "Used", "Avail", "Refer", "Mountpoint"]
@@ -57,4 +88,4 @@ datasetSelector = make component { initialState, render }
             }
       , showBody: true
       , footer: empty
-      }
+      } <> self.state.modal

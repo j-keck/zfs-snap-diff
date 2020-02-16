@@ -16,11 +16,13 @@ import (
 /// responds the configuration
 func (self *WebApp) configHndl(w http.ResponseWriter, r *http.Request) {
 	respond(w, r, struct{
-		Datasets   zfs.Datasets  `json:"datasets"`
-		DaysToScan int           `json:"daysToScan"`
+		Datasets             zfs.Datasets  `json:"datasets"`
+		DaysToScan           int           `json:"daysToScan"`
+		SnapshotNameTemplate string `json:"snapshotNameTemplate"`
 	}{
 		Datasets: self.zfs.Datasets(),
 		DaysToScan: config.Get.DaysToScan,
+		SnapshotNameTemplate: config.Get.SnapshotNameTemplate,
 	})
 }
 
@@ -160,6 +162,71 @@ func (self *WebApp) snapshotsForDatasetHndl(w http.ResponseWriter, r *http.Reque
 	}
 
 	respond(w, r, snaps)
+}
+
+
+func (self *WebApp) createSnapshotHndl(w http.ResponseWriter, r *http.Request) {
+	// decode the payload
+	type Payload struct {
+		DatasetName  string `json:"datasetName"`
+		SnapshotName string `json:"snapshotName"`
+	}
+
+	payload, ok := decodeJsonPayload(w, r, &Payload{}).(*Payload)
+	if !ok {
+		return
+	}
+
+	// get the dataset
+	ds, err := self.zfs.FindDatasetByName(payload.DatasetName)
+	if err != nil {
+		log.Errorf("Dataset with name: %s not found - %v", payload.DatasetName, err)
+		http.Error(w, "Dataset with the given name not found", 400)
+		return
+	}
+
+	name, err := ds.CreateSnapshot(payload.SnapshotName)
+	if err != nil {
+		log.Errorf("Unable to create snapshot: %s - %v", name, err)
+		http.Error(w, "Unable to create snapshot", 500)
+		return
+	}
+
+	msg := fmt.Sprintf("Snapshot '%s' created", name)
+	log.Info(msg)
+	w.Write([]byte(msg))
+}
+
+func (self *WebApp) destroySnapshotHndl(w http.ResponseWriter, r *http.Request) {
+	// decode the payload
+	type Payload struct {
+		DatasetName  string `json:"datasetName"`
+		SnapshotName string `json:"snapshotName"`
+	}
+
+	payload, ok := decodeJsonPayload(w, r, &Payload{}).(*Payload)
+	if !ok {
+		return
+	}
+
+	// get the dataset
+	ds, err := self.zfs.FindDatasetByName(payload.DatasetName)
+	if err != nil {
+		log.Errorf("Dataset with name: %s not found - %v", payload.DatasetName, err)
+		http.Error(w, "Dataset with the given name not found", 400)
+		return
+	}
+
+	name, err := ds.DestroySnapshot(payload.SnapshotName)
+	if err != nil {
+		log.Errorf("Unable to destroy snapshot: %s - %v", name, err)
+		http.Error(w, "Unable to destroy snapshot", 500)
+		return
+	}
+
+	msg := fmt.Sprintf("Snapshot '%s' destroyed", name)
+	log.Info(msg)
+	w.Write([]byte(msg))
 }
 
 /// responds with the mime type of the request file

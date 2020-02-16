@@ -203,6 +203,7 @@ func (self *ZFS) MountSnapshot(snap Snapshot) error {
 	return err
 }
 
+
 type SortByPathDesc Datasets
 
 func (s SortByPathDesc) Len() int {

@@ -8,8 +8,9 @@ import ZSD.Utils.HTTP as HTTP
 import ZSD.Model.AppError (AppError)
 
 type Config =
-  { datasets   :: Datasets
-  , daysToScan :: Int
+  { datasets             :: Datasets
+  , daysToScan           :: Int
+  , snapshotNameTemplate :: String
   }
 
 

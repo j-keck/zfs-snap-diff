@@ -15,15 +15,16 @@ import React.Basic (Component, JSX, createComponent, empty, fragment, make)
 import React.Basic as React
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture_)
-
-import ZSD.Views.Messages as Messages
+import ZSD.Components.Confirm as Confirm
 import ZSD.Components.Panel (panel)
 import ZSD.Components.Spinner as Spinner
 import ZSD.Components.TableX (tableX)
-import ZSD.Utils.Formatter as Formatter
 import ZSD.Model.Dataset (Dataset)
+import ZSD.Model.Dataset as Dataset
 import ZSD.Model.Snapshot (Snapshots, Snapshot)
 import ZSD.Model.Snapshot as Snapshots
+import ZSD.Utils.Formatter as Formatter
+import ZSD.Views.Messages as Messages
 
 type Props =
   { dataset :: Dataset
@@ -33,12 +34,14 @@ type Props =
 type State =
   { snapshots :: Snapshots
   , selectedIdx :: Maybe Int
+  , modal :: JSX
   }
 
 
 data Command =
     FetchSnapshots
   | SelectSnapshotByIdx Int
+  | DestroySnapshot String
 
 update :: React.Self Props State -> Command -> Effect Unit
 update self = case _ of
@@ -57,6 +60,14 @@ update self = case _ of
     *> Spinner.remove
 
 
+  DestroySnapshot name -> launchAff_ do
+     res <- Dataset.destroySnapshot self.props.dataset name
+     liftEffect do
+       either Messages.appError Messages.info res
+       update self FetchSnapshots
+
+
+
 snapshotSelector :: Props -> JSX
 snapshotSelector = make component { initialState, didMount, didUpdate, render }
   where
@@ -64,7 +75,7 @@ snapshotSelector = make component { initialState, didMount, didUpdate, render }
     component :: Component Props
     component = createComponent "SelectSnapshot"
 
-    initialState = { snapshots: [], selectedIdx: Nothing }
+    initialState = { snapshots: [], selectedIdx: Nothing, modal: empty }
 
     didMount self = update self FetchSnapshots
 
@@ -111,7 +122,27 @@ snapshotSelector = make component { initialState, didMount, didUpdate, render }
           tableX
            { header: ["Snapshot Name", "Snapshot Created"]
            , rows: self.state.snapshots
-           , mkRow: \s -> [ R.text s.name, R.text $ Formatter.dateTime s.created ]
+           , mkRow: \s -> [ R.text s.name
+                          , fragment
+                            [ R.text $ Formatter.dateTime s.created
+                            , R.span
+                              { className: "float-right fas fa-trash pointer p-1"
+                              , title: "Destroy snapshot"
+                              , onClick: capture_ $
+                                  self.setState _ {
+                                    modal = Confirm.confirm
+                                                      { header: R.text "Confirm destructive action"
+                                                      , body: R.text "Destroy snapshot " <>
+                                                              R.br {} <>
+                                                              R.b_ [R.text  s.fullName]
+                                                      , onOk: self.setState _ { modal = empty }
+                                                              *> update self (DestroySnapshot s.name)
+                                                      , onCancel: self.setState _ { modal = empty }
+                                                      }
+                                    }
+                              }
+                            ]
+                          ]
            , onRowSelected: \(Tuple idx snapshot) -> do
                hidePanelBodyFn
                self.setState _ { selectedIdx = Just idx }
@@ -121,6 +152,7 @@ snapshotSelector = make component { initialState, didMount, didUpdate, render }
         , showBody: true
         , footer: empty
         }
+      , self.state.modal
       ]
 
 

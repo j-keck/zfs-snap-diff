@@ -75,6 +75,7 @@ browseFilesystem = make component { initialState, render }
         -- dataset selector
         datasetSelector { datasets: self.props.config.datasets
                         , onDatasetSelected: update self <<< DatasetSelected
+                        , snapshotNameTemplate: self.props.config.snapshotNameTemplate
                         }
 
         -- dir browser

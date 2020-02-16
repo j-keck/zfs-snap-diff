@@ -15,6 +15,7 @@ var Get Config = Config{
 	UseCacheDirForBackups: true,
 	DaysToScan: 7,
 	MaxArchiveUnpackedSizeMB: 200,
+	SnapshotNameTemplate: "zfs-snap-diff-%FT%H:%M",
 }
 
 type Config struct {
@@ -23,6 +24,7 @@ type Config struct {
 	UseCacheDirForBackups      bool
 	DaysToScan                 int
 	MaxArchiveUnpackedSizeMB   int
+	SnapshotNameTemplate       string
 }
 
 

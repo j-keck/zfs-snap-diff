@@ -40,12 +40,16 @@ data Command =
 
 update :: (React.Self Props State) -> Command -> Effect Unit
 update self = case _ of
-  DatasetSelected ds ->
-    self.setState _ { selectedDataset = Just ds
+  DatasetSelected ds -> do
+    -- FIXME: when a snapshot are created from the 'DatasetSelector' fragment,
+    -- the new snapshot was not shown. Resetting the 'selectedDataset' triggers
+    -- a reload of the component. FIX: include a event notification
+    self.setState _ { selectedDataset = Nothing
                     , selectedSnapshot = Nothing
                     , selectedFile = Nothing
                     , selectedDir = Nothing
                     }
+    self.setState _ { selectedDataset = Just ds }
 
   SnapshotSelected snap ->
     self.setState _ { selectedSnapshot = Just snap
@@ -87,6 +91,7 @@ browseSnapshots = make component { initialState, render }
         -- dataset selector
         datasetSelector { datasets: self.props.config.datasets
                         , onDatasetSelected: update self <<< DatasetSelected
+                        , snapshotNameTemplate: self.props.config.snapshotNameTemplate
                         }
 
         -- snapshot selector

@@ -66,6 +66,35 @@ func (self *Dataset) ScanSnapshots() (Snapshots, error) {
 	return snapshots.Reverse(), nil
 }
 
+func (self *Dataset) CreateSnapshot(name string) (string, error) {
+	if len(name) == 0 {
+		return "", errors.New("snapshot-name can't be empty")
+	}
+
+	if ! strings.HasPrefix(name, self.Name) {
+		name = self.Name + "@" + name
+	}
+
+	log.Debugf("create snapshot: %s", name)
+	stdout, stderr, err := self.cmd.Exec("snapshot", name)
+	log.Tracef("create snapshot stdout: %s", stdout)
+	log.Tracef("create snapshot stderr: %s", stderr)
+	return name, err
+}
+
+func (self *Dataset) DestroySnapshot(name string) (string, error) {
+	if ! strings.HasPrefix(name, self.Name) {
+		name = self.Name + "@" + name
+	}
+
+	log.Debugf("destroy snapshot: %s", name)
+	stdout, stderr, err := self.cmd.Exec("destroy", name)
+	log.Tracef("destroy snapshot stdout: %s", stdout)
+	log.Tracef("destroy snapshot stderr: %s", stderr)
+	return name, err
+}
+
+
 // Datasets are a list of Dataset
 type Datasets []Dataset
 
