@@ -85,7 +85,7 @@ func (self *CompareByMTime) HasChanged(other fs.FileHandle) bool {
 	// cache the mtime of the other file for the next run
 	self.otherMTime = other.MTime
 
-	return !(self.actual.MTime.Equal(other.MTime) || prevMTime.Equal(other.MTime)) 
+	return !(self.actual.MTime.Equal(other.MTime) || prevMTime.Equal(other.MTime))
 }
 
 //

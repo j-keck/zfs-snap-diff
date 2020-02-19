@@ -93,7 +93,12 @@ func parseFlags() CliConfig {
 	cfg := &config.Get
 	flag.BoolVar(&cfg.UseCacheDirForBackups, "use-cache-dir-for-backups", cfg.UseCacheDirForBackups,
 		"use platform depend user local cache directory for backups")
-	flag.IntVar(&config.Get.DaysToScan, "d", config.Get.DaysToScan, "days to scan")
+	flag.IntVar(&cfg.DaysToScan, "d", cfg.DaysToScan, "days to scan")
+
+	flag.StringVar(&cfg.CompareMethod, "compare-method", cfg.CompareMethod,
+		"used method to determine if a file was modified ('auto', 'mtime', 'size+mtime', 'content', 'md5')")
+	flag.IntVar(&cfg.DiffContextSize, "diff-context-size", cfg.DiffContextSize,
+		"show N lines before and after each diff")
 
 	// webserver
 	webCfg := &config.Get.Webserver

@@ -16,6 +16,8 @@ var Get Config = Config{
 	DaysToScan: 7,
 	MaxArchiveUnpackedSizeMB: 200,
 	SnapshotNameTemplate: "zfs-snap-diff-%FT%H:%M",
+	CompareMethod: "auto",
+	DiffContextSize: 5,
 }
 
 type Config struct {
@@ -25,6 +27,8 @@ type Config struct {
 	DaysToScan                 int             `toml:"days-to-scan"`
 	MaxArchiveUnpackedSizeMB   int             `toml:"max-archive-unpacked-size-mb"`
 	SnapshotNameTemplate       string          `toml:"snapshot-name-template"`
+	CompareMethod              string          `toml:"compare-method"`
+	DiffContextSize            int             `toml:"diff-context-size"`
 }
 
 

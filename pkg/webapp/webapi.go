@@ -108,7 +108,8 @@ func (self *WebApp) findFileVersionsHndl(w http.ResponseWriter, r *http.Request)
 	}
 
 	dateRange := scanner.NewDateRange(time.Now(), config.Get.DaysToScan)
-	defaults := Payload{CompareMethod: "auto", DateRange: dateRange }
+	compareMethod := config.Get.CompareMethod
+	defaults := Payload{CompareMethod: compareMethod, DateRange: dateRange }
 	payload, ok := decodeJsonPayload(w, r, &defaults).(*Payload)
 	if !ok {
 		return
@@ -377,7 +378,8 @@ func (self *WebApp) diffHndl(w http.ResponseWriter, r *http.Request) {
 		DiffContextSize int    `json:"diffContextSize"`
 	}
 
-	payload, ok := decodeJsonPayload(w, r, &Payload{DiffContextSize: 5}).(*Payload)
+	diffContextSize := config.Get.DiffContextSize
+	payload, ok := decodeJsonPayload(w, r, &Payload{DiffContextSize: diffContextSize}).(*Payload)
 	if !ok {
 		return
 	}
