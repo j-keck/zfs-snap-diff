@@ -19,6 +19,7 @@ type CliConfig struct {
 	logTimestamps bool
 	logLocations  bool
 	printVersion  bool
+	listenOnAllInterfaces bool
 }
 
 func main() {
@@ -30,11 +31,19 @@ func main() {
 
 	initLogger()
 	cliCfg := parseFlags()
-	reconfigureLogger(cliCfg)
+	log := reconfigureLogger(cliCfg)
 
 	if cliCfg.printVersion {
 		fmt.Printf("zfs-snap-diff: %s\n", version)
 		return
+	}
+
+	if cliCfg.listenOnAllInterfaces {
+		if config.Get.Webserver.ListenIp != "127.0.0.1" {
+			log.Warnf("ignore 'ListenIp' value: '%s' because parameter '-a' was given",
+				config.Get.Webserver.ListenIp)
+		}
+		config.Get.Webserver.ListenIp = "0.0.0.0"
 	}
 
 	datasetName := flag.Arg(0)
@@ -90,7 +99,7 @@ func parseFlags() CliConfig {
 	webCfg := &config.Get.Webserver
 	flag.StringVar(&webCfg.ListenIp, "l", webCfg.ListenIp, "webserver listen address")
 	flag.IntVar(&webCfg.ListenPort, "p", webCfg.ListenPort, "webserver port")
-	flag.BoolVar(&webCfg.ListenOnAllInterfaces, "a", webCfg.ListenOnAllInterfaces, "listen on all interfaces")
+	flag.BoolVar(&cliCfg.listenOnAllInterfaces, "a", cliCfg.listenOnAllInterfaces, "listen on all interfaces")
 	flag.BoolVar(&webCfg.UseTLS, "tls", webCfg.UseTLS,
 		"use TLS - NOTE: -cert <CERT_FILE> -key <KEY_FILE> are mandatory")
 	flag.StringVar(&webCfg.CertFile, "cert", webCfg.CertFile, "TLS certificate file")

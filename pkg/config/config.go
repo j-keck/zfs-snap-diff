@@ -19,12 +19,12 @@ var Get Config = Config{
 }
 
 type Config struct {
-	Webserver                  WebserverConfig
-	ZFS                        ZFSConfig
-	UseCacheDirForBackups      bool
-	DaysToScan                 int
-	MaxArchiveUnpackedSizeMB   int
-	SnapshotNameTemplate       string
+	Webserver                  WebserverConfig `toml:"webserver"`
+	ZFS                        ZFSConfig       `toml:"zfs"`
+	UseCacheDirForBackups      bool            `toml:"use-cache-dir-for-backups"`
+	DaysToScan                 int             `toml:"days-to-scan"`
+	MaxArchiveUnpackedSizeMB   int             `toml:"max-archive-unpacked-size-mb"`
+	SnapshotNameTemplate       string          `toml:"snapshot-name-template"`
 }
 
 
