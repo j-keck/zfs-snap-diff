@@ -27,15 +27,17 @@ type CliConfig struct {
 
 func main() {
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "zsd is a little independent cli tool to find different versions for a given file in your zfs-snapshots.\n")
+		fmt.Fprintf(os.Stderr, "zsd - cli tool to find older versions of a given file in your zfs snapshots.\n\n")
 		fmt.Fprintf(os.Stderr, "USAGE:\n %s [OPTIONS] <FILE> <ACTION>\n\n", os.Args[0])
 		fmt.Fprintf(os.Stderr, "OPTIONS:\n")
 		flag.PrintDefaults()
 		fmt.Fprintf(os.Stderr, "\nACTIONS:\n")
-		fmt.Fprintf(os.Stderr, "  list                : list zfs-snapshots with different file-versions for the given file\n")
-		fmt.Fprintf(os.Stderr, "  cat     <#|SNAPSHOT>: show the file-content from the given snapshot\n");
-		fmt.Fprintf(os.Stderr, "  diff    <#|SNAPSHOT>: show differences between the actual version and from the selected snapshot\n")
+		fmt.Fprintf(os.Stderr, "  list                : list zfs snapshots where the given file was modified\n")
+		fmt.Fprintf(os.Stderr, "  cat     <#|SNAPSHOT>: show the file content from the given snapshot\n");
+		fmt.Fprintf(os.Stderr, "  diff    <#|SNAPSHOT>: show a diff from the selected snapshot to the actual version\n")
 		fmt.Fprintf(os.Stderr, "  restore <#|SNAPSHOT>: restore the file from the given snapshot\n")
+		fmt.Fprintf(os.Stderr, "\nYou can use the snapshot number from the `list` output or the snapshot name to select a snapshot.\n")
+		fmt.Fprintf(os.Stderr, "\nProject home page: https://j-keck.github.io/zfs-snap-diff\n")
 	}
 
 
@@ -48,9 +50,8 @@ func main() {
 		return
 	}
 
-
 	if len(flag.Args()) < 2 {
-		fmt.Fprintf(os.Stderr, "Argument <FILE> <ACTION> missing (check %s -h)\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Argument <FILE> <ACTION> missing (see `%s -h` for help)\n", os.Args[0])
 		return
 	}
 
@@ -62,6 +63,7 @@ func main() {
 		log.Errorf("unable to get absolute path for: '%s' - %v", fileName, err)
 		return
 	}
+	log.Debugf("full path: %s", filePath)
 
 
 	// init zfs handler
@@ -88,7 +90,7 @@ func main() {
 
 		cacheFileVersions(scanResult.FileVersions)
 
-		// find the longest snapshot name
+		// find the longest snapshot name to format the output table
 		width := 0
 		for _, v := range scanResult.FileVersions {
 			width = int(math.Max(float64(width), float64(len(v.Snapshot.Name))))
@@ -105,7 +107,7 @@ func main() {
 
 	case "cat":
 		if len(flag.Args()) != 3 {
-			fmt.Fprintf(os.Stderr, "Argument <#|SNAPSHOT> missing (check %s -h)\n", os.Args[0])
+			fmt.Fprintf(os.Stderr, "Argument <#|SNAPSHOT> missing (see `%s -h` for help)\n", os.Args[0])
 			return
 		}
 
@@ -131,7 +133,7 @@ func main() {
 
 	case "diff":
 		if len(flag.Args()) != 3 {
-			fmt.Fprintf(os.Stderr, "Argument <#|SNAPSHOT> missing (check %s -h)\n", os.Args[0])
+			fmt.Fprintf(os.Stderr, "Argument <#|SNAPSHOT> missing (see `%s -h` for help)\n", os.Args[0])
 			return
 		}
 
@@ -152,7 +154,7 @@ func main() {
 
 	case "restore":
 		if len(flag.Args()) != 3 {
-			fmt.Fprintf(os.Stderr, "Argument <#|SNAPSHOT> missing (check %s -h)\n", os.Args[0])
+			fmt.Fprintf(os.Stderr, "Argument <#|SNAPSHOT> missing (see `%s -h` for help)\n", os.Args[0])
 			return
 		}
 
@@ -175,7 +177,7 @@ func main() {
 		fmt.Printf("version restored from snapshot: %s\n", version.Snapshot.Name)
 
 	default:
-		fmt.Fprintf(os.Stderr, "invalid action: %s\n", action)
+		fmt.Fprintf(os.Stderr, "invalid action: %s (see `%s -h` for help)\n", action, os.Args[0])
 		return
 	}
 }
