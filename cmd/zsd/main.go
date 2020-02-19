@@ -26,9 +26,10 @@ type CliConfig struct {
 }
 
 func main() {
+	zsdBin := os.Args[0]
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "zsd - cli tool to find older versions of a given file in your zfs snapshots.\n\n")
-		fmt.Fprintf(os.Stderr, "USAGE:\n %s [OPTIONS] <FILE> <ACTION>\n\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "USAGE:\n %s [OPTIONS] <FILE> <ACTION>\n\n", zsdBin)
 		fmt.Fprintf(os.Stderr, "OPTIONS:\n")
 		flag.PrintDefaults()
 		fmt.Fprintf(os.Stderr, "\nACTIONS:\n")
@@ -51,7 +52,7 @@ func main() {
 	}
 
 	if len(flag.Args()) < 2 {
-		fmt.Fprintf(os.Stderr, "Argument <FILE> <ACTION> missing (see `%s -h` for help)\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Argument <FILE> <ACTION> missing (see `%s -h` for help)\n", zsdBin)
 		return
 	}
 
@@ -107,11 +108,12 @@ func main() {
 
 	case "cat":
 		if len(flag.Args()) != 3 {
-			fmt.Fprintf(os.Stderr, "Argument <#|SNAPSHOT> missing (see `%s -h` for help)\n", os.Args[0])
+			fmt.Fprintf(os.Stderr, "Argument <#|SNAPSHOT> missing (see `%s -h` for help)\n", zsdBin)
 			return
 		}
 
-		version, err := lookupRequestedVersion(flag.Arg(2))
+		versionName := flag.Arg(2)
+		version, err := lookupRequestedVersion(filePath, versionName)
 		if err != nil {
 			log.Error(err)
 			return
@@ -133,11 +135,12 @@ func main() {
 
 	case "diff":
 		if len(flag.Args()) != 3 {
-			fmt.Fprintf(os.Stderr, "Argument <#|SNAPSHOT> missing (see `%s -h` for help)\n", os.Args[0])
+			fmt.Fprintf(os.Stderr, "Argument <#|SNAPSHOT> missing (see `%s -h` for help)\n", zsdBin)
 			return
 		}
 
-		version, err := lookupRequestedVersion(flag.Arg(2))
+		versionName := flag.Arg(2)
+		version, err := lookupRequestedVersion(filePath, versionName)
 		if err != nil {
 			log.Error(err)
 			return
@@ -154,11 +157,12 @@ func main() {
 
 	case "restore":
 		if len(flag.Args()) != 3 {
-			fmt.Fprintf(os.Stderr, "Argument <#|SNAPSHOT> missing (see `%s -h` for help)\n", os.Args[0])
+			fmt.Fprintf(os.Stderr, "Argument <#|SNAPSHOT> missing (see `%s -h` for help)\n", zsdBin)
 			return
 		}
 
-		version, err := lookupRequestedVersion(flag.Arg(2))
+		versionName := flag.Arg(2)
+		version, err := lookupRequestedVersion(filePath, versionName)
 		if err != nil {
 			log.Error(err)
 			return
@@ -177,13 +181,13 @@ func main() {
 		fmt.Printf("version restored from snapshot: %s\n", version.Snapshot.Name)
 
 	default:
-		fmt.Fprintf(os.Stderr, "invalid action: %s (see `%s -h` for help)\n", action, os.Args[0])
+		fmt.Fprintf(os.Stderr, "invalid action: %s (see `%s -h` for help)\n", action, zsdBin)
 		return
 	}
 }
 
 
-func lookupRequestedVersion(arg string) (*scanner.FileVersion, error) {
+func lookupRequestedVersion(filePath, versionName string) (*scanner.FileVersion, error) {
 
 	// load file-versions from cache file
 	fileVersions, err := loadCachedFileVersions()
@@ -192,21 +196,31 @@ func lookupRequestedVersion(arg string) (*scanner.FileVersion, error) {
 	}
 
 
-	if idx, err := strconv.Atoi(arg); err == nil {
+	// `versionName` can be the snapshot number from the `list` output or the name
+	var version *scanner.FileVersion
+	if idx, err := strconv.Atoi(versionName); err == nil {
 		if idx >= 0 && idx < len(fileVersions) {
-			return &fileVersions[idx], nil
+			version = &fileVersions[idx]
+		} else {
+			return nil, errors.New("snapshot number not found")
 		}
-		return nil, errors.New("invalid version index given")
 	} else {
 		for _, v := range fileVersions {
-			if v.Snapshot.Name == arg {
-				return &v, nil
+			if v.Snapshot.Name == versionName {
+				version = &v
+				break
 			}
+		}
+		if version == nil {
+			return nil, errors.New("snapshot name not found")
 		}
 	}
 
-
-	return nil, errors.New("requested version not found")
+	if version.Actual.Path == filePath {
+		return version, nil
+	} else {
+		return nil, errors.New("file mismatch - perform a `list` action at first")
+	}
 }
 
 
