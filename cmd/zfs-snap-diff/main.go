@@ -28,8 +28,9 @@ func main() {
 		flag.PrintDefaults()
 	}
 
+	initLogger()
 	cliCfg := parseFlags()
-	setupLogger(cliCfg)
+	reconfigureLogger(cliCfg)
 
 	if cliCfg.printVersion {
 		fmt.Printf("zfs-snap-diff: %s\n", version)
@@ -108,13 +109,21 @@ func parseFlags() CliConfig {
 }
 
 func loadConfig() {
-	plog.DropUnhandledMessages()
 	configDir, _ := fs.ConfigDir()
 	configPath := configDir.Path + "/zfs-snap-diff.toml"
 	config.LoadConfig(configPath)
 }
 
-func setupLogger(cliCfg CliConfig) plog.Logger {
+
+func initLogger() {
+	consoleLogger := plog.NewConsoleLogger(" | ")
+	consoleLogger.AddLogFormatter(plog.Level)
+	consoleLogger.AddLogFormatter(plog.Message)
+
+	plog.GlobalLogger().Add(consoleLogger)
+}
+
+func reconfigureLogger(cliCfg CliConfig) plog.Logger {
 
 	consoleLogger := plog.NewConsoleLogger(" | ")
 	consoleLogger.SetLevel(cliCfg.logLevel)
@@ -131,5 +140,5 @@ func setupLogger(cliCfg CliConfig) plog.Logger {
 
 	consoleLogger.AddLogFormatter(plog.Message)
 
-	return plog.GlobalLogger().Add(consoleLogger)
+	return plog.GlobalLogger().Reset().Add(consoleLogger)
 }

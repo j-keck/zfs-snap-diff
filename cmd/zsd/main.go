@@ -39,14 +39,15 @@ func main() {
 	}
 
 
+	initLogger()
 	cliCfg := parseFlags()
+	log := reconfigureLogger(cliCfg)
 
 	if cliCfg.printVersion {
 		fmt.Printf("zsd: %s\n", version)
 		return
 	}
 
-	log := setupLogger(cliCfg)
 
 	if len(flag.Args()) < 2 {
 		fmt.Fprintf(os.Stderr, "Argument <FILE> <ACTION> missing (check %s -h)\n", os.Args[0])
@@ -251,18 +252,25 @@ func loadConfig() {
 	config.LoadConfig(configPath)
 }
 
+func initLogger() {
+	consoleLogger := plog.NewConsoleLogger(" | ")
+	consoleLogger.AddLogFormatter(plog.Level)
+	consoleLogger.AddLogFormatter(plog.Message)
 
-func setupLogger(cliCfg CliConfig) plog.Logger {
+	plog.GlobalLogger().Add(consoleLogger)
+}
 
-	log := plog.NewConsoleLogger(" ")
-	log.SetLevel(cliCfg.logLevel)
-	log.AddLogFormatter(plog.LevelFmt("%5s: "))
+func reconfigureLogger(cliCfg CliConfig) plog.Logger {
+
+	consoleLogger := plog.NewConsoleLogger(" | ")
+	consoleLogger.SetLevel(cliCfg.logLevel)
+	consoleLogger.AddLogFormatter(plog.Level)
 
 	if cliCfg.logLevel == plog.Trace {
-		log.AddLogFormatter(plog.Location)
+		consoleLogger.AddLogFormatter(plog.Location)
 	}
 
-	log.AddLogFormatter(plog.Message)
+	consoleLogger.AddLogFormatter(plog.Message)
 
-	return plog.GlobalLogger().Add(log)
+	return plog.GlobalLogger().Reset().Add(consoleLogger)
 }

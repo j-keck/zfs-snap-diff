@@ -93,7 +93,7 @@ let
     pname = "zfs-snap-diff";
     inherit version;
     src = pkgs.nix-gitignore.gitignoreSource [ ".gitignore" "/webapp/" ] ./.;
-    modSha256 = "1v1wy8sxv4c7cr2rxwqi3j82cxlpxaf67xwd7rzq6mvxh6yzyirv";
+    modSha256 = "0k1sz9mnz09pgn4w3k2dx0grcb66xd3h0f6ccc2r76vz6mz1hpgf";
 
     preBuild = ''
       export GOOS=${goos}
