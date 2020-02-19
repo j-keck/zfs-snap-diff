@@ -105,7 +105,7 @@ fileVersionSelector = make component { initialState, didMount, render }
          { header: fragment
            [ R.text $ "Versions" <> case self.state.selectedVersion of
                 Just (ActualVersion (FH {name})) -> " for " <> name
-                Just (BackupVersion {actual: FH {name}, snapshot: {name: snap}}) -> " - selected version: " <> name <> "@" <> snap
+                Just (BackupVersion {actual: FH {name}}) -> " for " <> name
                 _ -> mempty
            , R.span
              { className: "float-right"
@@ -115,7 +115,7 @@ fileVersionSelector = make component { initialState, didMount, render }
                  , children:
                    [ R.button
                      { className: "btn btn-secondary" <> guard  (not $ hasOlderVersions self.state) " disabled"
-                     , title: "Select / Serach the previous version"
+                     , title: "Select / search the previous version"
                      , onClick: capture_ $ guard (hasOlderVersions self.state)
                                          $ update self (SelectVersionByIdx (self.state.selectedIdx + 1))
                      , children:

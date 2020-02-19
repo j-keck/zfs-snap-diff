@@ -58,15 +58,6 @@ datasetSelector = make component { initialState, render }
                                                                 *> self.props.onDatasetSelected ds
                                                             }
                                                   }
-                            -- , onClick: capture_ $ CreateSnapshotModal.show { dataset: ds
-                            --                                                , onSnapCreated: self.props.onDatasetSelected ds
-                            --                                                }
-                            -- , onClick: capture_ $ launchAff_ $
-                            --          Dataset.createSnapshot ds "erster aus der webapp3"
-                            --      >>= either Messages.appError (\msg -> Messages.info msg
-                            --                                         *> log "Snapshot created!"
-                            --                                         *> self.props.onDatasetSelected ds)
-                            --      >>> liftEffect
                             }) self.state.selectedDataset
           ]
 
