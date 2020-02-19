@@ -6,8 +6,6 @@ creator = "Emacs 26.3 (Org mode 9.1.9 + ox-hugo)"
 weight = 10
 +++
 
-## Intro {#intro}
-
 {{< hint danger >}}
 This describes the currently ****unreleased beta version****.
 {{< /hint >}}
@@ -17,7 +15,7 @@ This describes the currently ****unreleased beta version****.
 If you have hundreds or thousands of zfs snapshots, `zfs-snap-diff` searched
 the snapshots and shows you only the snapshots where a given file was modified.
 
-To speedup this process, it performs the search incremental when you request a older file version.
+To speedup this process, it performs the search incremental when you request an older file version.
 
 You can inspect a diff from the actual file version to the older file version in the
 snapshot, revert a single change or restore a whole file.
@@ -25,32 +23,5 @@ snapshot, revert a single change or restore a whole file.
 `zfs-snap-diff` has a web frontend, so it can run on your local work machine or on your
 remote file / backup server (no Xserver necesarry). To keep it portable it's made
 as a single static compiled executable.
-
-
-## Usage {#usage}
-
--   install `zfs-snap-diff`
-
-see: [Installation](/docs/install)
-
--   startup a server instance
-
-<!--listend-->
-
-```sh
-./zfs-snap-diff [OPTIONS] <ZFS_DATASET_NAME>
-```
-
-This starts a embedded webserver and serves the included web-app.
-
--   open your webbrowser at
-
-<!--listend-->
-
-```sh
-http://127.0.0.1:12345
-```
-
--   inspect a diff and revert to a older version
 
 {{< figure src="/images/zfs-snap-diff.gif" alt="Example session from zfs-snap-diff" link="/images/zfs-snap-diff.gif" >}}

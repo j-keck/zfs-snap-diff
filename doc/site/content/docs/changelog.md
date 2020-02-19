@@ -7,7 +7,7 @@ weight = 40
 
 ## 1.0.0-beta (unreleased) {#1-dot-0-dot-0-beta--unreleased}
 
-{{< hint note >}}
+{{< hint info >}}
 This version is a complete rewrite.
 
 The backend is implemented in [Go](https://golang.org) (as before) and the frontend in [PureScript](http://purescript.org).
@@ -15,21 +15,19 @@ The backend is implemented in [Go](https://golang.org) (as before) and the front
 
 -   create and destroy snapshots from the webapp
 
--   download a complete directory as zip-archive
+-   download a complete directory as a zip-archive
 
--   [`zsd`](/docs/guide/#zsd) cli tool to find different file-versions in the command line
+-   [`zsd`](/docs/zsd) cli tool to find different file-versions in the command line
     -   does not need a running `zfs-snap-diff` instance
 
 -   date-range based search for file versions
     -   this speeds up the scan dramatically if
-        there are thousands snapshots on spinning disk
+        there are thousands snapshots on spinning disks
 
 -   bookmark support
     -   bookmarks are per dataset and stored in the browser ([Web storage](https://en.wikipedia.org/wiki/Web%5Fstorage)).
 
 -   works now also with 'legacy' mountpoints
-
--   new backend and frontend code
 
 [all commits from 0.0.10...dev](https://github.com/j-keck/zfs-snap-diff/compare/0.0.10...dev)
 
