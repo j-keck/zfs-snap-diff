@@ -23,10 +23,13 @@ type CliConfig struct {
 }
 
 func main() {
+	zfsSnapDiffBin := os.Args[0]
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "\nUSAGE:\n  %s [OPTIONS] <ZFS_DATASET_NAME>\n\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "zfs-snap-diff - web application to find older versions of a given file in your zfs snapshots.\n")
+		fmt.Fprintf(os.Stderr, "\nUSAGE:\n  %s [OPTIONS] <ZFS_DATASET_NAME>\n\n", zfsSnapDiffBin)
 		fmt.Fprint(os.Stderr, "OPTIONS:\n")
 		flag.PrintDefaults()
+		fmt.Fprintf(os.Stderr, "\nProject home page: https://j-keck.github.io/zfs-snap-diff\n")
 	}
 
 	initLogger()
@@ -40,7 +43,7 @@ func main() {
 
 	if cliCfg.listenOnAllInterfaces {
 		if config.Get.Webserver.ListenIp != "127.0.0.1" {
-			log.Warnf("ignore 'ListenIp' value: '%s' because parameter '-a' was given",
+			log.Warnf("ignore '-l' value: '%s' because parameter '-a' was given",
 				config.Get.Webserver.ListenIp)
 		}
 		config.Get.Webserver.ListenIp = "0.0.0.0"
@@ -51,12 +54,12 @@ func main() {
 		fmt.Fprintf(os.Stderr, "\nABORT:\n  paramter <ZFS_DATASET_NAME> missing\n")
 		if datasetNames, err := zfs.AvailableDatasetNames(); err == nil {
 			names := strings.Join(datasetNames, " | ")
-			fmt.Fprintf(os.Stderr, "\nUSAGE:\n  %s [OPTIONS] <ZFS_DATASET_NAME>\n\n",  os.Args[0])
+			fmt.Fprintf(os.Stderr, "\nUSAGE:\n  %s [OPTIONS] <ZFS_DATASET_NAME>\n\n",  zfsSnapDiffBin)
 			fmt.Fprintf(os.Stderr, "  <ZFS_DATASET_NAMES>: %s\n\n", names)
 		} else {
-			fmt.Fprintf(os.Stderr, "\nUSAGE:\n  %s [OPTIONS] <ZFS_DATASET_NAME>\n\n", os.Args[0])
+			fmt.Fprintf(os.Stderr, "\nUSAGE:\n  %s [OPTIONS] <ZFS_DATASET_NAME>\n\n", zfsSnapDiffBin)
 		}
-		fmt.Fprintf(os.Stderr, "For more information use `%s -h`", os.Args[0])
+		fmt.Fprintf(os.Stderr, "For more information use `%s -h`", zfsSnapDiffBin)
 		return
 	}
 

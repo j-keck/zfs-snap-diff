@@ -106,7 +106,7 @@ func (self *ZFS) FindDatasetForPath(path string) (Dataset, error) {
 		// TODO: filepath.HasPrefix is buggy
 		//  see: https://github.com/golang/go/issues/18358
 		if filepath.HasPrefix(path, ds.MountPoint.Path) {
-			log.Tracef("Dataset for path found - path: %s, ds: %s, mount-point: %s",
+			log.Debugf("Dataset for path found - path: %s, ds: %s, mount-point: %s",
 				path, ds.Name, ds.MountPoint.Path)
 			return ds, nil
 		}
