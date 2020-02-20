@@ -3,7 +3,7 @@ module ZSD.Fragments.DatasetSelector where
 import Prelude
 
 import Data.Foldable (foldMap)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), maybe)
 import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
@@ -44,7 +44,7 @@ datasetSelector = make component { initialState, render }
       panel
       { header:
           fragment
-          [ R.text "Datasets"
+          [ R.text $ maybe "Datasets" (\{name} -> "Dataset: " <> name) self.state.selectedDataset
           , foldMap (\ds -> R.span
                             { className: "float-right fas fa-camera pointer p-1"
                             , title: "Create a snapshot for " <> ds.name
