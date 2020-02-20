@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>zfs-snap-diff on ZFS Snap Diff</title><link>https://j-keck.github.io/zfs-snap-diff/</link><description>Recent content in zfs-snap-diff on ZFS Snap Diff</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://j-keck.github.io/zfs-snap-diff/index.xml" rel="self" type="application/rss+xml"/><item><title>Installation</title><link>https://j-keck.github.io/zfs-snap-diff/docs/install/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://j-keck.github.io/zfs-snap-diff/docs/install/</guid><description>This describes the currently unreleased beta version. Binary packages You can download the latest binary package from here or from the githup release page.
+Linux Download the beta version for Linux amd64 here:
+zfs-snap-diff-linux-v1.0.0-beta-16-g1bae2c4.tgz
+FreeBSD Download the beta version for FreeBSD amd64 here:
+zfs-snap-diff-freebsd-v1.0.0-beta-16-g1bae2c4.tgz
+macOS Download the beta version for macOS amd64 here:
+zfs-snap-diff-darwin-v1.0.0-beta-16-g1bae2c4.tgz
+Solaris Download the beta version for Solaris amd64 here:</description></item><item><title>zfs-snap-diff</title><link>https://j-keck.github.io/zfs-snap-diff/docs/zfs-snap-diff/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://j-keck.github.io/zfs-snap-diff/docs/zfs-snap-diff/</guid><description>This describes the currently unreleased beta version. zfs-snap-diff - web application to find older versions of a given file in your zfs snapshots.
+With zfs-snap-diff you can
+find older file versions in your zfs-snapshots for a given file
+view the file content from a given snapshot
+inspect a diff from the older version to the actual version
+revert a single change</description></item><item><title>zsd</title><link>https://j-keck.github.io/zfs-snap-diff/docs/zsd/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://j-keck.github.io/zfs-snap-diff/docs/zsd/</guid><description>This describes the currently unreleased beta version. zsd - cli tool to find older versions of a given file in your zfs snapshots.
+With zsd you can
+find older file versions in your zfs snapshots for a given file
+view the file content from a given snapshot
+inspect a diff from the older version to the actual version
+restore a version from a zfs snapshot</description></item><item><title>Changelog</title><link>https://j-keck.github.io/zfs-snap-diff/docs/changelog/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://j-keck.github.io/zfs-snap-diff/docs/changelog/</guid><description>1.0.0-beta (unreleased) This version is a complete rewrite.
+The backend is implemented in Go (as before) and the frontend in PureScript.
+create and destroy snapshots from the webapp
+download a complete directory as a zip-archive
+zsd cli tool to find different file-versions in the command line
+does not need a running zfs-snap-diff instance date-range based search for file versions</description></item></channel></rss>
