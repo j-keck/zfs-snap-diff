@@ -20,7 +20,7 @@ confirm = makeStateless component \props -> fragment
   [ R.div
     { className: "modal modal-show"
       , children:
-      [ div "modal-dialog modal-dialog-centered" $
+      [ div "modal-dialog modal-lg modal-dialog-centered" $
           div "modal-content" $ fragment
             [ div "modal-header" $ props.header
             , div "modal-body" $ props.body
