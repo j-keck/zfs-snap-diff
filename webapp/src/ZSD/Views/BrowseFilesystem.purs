@@ -4,6 +4,7 @@ import Prelude
 
 import Data.Foldable (foldMap)
 import Data.Maybe (Maybe(..))
+import Data.Monoid (guard)
 import Data.Tuple.Nested (tuple2, uncurry2)
 import Effect (Effect)
 import React.Basic (Component, JSX, createComponent, make)
@@ -36,7 +37,7 @@ data Command =
 
 update :: (React.Self Props State) -> Command -> Effect Unit
 update self = case _ of
-  DatasetSelected ds ->
+  DatasetSelected ds -> guard (Just ds /= self.state.selectedDataset)
     self.setState _ { selectedDataset = Just ds
                     , selectedFile = Nothing
                     , selectedVersion = Nothing
