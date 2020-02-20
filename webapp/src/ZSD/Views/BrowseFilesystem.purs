@@ -20,7 +20,11 @@ import ZSD.Model.FileVersion (FileVersion)
 import ZSD.Views.BrowseFilesystem.FileVersionSelector (fileVersionSelector)
 
 
-type Props = { config :: Config }
+type Props =
+  { config            :: Config
+  , activeDataset     :: Maybe Dataset
+  , onDatasetSelected :: Dataset -> Effect Unit
+  }
 
 type State = { selectedDataset      :: Maybe Dataset
              , selectedFile         :: Maybe FH
@@ -37,11 +41,12 @@ data Command =
 
 update :: (React.Self Props State) -> Command -> Effect Unit
 update self = case _ of
-  DatasetSelected ds -> guard (Just ds /= self.state.selectedDataset)
+  DatasetSelected ds -> guard (Just ds /= self.state.selectedDataset) do
     self.setState _ { selectedDataset = Just ds
                     , selectedFile = Nothing
                     , selectedVersion = Nothing
                     }
+    self.props.onDatasetSelected ds
 
   FileSelected f ->
     self.setState _ { selectedFile = Just f
@@ -58,7 +63,7 @@ update self = case _ of
 
 
 browseFilesystem :: Props -> JSX
-browseFilesystem = make component { initialState, render }
+browseFilesystem = make component { initialState, didMount, render }
 
   where
 
@@ -70,11 +75,14 @@ browseFilesystem = make component { initialState, render }
                    , selectedVersion: Nothing
                    }
 
+    didMount self = self.setState _ { selectedDataset = self.props.activeDataset }
+
     render self =
       R.div_
       [
         -- dataset selector
         datasetSelector { datasets: self.props.config.datasets
+                        , activeDataset: self.props.activeDataset
                         , onDatasetSelected: update self <<< DatasetSelected
                         , snapshotNameTemplate: self.props.config.snapshotNameTemplate
                         }

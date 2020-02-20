@@ -21,7 +21,11 @@ import ZSD.Model.Snapshot (Snapshot)
 import ZSD.Views.BrowseSnapshots.SnapshotSelector (snapshotSelector)
 
 
-type Props = { config :: Config }
+type Props =
+  { config            :: Config
+  , activeDataset     :: Maybe Dataset
+  , onDatasetSelected :: Dataset -> Effect Unit
+  }
 
 type State =
   { selectedDataset  :: Maybe Dataset
@@ -50,6 +54,7 @@ update self = case _ of
                     , selectedDir = Nothing
                     }
     self.setState _ { selectedDataset = Just ds }
+    self.props.onDatasetSelected ds
 
   SnapshotSelected snap ->
     self.setState _ { selectedSnapshot = Just snap
@@ -73,7 +78,7 @@ update self = case _ of
 
 
 browseSnapshots :: Props -> JSX
-browseSnapshots = make component { initialState, render }
+browseSnapshots = make component { initialState, didMount, render }
   where
 
     component :: Component Props
@@ -85,11 +90,14 @@ browseSnapshots = make component { initialState, render }
                    , selectedDir: Nothing
                    }
 
+    didMount self = self.setState _ { selectedDataset = self.props.activeDataset }
+
     render self =
       R.div_
       [
         -- dataset selector
         datasetSelector { datasets: self.props.config.datasets
+                        , activeDataset: self.props.activeDataset
                         , onDatasetSelected: update self <<< DatasetSelected
                         , snapshotNameTemplate: self.props.config.snapshotNameTemplate
                         }

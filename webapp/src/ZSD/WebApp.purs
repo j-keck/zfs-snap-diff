@@ -4,19 +4,19 @@
 -- |
 module ZSD.WebApp where
 
-import Prelude (map, ($), (/=))
 import Data.Array as A
-import Data.Monoid (guard)
+import Data.Eq ((==))
+import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
-import React.Basic (Component, JSX, createComponent, fragment, make)
-import React.Basic.DOM as R
-
+import Prelude (($))
+import React.Basic (Component, JSX, createComponent, empty, fragment, make)
 import ZSD.Components.Navbar (navbar)
 import ZSD.Components.Spinner as Spinner
 import ZSD.Model.Config (Config)
-import ZSD.Views.Messages as Messages
-import ZSD.Views.BrowseSnapshots (browseSnapshots)
+import ZSD.Model.Dataset (Dataset)
 import ZSD.Views.BrowseFilesystem (browseFilesystem)
+import ZSD.Views.BrowseSnapshots (browseSnapshots)
+import ZSD.Views.Messages as Messages
 
 
 type Props = { config :: Config }
@@ -25,13 +25,14 @@ type Title = String
 type View = JSX
 
 type State =
-  { views       :: Array (Tuple Title View)
-  , activeTitle :: Title
+  { views         :: Array (Tuple Title View)
+  , activeView    :: View
+  , activeDataset :: Maybe Dataset
   }
 
 
 webApp :: Props -> JSX
-webApp props = make component { initialState, render } props
+webApp props = make component { initialState, didMount, render } props
 
   where
 
@@ -39,29 +40,38 @@ webApp props = make component { initialState, render } props
     component = createComponent "WebApp"
 
 
-    initialState =
-      let views = [ Tuple "Browse filesystem" $ browseFilesystem { config: props.config }
-                  , Tuple "Browse snapshots" $ browseSnapshots { config: props.config }
+    initialState = { views: [], activeView: empty, activeDataset: Nothing }
+
+    didMount self = do
+      -- if the is only one dataset, select it
+      let activeDataset = if (A.length self.props.config.datasets == 1)
+                          then A.head self.props.config.datasets
+                          else Nothing
+      self.setState _ { activeDataset = activeDataset }
+
+
+
+
+    render self = fragment $
+      [ navbar
+        { views:
+          [ Tuple "Browse filesystem" $ browseFilesystem
+                                        { config: props.config
+                                        , activeDataset: self.state.activeDataset
+                                        , onDatasetSelected:
+                                          \ds -> self.setState _ { activeDataset = Just ds }
+                                        }
+          , Tuple "Browse snapshots" $ browseSnapshots
+                                       { config: props.config
+                                       , activeDataset: self.state.activeDataset
+                                       , onDatasetSelected:
+                                         \ds -> self.setState _ { activeDataset = Just ds }
+                                       }
                   , Tuple "Messages" $ Messages.messages
                   ]
-                  
-       in { views, activeTitle: "" } 
-
-
-    render self = fragment $ 
-      A.concat
-      [ [ navbar
-          { views: self.state.views
-          , onViewSelected: \title -> self.setState _ { activeTitle = title }
-          }
-        , Messages.toasts
-        ]
-        , map (embedView self) self.state.views
-        , [Spinner.spinner]
+        , onViewSelected: \view -> self.setState _ { activeView = view }
+        }
+      , Messages.toasts
+      , self.state.activeView
+      , Spinner.spinner
       ]
-
-    embedView self (Tuple title view) =
-      R.div
-      { className: guard (title /= self.state.activeTitle) "d-none"
-      , children: [ view ]
-      }

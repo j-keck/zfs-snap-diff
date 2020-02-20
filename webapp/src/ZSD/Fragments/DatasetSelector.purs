@@ -3,7 +3,7 @@ module ZSD.Fragments.DatasetSelector where
 import Prelude
 
 import Data.Foldable (foldMap)
-import Data.Maybe (Maybe(..), maybe)
+import Data.Maybe (Maybe(..), isNothing, maybe)
 import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
@@ -21,6 +21,7 @@ import ZSD.Utils.Formatter as Formatter
 type Props =
   { datasets             :: Datasets
   , snapshotNameTemplate :: String
+  , activeDataset        :: Maybe Dataset
   , onDatasetSelected    :: Dataset -> Effect Unit
   }
 
@@ -31,7 +32,7 @@ type State =
   }
 
 datasetSelector :: Props -> JSX
-datasetSelector = make component { initialState, render }
+datasetSelector = make component { initialState, didMount, render }
 
   where
 
@@ -39,6 +40,8 @@ datasetSelector = make component { initialState, render }
     component  = createComponent "DatasetSelector"
 
     initialState = { selectedDataset: Nothing, activeIdx: Nothing, modal: empty }
+
+    didMount self = self.setState _ { selectedDataset = self.props.activeDataset }
 
     render self =
       panel
@@ -77,6 +80,6 @@ datasetSelector = make component { initialState, render }
                     self.props.onDatasetSelected ds
             , activeIdx: self.state.activeIdx
             }
-      , showBody: true
+      , showBody: isNothing self.props.activeDataset
       , footer: empty
       } <> self.state.modal

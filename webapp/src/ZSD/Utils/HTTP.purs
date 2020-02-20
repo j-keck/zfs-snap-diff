@@ -58,7 +58,6 @@ decode url = lmap (LNE.head >>> F.renderForeignError >>> JSONError >>> HTTPError
 
 
 -- | interprets the server response
--- FIXME: error message
 interpret :: forall a. URL -> Either A.Error (A.Response a) -> Either AppError a
 interpret url = case _ of
   Left err -> Left <<< HTTPError url <<< RequestError $ A.printError err
