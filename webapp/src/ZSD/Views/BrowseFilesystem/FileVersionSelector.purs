@@ -115,7 +115,7 @@ fileVersionSelector = make component { initialState, didMount, render }
                  , children:
                    [ R.button
                      { className: "btn btn-secondary" <> guard  (not $ hasOlderVersions self.state) " disabled"
-                     , title: "Select / search the previous version"
+                     , title: "Select the previous version or scan older snapshots"
                      , onClick: capture_ $ guard (hasOlderVersions self.state)
                                          $ update self (SelectVersionByIdx (self.state.selectedIdx + 1))
                      , children:

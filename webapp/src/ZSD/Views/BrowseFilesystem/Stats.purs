@@ -8,6 +8,7 @@ import React.Basic (JSX, createComponent, makeStateless)
 import React.Basic.DOM as R
 import React.Basic.DOM.Textf as TF
 import ZSD.Model.DateRange (DateRange(..))
+import ZSD.Model.DateRange as DateRange
 import ZSD.Model.FileVersion (ScanResult(..))
 import ZSD.Utils.Formatter as Formatter
 import ZSD.Utils.Ops (foldlSemigroup)
@@ -26,8 +27,9 @@ stats = makeStateless component \props ->
             [ TF.text { style: TF.textUnderline } "This scan: "
             , TF.text' "Scanned ", TF.int { style: TF.fontBolder } snapsScanned, TF.text' " snapshots in "
             , TF.text { style: TF.fontBolder } (Formatter.duration scanDuration), TF.text' ". "
-            , TF.text' "Date range: "
-            , fmtDate range.from, TF.text' " - "
+            , TF.text' "Scanned ", TF.int { style: TF.fontBolder } (DateRange.dayCount $ DateRange range)
+            , TF.text' " days - from "
+            , fmtDate range.from, TF.text' " to "
             , fmtDate range.to, TF.text' "."
             ]
           ]
