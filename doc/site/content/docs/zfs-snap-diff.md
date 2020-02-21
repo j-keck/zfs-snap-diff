@@ -124,10 +124,48 @@ and inspect the directory content where the snapshot was created
 
 ## Create snapshots {#create-snapshots}
 
-The default snapshot template name is configurable: `snapshot-name-template`
-  [![](/images/create-snapshot.png)](/images/create-snapshot.png)
+To create a snapshot of the actual dataset use the camera symbol {{< fa camera >}} in the dataset selector.
+![](/images/create-snapshot-symbol.png)
+
+You can enter a snapshot name in **"Snapshot name template"** and `zfs-snap-diff` will
+show the resulting name in **"Snapshot name"**.
+
+{{< figure src="/images/create-snapshot.png" link="/images/create-snapshot.png" >}}
+
+The template supports the following format sequences:
+
+```text
+Format sequences are alike the `date` command
+  %d: day of month (e.g., 01)
+  %m: month (01..12)
+  %y: last two digits of year (00..99)
+  %Y: year
+  %F: full date; like %Y-%m-%d
+  %H: hour (00..23)
+  %I: hour (01..12)
+  %M: minute (00..59)
+  %S: second (00..60)
+  %s: seconds since 1970-01-01 00:00:00 UTC
+```
+
+The default snapshot name template is per [`snapshot-name-template`](/docs/configuration/#snapshot-name-template) configurable.
 
 
-## Configuration {#configuration}
+## Destroy snapshot {#destroy-snapshot}
 
-TODO
+You can destroy snapshots with the {{< fa trash >}} symbol in **"Browse snapshots"**
+where you see all snapshots for the selected dataset.
+
+{{< figure src="/images/delete-snapshot.png" link="/images/delete-snapshot.png" >}}
+
+
+## Download zip-archive {#download-zip-archive}
+
+With the {{< fa file-archive >}} symbol in the file browser you can download
+a whole directory as a zip-archive. You can download a archive from the
+actual filesystem or from a snapshot.
+
+{{< figure src="/images/create-zip-archive.png" link="/images/create-zip-archive.png" >}}
+
+The archive size is restricted by default. You can configure per
+[`max-archive-unpacked-size-mb`](/docs/configuration/#max-archive-unpacked-size-mb).

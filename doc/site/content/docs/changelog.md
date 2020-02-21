@@ -2,7 +2,7 @@
 title = "Changelog"
 draft = false
 creator = "Emacs 26.3 (Org mode 9.1.9 + ox-hugo)"
-weight = 40
+weight = 50
 +++
 
 ## 1.0.0-beta (unreleased) {#1-dot-0-dot-0-beta--unreleased}

@@ -99,7 +99,7 @@ func parseFlags() CliConfig {
 	flag.IntVar(&cfg.DaysToScan, "d", cfg.DaysToScan, "days to scan")
 
 	flag.StringVar(&cfg.CompareMethod, "compare-method", cfg.CompareMethod,
-		"used method to determine if a file was modified ('auto', 'mtime', 'size+mtime', 'content', 'md5')")
+		"used method to determine if a file was modified ('auto', 'size', 'mtime', 'size+mtime', 'content', 'md5')")
 	flag.IntVar(&cfg.DiffContextSize, "diff-context-size", cfg.DiffContextSize,
 		"show N lines before and after each diff")
 

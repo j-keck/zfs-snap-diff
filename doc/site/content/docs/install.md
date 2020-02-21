@@ -18,25 +18,25 @@ from the [githup release page](https://github.com/j-keck/zfs-snap-diff/releases)
 {{<tabs "install">}}{{< tab "Linux" >}}
 Download the beta version for ****Linux amd64**** here:
 
-[zfs-snap-diff-linux-v1.0.0-beta-9-gc1980ab.tgz](/zfs-snap-diff-linux-v1.0.0-beta-9-gc1980ab.tgz)
+[zfs-snap-diff-linux-v1.0.0-beta-16-g1bae2c4.tgz](/zfs-snap-diff-linux-v1.0.0-beta-16-g1bae2c4.tgz)
 {{< /tab >}}
 
 {{< tab "FreeBSD" >}}
 Download the beta version for ****FreeBSD amd64**** here:
 
-[zfs-snap-diff-freebsd-v1.0.0-beta-9-gc1980ab.tgz](/zfs-snap-diff-freebsd-v1.0.0-beta-9-gc1980ab.tgz)
+[zfs-snap-diff-freebsd-v1.0.0-beta-16-g1bae2c4.tgz](/zfs-snap-diff-freebsd-v1.0.0-beta-16-g1bae2c4.tgz)
 {{< /tab >}}
 
 {{< tab "macOS" >}}
 Download the beta version for ****macOS amd64**** here:
 
-[zfs-snap-diff-darwin-v1.0.0-beta-9-gc1980ab.tgz](/zfs-snap-diff-darwin-v1.0.0-beta-9-gc1980ab.tgz)
+[zfs-snap-diff-darwin-v1.0.0-beta-16-g1bae2c4.tgz](/zfs-snap-diff-darwin-v1.0.0-beta-16-g1bae2c4.tgz)
 {{< /tab >}}
 
 {{< tab "Solaris" >}}
 Download the beta version for ****Solaris amd64**** here:
 
-[zfs-snap-diff-solaris-v1.0.0-beta-9-gc1980ab.tgz](/zfs-snap-diff-solaris-v1.0.0-beta-9-gc1980ab.tgz)
+[zfs-snap-diff-solaris-v1.0.0-beta-16-g1bae2c4.tgz](/zfs-snap-diff-solaris-v1.0.0-beta-16-g1bae2c4.tgz)
 {{< /tab >}}
 
 {{< /tabs >}}

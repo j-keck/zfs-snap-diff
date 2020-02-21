@@ -57,41 +57,35 @@ You can download the latest binary package from here or
 from the [[https://github.com/j-keck/zfs-snap-diff/releases][githup release page]].
 
  #+BEGIN_SRC elisp :results output raw :exports results
-   (defun exec-to-string (cmd)
-     "Execute the given CMD and return stdout."
-     (s-trim-right
-      (with-output-to-string
-        (with-current-buffer
-            standard-output
-          (process-file shell-file-name nil '(t nil)  nil shell-command-switch cmd)))))
-
    (defun version-string ()
-     "Lookup the actual `zfs-snap-diff' version."
-     (exec-to-string "git describe --always"))
+       "Lookup the actual `zfs-snap-diff' version."
+       (s-trim-right (shell-command-to-string "git describe ")));; --abbrev=0 --match 'v[0-9].[0-9].[0-9]'")))
 
-   (defun archive-name-string (platform)
-     "Generate the archive name for the given PLATFORM."
-     (format "zfs-snap-diff-%s-%s.tgz" platform (version-string)))
+     (defun archive-name-string (platform)
+       "Generate the archive name for the given PLATFORM."
+       (format "zfs-snap-diff-%s-%s.tgz" platform (version-string)))
 
 
-   (defun section-for (platform artifact)
-     (format (concat "{{< tab \"%s\" >}}\n"
-                     "Download the beta version for **%s amd64** here:\n\n"
-                     "[[/%s][%s]]\n"
-                     "{{< /tab >}}\n\n"
-             ) platform platform artifact artifact))
+     (defun section-for (platform artifact)
+       (format (concat "{{< tab \"%s\" >}}\n"
+                       "Download the beta version for **%s amd64** here:\n\n"
+                       "[[/%s][%s]]\n"
+                       "{{< /tab >}}\n\n"
+               ) platform platform artifact artifact))
 
-   (princ "\n\n{{<tabs \"install\">}}")
-   (princ (section-for "Linux" (archive-name-string "linux")))
-   (princ (section-for "FreeBSD" (archive-name-string "freebsd")))
-   (princ (section-for "macOS" (archive-name-string "darwin")))
-   (princ (section-for "Solaris" (archive-name-string "solaris")))
-   (princ "{{< /tabs >}}\n\n")
+     (princ "\n\n{{<tabs \"install\">}}")
+     (princ (section-for "Linux" (archive-name-string "linux")))
+     (princ (section-for "FreeBSD" (archive-name-string "freebsd")))
+     (princ (section-for "macOS" (archive-name-string "darwin")))
+     (princ (section-for "Solaris" (archive-name-string "solaris")))
+     (princ "{{< /tabs >}}\n\n")
  #+END_SRC
 
- {{< hint warning >}}
- Try with the ~-use-sudo~ flag if it's not working - and please give feedback.
- {{< /hint >}}
+
+
+{{< hint warning >}}
+Try with the ~-use-sudo~ flag if it's not working - and please give feedback.
+{{< /hint >}}
 
 {{< hint info >}}
 If you need a 32bit version, or a binary for a different
@@ -217,6 +211,7 @@ Project home page: https://j-keck.github.io/zfs-snap-diff
 
 #+END_EXAMPLE
 
+
 ** Startup
 
    - startup a server instance
@@ -257,14 +252,48 @@ and inspect the directory content where the snapshot was created
 
 ** Create snapshots
 
-The default snapshot template name is configurable: ~snapshot-name-template~
+To create a snapshot of the actual dataset use the camera symbol {{< fa camera >}} in the dataset selector.
+[[/images/create-snapshot-symbol.png]]
+
+You can enter a snapshot name in *"Snapshot name template"* and ~zfs-snap-diff~ will
+show the resulting name in *"Snapshot name"*.
+
   [[/images/create-snapshot.png][file:/images/create-snapshot.png]]
 
+The template supports the following format sequences:
+ #+BEGIN_EXAMPLE
+ Format sequences are alike the `date` command
+   %d: day of month (e.g., 01)
+   %m: month (01..12)
+   %y: last two digits of year (00..99)
+   %Y: year
+   %F: full date; like %Y-%m-%d
+   %H: hour (00..23)
+   %I: hour (01..12)
+   %M: minute (00..59)
+   %S: second (00..60)
+   %s: seconds since 1970-01-01 00:00:00 UTC
+ #+END_EXAMPLE
 
-** Configuration
+The default snapshot name template is per [[/docs/configuration/#snapshot-name-template][~snapshot-name-template~]] configurable.
 
-TODO
+** Destroy snapshot
 
+You can destroy snapshots with the {{< fa trash >}} symbol in *"Browse snapshots"*
+where you see all snapshots for the selected dataset.
+
+[[/images/delete-snapshot.png][file:/images/delete-snapshot.png]]
+
+** Download zip-archive
+
+With the {{< fa file-archive >}} symbol in the file browser you can download
+a whole directory as a zip-archive. You can download a archive from the
+actual filesystem or from a snapshot.
+
+[[/images/create-zip-archive.png][file:/images/create-zip-archive.png]]
+
+The archive size is restricted by default. You can configure per
+[[/docs/configuration/#max-archive-unpacked-size-mb][~max-archive-unpacked-size-mb~]].
 
 * zsd
   :PROPERTIES:
@@ -404,10 +433,128 @@ A backup of the actual version will be created.
 
 
 
+* Configuration
+:PROPERTIES:
+:export_file_name: configuration
+:export_hugo_weight: 40
+:export_hugo_section: docs
+:END:
+
+~zfs-snap-diff~ loads it's configuration from:
+
+{{< tabs "config-location" >}}
+{{< tab "Linux, FreeBSD, Solaris" >}}
+#+BEGIN_EXAMPLE
+$XDG_CONFIG_HOME/.config/zfs-snap-diff/zfs-snap-diff.toml
+$HOME/.config/zfs-snap-diff/zfs-snap-diff.toml
+#+END_EXAMPLE
+{{< /tab >}}
+{{< tab "macOS" >}}
+#+BEGIN_EXAMPLE
+$HOME/Library/Application Support/zfs-snap-diff/zfs-snap-diff.toml
+#+END_EXAMPLE
+{{< /tab >}}
+{{< /tabs >}}
+
+if it does not find a configuration, it will create the following default configuration:
+#+BEGIN_EXAMPLE
+use-cache-dir-for-backups = true
+days-to-scan = 7
+max-archive-unpacked-size-mb = 200
+snapshot-name-template = "zfs-snap-diff-%FT%H:%M"
+compare-method = "auto"
+diff-context-size = 5
+
+[webserver]
+  listen-ip = "127.0.0.1"
+  listen-port = 12345
+  use-tls = false
+  cert-file = ""
+  key-file = ""
+
+[zfs]
+  use-sudo = false
+  mount-snapshots = false
+#+END_EXAMPLE
+
+** Keys
+
+*** ~use-cache-dir-for-backups~
+
+If it's set to ~true~, the file backups will be stored in the users cache-directory.
+#+BEGIN_QUOTE
+On Unix systems, it returns $XDG_CACHE_HOME as specified by https://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html
+if non-empty, else $HOME/.cache. On Darwin, it returns $HOME/Library/Caches. On Windows, it returns %LocalAppData%.
+On Plan 9, it returns $home/lib/cache.
+#+END_QUOTE
+https://golang.org/pkg/os/#UserCacheDir
+
+
+If it's ~false~, it will create the backup file under the actual directory in the ~./zfs-snap-diff/~ folder.
+
+*** ~days-to-scan~
+
+Configures the day range for each scan. If you have a many daily snapshots set this to ~1~.
+
+*** ~max-archive-unpacked-size-mb~
+
+Maximal unpacked archive size in megabytes.
+Set this to ~-1~ to disable the size-check.
+
+*** ~snapshot-name-template~
+
+ #+BEGIN_EXAMPLE
+ Format sequences are alike the `date` command
+   %d: day of month (e.g., 01)
+   %m: month (01..12)
+   %y: last two digits of year (00..99)
+   %Y: year
+   %F: full date; like %Y-%m-%d
+   %H: hour (00..23)
+   %I: hour (01..12)
+   %M: minute (00..59)
+   %S: second (00..60)
+   %s: seconds since 1970-01-01 00:00:00 UTC
+ #+END_EXAMPLE
+
+*** ~compare-method~
+
+Method how to determine two file versions are the same version.
+This is used when scanning the zfs snapshots to determine
+a file was changed in a snapshot.
+
+**** auto
+Uses ~md5~ for text files and ~size+mtime~ for others
+
+**** size
+If two files versions have the same filesize,
+it's interpreted as the same version.
+
+**** mtime
+If two files versions have the same mtime,
+it's interpreted as the same version.
+
+**** size+mtime
+If two files versions have the same size AND mtime,
+it's interpreted as the same version.
+
+**** content
+If two files versions have the same content,
+it's interpreted as the same version.
+
+**** md5
+If two files versions have the same md5 sum,
+it's interpreted as the same version.
+
+*** ~diff-context-size~
+
+Diff context size in the webui.
+
+
 * Changelog
 :PROPERTIES:
 :export_file_name: changelog
-:export_hugo_weight: 40
+:export_hugo_weight: 50
 :export_hugo_section: docs
 :END:
 
