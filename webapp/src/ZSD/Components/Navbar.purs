@@ -50,6 +50,7 @@ navbar = make component { initialState, didMount, render }
     navbarBrand =
       R.a
       { className: "navbar-brand"
+      , target: "_blank"
       , href: "https://j-keck.github.com/zfs-snap-diff"
       , children: [ R.text "ZFS-Snap-Diff" ]
       }
