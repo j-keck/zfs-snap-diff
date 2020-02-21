@@ -133,7 +133,7 @@ func (self *FileHandle) Backup() (string, error) {
 			return "", err
 		}
 
-		backupDir, err := dir.GetOrCreateSubDirHandle(".zsd", 0770)
+		backupDir, err := dir.GetOrCreateSubDirHandle(".zfs-snap-diff", 0770)
 		if err != nil {
 			return "", err
 		}
