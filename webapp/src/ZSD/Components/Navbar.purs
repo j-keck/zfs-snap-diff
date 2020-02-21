@@ -40,7 +40,7 @@ navbar = make component { initialState, didMount, render }
 
     render self =
       R.nav
-      { className: "navbar navbar-expand-lg navbar-dark bg-primary"
+      { className: "navbar navbar-expand navbar-dark bg-primary"
       , children:
         [ navbarBrand
         , navbarItems self
