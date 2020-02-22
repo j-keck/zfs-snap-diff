@@ -14,7 +14,7 @@ import (
 
 // Comparator compares ...
 type Comparator interface {
-	init(actual fs.FileHandle)
+	init(current fs.FileHandle)
 	HasChanged(other fs.FileHandle) bool
 }
 
@@ -51,12 +51,12 @@ func NewComparator(method string, fh fs.FileHandle) (Comparator, error) {
 //
 // by size
 type CompareBySize struct {
-	actual    fs.FileHandle
+	current    fs.FileHandle
 	otherSize int64
 }
 
-func (self *CompareBySize) init(actual fs.FileHandle) {
-	self.actual = actual
+func (self *CompareBySize) init(current fs.FileHandle) {
+	self.current = current
 }
 func (self *CompareBySize) HasChanged(other fs.FileHandle) bool {
 	// previous other size
@@ -65,18 +65,18 @@ func (self *CompareBySize) HasChanged(other fs.FileHandle) bool {
 	// cache the size of the other file for the next run
 	self.otherSize = other.Size
 
-	return self.actual.Size != other.Size &&
+	return self.current.Size != other.Size &&
 		prevSize != other.Size
 }
 
 // by modification time
 type CompareByMTime struct {
-	actual     fs.FileHandle
+	current     fs.FileHandle
 	otherMTime time.Time
 }
 
-func (self *CompareByMTime) init(actual fs.FileHandle) {
-	self.actual = actual
+func (self *CompareByMTime) init(current fs.FileHandle) {
+	self.current = current
 }
 func (self *CompareByMTime) HasChanged(other fs.FileHandle) bool {
 	// previous other mtime
@@ -85,7 +85,7 @@ func (self *CompareByMTime) HasChanged(other fs.FileHandle) bool {
 	// cache the mtime of the other file for the next run
 	self.otherMTime = other.MTime
 
-	return !(self.actual.MTime.Equal(other.MTime) || prevMTime.Equal(other.MTime))
+	return !(self.current.MTime.Equal(other.MTime) || prevMTime.Equal(other.MTime))
 }
 
 //
@@ -95,13 +95,13 @@ type CompareBySizeAndModTime struct {
 	byMTime Comparator
 }
 
-func (self *CompareBySizeAndModTime) init(actual fs.FileHandle) {
+func (self *CompareBySizeAndModTime) init(current fs.FileHandle) {
 	bySize := new(CompareBySize)
-	bySize.init(actual)
+	bySize.init(current)
 	self.bySize = bySize
 
 	byMTime := new(CompareByMTime)
-	byMTime.init(actual)
+	byMTime.init(current)
 	self.byMTime = byMTime
 }
 func (self *CompareBySizeAndModTime) HasChanged(other fs.FileHandle) bool {
@@ -111,19 +111,19 @@ func (self *CompareBySizeAndModTime) HasChanged(other fs.FileHandle) bool {
 //
 // compare by content
 type CompareByContent struct {
-	actual        fs.FileHandle
-	actualContent []byte
+	current        fs.FileHandle
+	currentContent []byte
 	otherContent  []byte
 }
 
-func (self *CompareByContent) init(actual fs.FileHandle) {
-	self.actual = actual
+func (self *CompareByContent) init(current fs.FileHandle) {
+	self.current = current
 
-	buf, err := ioutil.ReadFile(self.actual.Path)
+	buf, err := ioutil.ReadFile(self.current.Path)
 	if err != nil {
-		log.Warnf("unable to read the 'actual' file: %s - err: %v", self.actual.Path, err)
+		log.Warnf("unable to read the 'current' file: %s - err: %v", self.current.Path, err)
 	}
-	self.actualContent = buf
+	self.currentContent = buf
 }
 func (self *CompareByContent) HasChanged(other fs.FileHandle) bool {
 	buf, err := ioutil.ReadFile(other.Path)
@@ -137,26 +137,26 @@ func (self *CompareByContent) HasChanged(other fs.FileHandle) bool {
 	// cache the content of the other file for the next run
 	self.otherContent = buf
 
-	return bytes.Compare(self.actualContent, buf) != 0 &&
+	return bytes.Compare(self.currentContent, buf) != 0 &&
 		bytes.Compare(prevContent, buf) != 0
 }
 
 //
 // compare by md5 hash
 type CompareByMD5 struct {
-	actual     fs.FileHandle
-	actualHash []byte
+	current     fs.FileHandle
+	currentHash []byte
 	otherHash  []byte
 }
 
-func (self *CompareByMD5) init(actual fs.FileHandle) {
-	self.actual = actual
+func (self *CompareByMD5) init(current fs.FileHandle) {
+	self.current = current
 
-	h, err := self.calculateMD5(actual.Path)
+	h, err := self.calculateMD5(current.Path)
 	if err != nil {
-		log.Warnf("unable to hash the 'actual' file: %s - err: %v", self.actual.Path, err)
+		log.Warnf("unable to hash the 'current' file: %s - err: %v", self.current.Path, err)
 	}
-	self.actualHash = h
+	self.currentHash = h
 }
 func (self *CompareByMD5) HasChanged(other fs.FileHandle) bool {
 	h, err := self.calculateMD5(other.Path)
@@ -171,9 +171,9 @@ func (self *CompareByMD5) HasChanged(other fs.FileHandle) bool {
 	// cache the md5 of the other file for the next run
 	self.otherHash = h
 
-	// compare the actual (newest) hash with the others file hash AND
+	// compare the current (newest) hash with the others file hash AND
 	// the others file hash with the previous hash
-	return bytes.Compare(self.actualHash, h) != 0 &&
+	return bytes.Compare(self.currentHash, h) != 0 &&
 		bytes.Compare(prevHash, h) != 0
 
 }

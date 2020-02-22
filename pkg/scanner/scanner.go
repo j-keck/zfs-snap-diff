@@ -30,7 +30,7 @@ type ScanResult struct {
 }
 
 type FileVersion struct {
-	Actual   fs.FileHandle `json:"actual"`
+	Current  fs.FileHandle `json:"current"`
 	Backup   fs.FileHandle `json:"backup"`
 	Snapshot zfs.Snapshot  `json:"snapshot"`
 }
@@ -39,11 +39,11 @@ func NewScanner(dateRange DateRange, compareMethod string, dataset zfs.Dataset, 
 	return Scanner{dateRange, compareMethod, dataset, zfs}
 }
 
-func (self *Scanner) FindFileVersions(pathActualVersion string) (ScanResult, error) {
+func (self *Scanner) FindFileVersions(pathCurrentVersion string) (ScanResult, error) {
 	sr := ScanResult{FileVersions: make([]FileVersion, 0), DateRange: self.dateRange}
 	startTs := time.Now()
 
-	actualVersionFh, err := fs.GetFileHandle(pathActualVersion)
+	currentVersionFh, err := fs.GetFileHandle(pathCurrentVersion)
 	if err != nil {
 		return ScanResult{}, err
 	}
@@ -54,12 +54,12 @@ func (self *Scanner) FindFileVersions(pathActualVersion string) (ScanResult, err
 	}
 
 	log.Debugf("search for file versions for file: %s, in the date range: %s",
-		pathActualVersion, self.dateRange.String())
+		pathCurrentVersion, self.dateRange.String())
 	var cmp Comparator
 	snapsSkipped := 0
 	for idx, snap := range snaps {
 
-		// search is data-range based - check if the actual checked snapshot
+		// search is data-range based - check if the current checked snapshot
 		// was created in the given range
 		if self.dateRange.IsBefore(snap.Created) {
 			snapsSkipped = snapsSkipped + 1
@@ -96,10 +96,10 @@ func (self *Scanner) FindFileVersions(pathActualVersion string) (ScanResult, err
 		if cmp == nil {
 
 			var pathInitVersion string
-			if p, ok := self.findLastPathInSnap(pathActualVersion, idx-1, snaps); ok {
+			if p, ok := self.findLastPathInSnap(pathCurrentVersion, idx-1, snaps); ok {
 				pathInitVersion = p
 			} else {
-				pathInitVersion = pathActualVersion
+				pathInitVersion = pathCurrentVersion
 			}
 
 			fh, err := fs.GetFileHandle(pathInitVersion)
@@ -114,7 +114,7 @@ func (self *Scanner) FindFileVersions(pathActualVersion string) (ScanResult, err
 		}
 
 		// get the file-handle to the backup version in the snapshot
-		fh, err := fs.GetFileHandle(self.pathInSnapshot(pathActualVersion, snap))
+		fh, err := fs.GetFileHandle(self.pathInSnapshot(pathCurrentVersion, snap))
 		if err != nil {
 			// not every snapshot MUST have a version of the file.
 			// maybe the file was deleted and restored - so ignore the error
@@ -126,7 +126,7 @@ func (self *Scanner) FindFileVersions(pathActualVersion string) (ScanResult, err
 		log.Tracef("check if file was changed under path: %s", fh.Path)
 		if cmp.HasChanged(fh) {
 			log.Debugf("file was changed in snapshot: %s", fh.Path)
-			sr.FileVersions = append(sr.FileVersions, FileVersion{actualVersionFh, fh, snap})
+			sr.FileVersions = append(sr.FileVersions, FileVersion{currentVersionFh, fh, snap})
 		}
 
 		// update stats
@@ -138,12 +138,12 @@ func (self *Scanner) FindFileVersions(pathActualVersion string) (ScanResult, err
 	sr.SnapsToScan = len(snaps) - snapsSkipped - sr.SnapsScanned
 
 	log.Debugf("%d versions for file %s found - scan duration: %s",
-		len(sr.FileVersions), pathActualVersion, sr.ScanDuration)
+		len(sr.FileVersions), pathCurrentVersion, sr.ScanDuration)
 	return sr, nil
 }
 
-func (self *Scanner) pathInSnapshot(pathActualVersion string, snap zfs.Snapshot) string {
-	p := strings.TrimPrefix(pathActualVersion, self.dataset.MountPoint.Path)
+func (self *Scanner) pathInSnapshot(pathCurrentVersion string, snap zfs.Snapshot) string {
+	p := strings.TrimPrefix(pathCurrentVersion, self.dataset.MountPoint.Path)
 	return path.Join(snap.MountPoint.Path, p)
 }
 

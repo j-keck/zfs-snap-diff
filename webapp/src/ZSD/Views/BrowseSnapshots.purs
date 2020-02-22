@@ -118,8 +118,8 @@ browseSnapshots = make component { initialState, didMount, render }
 
         -- file actions
       , foldMap (uncurry3 (\ds snapshot file ->
-                            let actual = switchMountPoint (From snapshot.mountPoint) (To ds.mountPoint) file
-                                version = BackupVersion { actual, backup: file, snapshot }
+                            let current = switchMountPoint (From snapshot.mountPoint) (To ds.mountPoint) file
+                                version = BackupVersion { current, backup: file, snapshot }
                             in fileAction { file, version }
                           ))
           (tuple3 <$> self.state.selectedDataset

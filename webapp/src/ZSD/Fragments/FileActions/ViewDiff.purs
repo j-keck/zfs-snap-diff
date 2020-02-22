@@ -52,7 +52,7 @@ data Command =
 update :: Self -> Command -> Effect Unit
 update self = case _ of
   Diff -> case self.props.version of
-    ActualVersion _ -> self.setState _ { diff = Nothing }
+    CurrentVersion _ -> self.setState _ { diff = Nothing }
     BackupVersion _ -> launchAff_ $ do
       res <- Diff.fetch self.props.version
       liftEffect $ either Messages.appError (\diff -> self.setState _ { diff = Just diff}) res

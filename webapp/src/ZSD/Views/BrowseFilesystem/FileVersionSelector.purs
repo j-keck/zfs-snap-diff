@@ -51,13 +51,13 @@ data Action =
 
 
 data SelectedVersion =
-    Actual FileVersion
+    Current FileVersion
   | Backup FileVersion Int
 
 update :: React.Self Props State -> Action -> Effect Unit
 update self = case _ of
   DidMount -> do
-    self.setState _ { versions = [ ActualVersion self.props.file ] }
+    self.setState _ { versions = [ CurrentVersion self.props.file ] }
     update self $ Scan (Days <<< toNumber <<< negate $ self.props.daysToScan) (SelectVersionByIdx 0)
 
   Scan days next -> Spinner.display *> do
@@ -104,8 +104,8 @@ fileVersionSelector = make component { initialState, didMount, render }
        [ panel
          { header: fragment
            [ R.text $ "Versions" <> case self.state.selectedVersion of
-                Just (ActualVersion (FH {name})) -> " for " <> name
-                Just (BackupVersion {actual: FH {name}}) -> " for " <> name
+                Just (CurrentVersion (FH {name})) -> " for " <> name
+                Just (BackupVersion {current: FH {name}}) -> " for " <> name
                 _ -> mempty
            , R.span
              { className: "float-right"
@@ -143,7 +143,10 @@ fileVersionSelector = make component { initialState, didMount, render }
                { header: ["File modification time", "Snapshot Created", "Snapshot Name"]
                , rows: self.state.versions
                , mkRow: case _ of
-                   ActualVersion _     -> [ R.text $ "Actual version", R.text "-", R.text "-" ]
+                   CurrentVersion (FH {mtime}) -> [ R.text $ Formatter.dateTime mtime
+                                                  , R.text $ "Current version"
+                                                  , R.text "-"
+                                                  ]
                    BackupVersion {backup, snapshot} ->
                      [ R.text $ Formatter.dateTime (unwrap backup).mtime
                      , R.text $ Formatter.dateTime snapshot.created

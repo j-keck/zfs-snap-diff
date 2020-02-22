@@ -34,13 +34,13 @@ tank@s03	3
 tank@s04	4
 tank@s05	5`
 
-	actual, err := file.NewFileHandle("testdata/tank/testfile")
+	current, err := file.NewFileHandle("testdata/tank/testfile")
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	cmp, err := file.NewComparator("md5", actual)
+	cmp, err := file.NewComparator("md5", current)
 	if err != nil {
 		t.Error(err)
 		return
@@ -51,7 +51,7 @@ tank@s05	5`
 	ds.Path = "testdata/tank"
 	ds.cmd = NewZFSCmdMock(out, nil)
 
-	versions, err := ds.FindFileVersions(cmp, actual)
+	versions, err := ds.FindFileVersions(cmp, current)
 	if err != nil {
 		t.Error(err)
 		return

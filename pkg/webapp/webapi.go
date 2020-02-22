@@ -364,7 +364,7 @@ func (self *WebApp) downloadHndl(w http.ResponseWriter, r *http.Request) {
 
 /// responds with a diff
 ///
-/// expected payload: { actualPath: "/path/to/file"
+/// expected payload: { currentPath: "/path/to/file"
 ///                   , backupPath: "/snapshot/file"
 ///                   [, diff-context-size: 8 ]
 ///                   }
@@ -373,7 +373,7 @@ func (self *WebApp) diffHndl(w http.ResponseWriter, r *http.Request) {
 
 	// decode the payload
 	type Payload struct {
-		ActualPath      string `json:"actualPath"`
+		CurrentPath      string `json:"currentPath"`
 		BackupPath      string `json:"backupPath"`
 		DiffContextSize int    `json:"diffContextSize"`
 	}
@@ -384,7 +384,7 @@ func (self *WebApp) diffHndl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := self.checkPathIsAllowed(payload.ActualPath); err != nil {
+	if err := self.checkPathIsAllowed(payload.CurrentPath); err != nil {
 		http.Error(w, err.Error(), 400)
 		return
 	}
@@ -395,7 +395,7 @@ func (self *WebApp) diffHndl(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// diff
-	diffs, err := diff.NewDiffFromPath(payload.BackupPath, payload.ActualPath, payload.DiffContextSize)
+	diffs, err := diff.NewDiffFromPath(payload.BackupPath, payload.CurrentPath, payload.DiffContextSize)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to create diff - %v", err)
 		log.Error(msg)
@@ -407,14 +407,14 @@ func (self *WebApp) diffHndl(w http.ResponseWriter, r *http.Request) {
 
 /// revert a changeset
 ///
-/// expected payload: { actualPath: "/path/to/file"
+/// expected payload: { currentPath: "/path/to/file"
 ///                   , backupPath: "/snapshot/file"
 ///                   , deltaIdx: 0
 ///                   }
 func (self *WebApp) revertChangeHndl(w http.ResponseWriter, r *http.Request) {
 	// decode the payload
 	type Payload struct {
-		ActualPath string `json:"actualPath"`
+		CurrentPath string `json:"currentPath"`
 		BackupPath string `json:"backupPath"`
 		DeltaIdx   int    `json:"deltaIdx"`
 	}
@@ -425,7 +425,7 @@ func (self *WebApp) revertChangeHndl(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// valiate path
-	if err := self.checkPathIsAllowed(payload.ActualPath); err != nil {
+	if err := self.checkPathIsAllowed(payload.CurrentPath); err != nil {
 		http.Error(w, err.Error(), 400)
 		return
 	}
@@ -437,7 +437,7 @@ func (self *WebApp) revertChangeHndl(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// diff
-	diffs, err := diff.NewDiffFromPath(payload.BackupPath, payload.ActualPath, 3)
+	diffs, err := diff.NewDiffFromPath(payload.BackupPath, payload.CurrentPath, 3)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to create diff - %v", err)
 		log.Error(msg)
@@ -445,9 +445,9 @@ func (self *WebApp) revertChangeHndl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// create a backup from the actual file
+	// create a backup from the current file
 	var backup string
-	fh, _ := fs.GetFileHandle(payload.ActualPath)
+	fh, _ := fs.GetFileHandle(payload.CurrentPath)
 	if backup, err = fh.Backup(); err != nil {
 		msg := fmt.Sprintf("Unable to backup the file - %v", err)
 		log.Error(msg)
@@ -456,7 +456,7 @@ func (self *WebApp) revertChangeHndl(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// patch
-	err = diff.PatchPath(payload.ActualPath, diffs.Deltas[payload.DeltaIdx])
+	err = diff.PatchPath(payload.CurrentPath, diffs.Deltas[payload.DeltaIdx])
 	if err != nil {
 		msg := fmt.Sprintf("Unable to revert change - %v", err)
 		log.Error(msg)
@@ -471,13 +471,13 @@ func (self *WebApp) revertChangeHndl(w http.ResponseWriter, r *http.Request) {
 
 /// restore a file version
 ///
-/// expected payload: { actualPath: "/path/to/file"
+/// expected payload: { currentPath: "/path/to/file"
 ///                   , backupPath: "/snapshot/file"
 ///                   }
 func (self *WebApp) restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 	// decode the payload
 	type Payload struct {
-		ActualPath string `json:"actualPath"`
+		CurrentPath string `json:"currentPath"`
 		BackupPath string `json:"backupPath"`
 	}
 
@@ -487,7 +487,7 @@ func (self *WebApp) restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// valiate path
-	if err := self.checkPathIsAllowed(payload.ActualPath); err != nil {
+	if err := self.checkPathIsAllowed(payload.CurrentPath); err != nil {
 		http.Error(w, err.Error(), 400)
 		return
 	}
@@ -498,10 +498,10 @@ func (self *WebApp) restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get the actual file
-	actualFh, err := fs.GetFileHandle(payload.ActualPath)
+	// get the current file
+	currentFh, err := fs.GetFileHandle(payload.CurrentPath)
 	if err != nil {
-		msg := fmt.Sprintf("Unable to open actual file - %v", err)
+		msg := fmt.Sprintf("Unable to open current file - %v", err)
 		log.Error(msg)
 		http.Error(w, msg, 400)
 		return
@@ -516,9 +516,9 @@ func (self *WebApp) restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// create a backup from the actual file
+	// create a backup from the current file
 	var backup string
-	if backup, err = actualFh.Backup(); err != nil {
+	if backup, err = currentFh.Backup(); err != nil {
 		msg := fmt.Sprintf("Unable to backup the file - %v", err)
 		log.Error(msg)
 		http.Error(w, msg, 400)
@@ -526,7 +526,7 @@ func (self *WebApp) restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// restore the backup file
-	if err := backupFh.Copy(payload.ActualPath); err != nil {
+	if err := backupFh.Copy(payload.CurrentPath); err != nil {
 		msg := fmt.Sprintf("Unable to restore the file - %v", err)
 		log.Error(msg)
 		http.Error(w, msg, 400)
@@ -534,7 +534,7 @@ func (self *WebApp) restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 	}
 
 	msg := fmt.Sprintf("File '%s' restored. Backup created at '%s'",
-		actualFh.Name, backup)
+		currentFh.Name, backup)
 	log.Info(msg)
 	w.Write([]byte(msg))
 }

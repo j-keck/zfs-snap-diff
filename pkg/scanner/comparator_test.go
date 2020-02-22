@@ -63,22 +63,22 @@ func TestCompareByMTime(t *testing.T) {
 	}
 
 	cmp, _ := NewComparator("mtime", fileHandleWithMTime(time.Unix(10, 0)))
-	// no diff to actual
+	// no diff to current
 	if cmp.HasChanged(fileHandleWithMTime(time.Unix(10, 0))) {
 		t.Error("wrong change detected")
 	}
 
-	// diff to actual - should trigger
+	// diff to current - should trigger
 	if !cmp.HasChanged(fileHandleWithMTime(time.Unix(20, 0))) {
 		t.Error("wrong change detected")
 	}
 
-	// diff to actual - should NOT trigger, same time as before
+	// diff to current - should NOT trigger, same time as before
 	if cmp.HasChanged(fileHandleWithMTime(time.Unix(20, 0))) {
 		t.Error("wrong change detected")
 	}
 
-	// diff to actual and before - should trigger
+	// diff to current and before - should trigger
 	if !cmp.HasChanged(fileHandleWithMTime(time.Unix(30, 0))) {
 		t.Error("wrong change detected")
 	}

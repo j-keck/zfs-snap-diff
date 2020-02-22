@@ -136,9 +136,10 @@ fileAction = make component { initialState, render, didMount, didUpdate }
             [ R.div
               { className: "card-header"
               , children: case self.props.version of
-                             ActualVersion actual -> [ R.text "Actual content of "
-                                                     , R.b_ [ R.text $ (unwrap >>> _.name) actual ]
-                                                     ]
+                             CurrentVersion current -> [ R.b_ [ R.text "Current" ]
+                                                       , R.text " content of "
+                                                       , R.b_ [ R.text $ (unwrap >>> _.name) current ]
+                                                       ]
                              BackupVersion { backup, snapshot } -> [ R.text "Content of "
                                                                  , R.b_ [ R.text $ (unwrap >>> _.name) backup ]
                                                                  , R.text " from snapshot: "
@@ -172,10 +173,10 @@ fileAction = make component { initialState, render, didMount, didUpdate }
 
         isBackupVersion = case _ of
           BackupVersion _ -> true
-          ActualVersion _ -> false
+          CurrentVersion _ -> false
 
 
 file :: FileVersion -> FH
 file = case _ of
-  ActualVersion actual -> actual
+  CurrentVersion current -> current
   BackupVersion { backup } -> backup

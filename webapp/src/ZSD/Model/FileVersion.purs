@@ -21,17 +21,17 @@ import ZSD.Utils.Ops ((<$$>))
 import ZSD.Utils.HTTP as HTTP
 
 data FileVersion =
-    ActualVersion FH
+    CurrentVersion FH
   | BackupVersion
-    { actual   :: FH
-    , backup   :: FH
+    { current   :: FH
+    , backup    :: FH
     , snapshot :: Snapshot
     }
 
 
 uniqueName :: FileVersion -> String
 uniqueName = case _ of
-  ActualVersion entry -> (unwrap entry).name
+  CurrentVersion entry -> (unwrap entry).name
   BackupVersion { backup: (FH { name }), snapshot } ->
     let { before, after } = maybe { before: name, after: "" }
                                   (flip S.splitAt name)
@@ -81,15 +81,15 @@ instance showFileVersion :: Show FileVersion where
   show = genericShow
 instance readForeignFileVersion :: ReadForeign FileVersion where
   readImpl f =     BackupVersion <$> readImpl f
-               <|> ActualVersion <$> readImpl f
+               <|> CurrentVersion <$> readImpl f
 
 
 
 
 
 restore :: FileVersion -> Aff (Either AppError String)
-restore (BackupVersion { actual, backup } ) =
-  let actualPath = (unwrap >>> _.path) actual
+restore (BackupVersion { current, backup } ) =
+  let currentPath = (unwrap >>> _.path) current
       backupPath = (unwrap >>> _.path) backup
-  in HTTP.post ARF.string "api/restore-file" { actualPath, backupPath }
-restore (ActualVersion _) = pure $ Left $ Bug "restore the actual version not possible"
+  in HTTP.post ARF.string "api/restore-file" { currentPath, backupPath }
+restore (CurrentVersion _) = pure $ Left $ Bug "restore the current version not possible"

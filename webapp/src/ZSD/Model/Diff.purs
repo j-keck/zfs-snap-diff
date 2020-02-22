@@ -56,17 +56,17 @@ type Deltas = Array Delta
 
 
 fetch :: FileVersion -> Aff (Either AppError Diff)
-fetch (BackupVersion { actual, backup }) =
-  let actualPath = (unwrap >>> _.path) actual
+fetch (BackupVersion { current, backup }) =
+  let currentPath = (unwrap >>> _.path) current
       backupPath = (unwrap >>> _.path) backup
-  in HTTP.post' "api/diff" { actualPath, backupPath }
-fetch (ActualVersion _ ) = pure $ Left $ Bug "diff with the same version not possible"
+  in HTTP.post' "api/diff" { currentPath, backupPath }
+fetch (CurrentVersion _ ) = pure $ Left $ Bug "diff with the same version not possible"
 
 
 
 revert :: FileVersion -> Int -> Aff (Either AppError String)
-revert (BackupVersion { actual, backup}) deltaIdx =
-  let actualPath = (unwrap >>> _.path) actual
+revert (BackupVersion { current, backup}) deltaIdx =
+  let currentPath = (unwrap >>> _.path) current
       backupPath = (unwrap >>> _.path) backup
-  in HTTP.post ARF.string "api/revert-change" { actualPath, backupPath, deltaIdx }
-revert (ActualVersion _) _ = pure $ Left $ Bug "revert for the actual version not possible"
+  in HTTP.post ARF.string "api/revert-change" { currentPath, backupPath, deltaIdx }
+revert (CurrentVersion _) _ = pure $ Left $ Bug "revert for the current version not possible"
