@@ -257,6 +257,12 @@ func parseFlags() CliConfig {
 	plog.FlagDebugVar(&cliCfg.logLevel, "v", "debug output")
 	plog.FlagTraceVar(&cliCfg.logLevel, "vv", "trace output with caller location")
 
+	// zfs
+	zfsCfg := &config.Get.ZFS
+	flag.BoolVar(&zfsCfg.UseSudo, "use-sudo", zfsCfg.UseSudo, "use sudo when executing 'zfs' commands")
+	flag.BoolVar(&zfsCfg.MountSnapshots, "mount-snapshots", zfsCfg.MountSnapshots,
+		"mount snapshot (only necessary if it's not mounted by zfs automatically")
+
 	flag.Parse()
 	return *cliCfg
 }
