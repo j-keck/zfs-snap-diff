@@ -118,8 +118,7 @@ fileAction = make component { initialState, render, didMount, didUpdate }
             [ btn "View" "fas fa-eye" View $
                 A.any (\f -> f self.state.mimeType) [MimeType.isText, MimeType.isImage, MimeType.isPDF]
 
-            , btn "Diff" "fas fa-random" Diff $
-                (MimeType.isText self.state.mimeType) && (isBackupVersion self.props.version)
+            , btn "Diff" "fas fa-random" Diff $ MimeType.isText self.state.mimeType
 
             , btn "Download" "fas fa-download" Download true
             , actionButton { text: "Restore"

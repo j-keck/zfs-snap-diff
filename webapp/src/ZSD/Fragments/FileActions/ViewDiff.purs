@@ -79,18 +79,23 @@ viewDiff = make component { initialState, render, didMount, didUpdate }
       guard (self.props.version /= prevProps.version) $ update self Diff
 
     render self =
-      fragment
-      [ R.ul
-        { className: "nav nav-tabs"
-        , children:
-          [ mkTabEntry InlineDiff     self
-          , mkTabEntry SideBySideDiff self
-          ]
-        }
-      , case self.state.view of
-             InlineDiff -> inlineDiff self
-             SideBySideDiff -> sideBySideDiff self
-      ]
+      case self.props.version of
+        CurrentVersion _ -> R.p
+                            { className: "text-center font-weight-bold"
+                            , children: [R.text "Current version selected - select an older version to view a diff." ]
+                            }
+        BackupVersion _ -> fragment
+                           [ R.ul
+                             { className: "nav nav-tabs"
+                             , children:
+                               [ mkTabEntry InlineDiff     self
+                               , mkTabEntry SideBySideDiff self
+                               ]
+                             }
+                           , case self.state.view of
+                                  InlineDiff -> inlineDiff self
+                                  SideBySideDiff -> sideBySideDiff self
+                           ]
 
 
     mkTabEntry id self =
