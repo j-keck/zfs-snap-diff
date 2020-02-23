@@ -13,7 +13,7 @@ var Get Config = Config{
 	Webserver: NewDefaultWebserverConfig(),
 	ZFS: NewDefaultZFSConfig(),
 	UseCacheDirForBackups: true,
-	DaysToScan: 7,
+	DaysToScan: 2,
 	MaxArchiveUnpackedSizeMB: 200,
 	SnapshotNameTemplate: "zfs-snap-diff-%FT%H:%M",
 	CompareMethod: "auto",
