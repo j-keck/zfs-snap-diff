@@ -51,15 +51,15 @@ func main() {
 
 	datasetName := flag.Arg(0)
 	if len(datasetName) == 0 {
-		fmt.Fprintf(os.Stderr, "\nABORT:\n  paramter <ZFS_DATASET_NAME> missing\n")
 		if datasetNames, err := zfs.AvailableDatasetNames(); err == nil {
+			fmt.Fprintf(os.Stderr, "\nABORT:\n  paramter <ZFS_DATASET_NAME> missing\n")
 			names := strings.Join(datasetNames, " | ")
 			fmt.Fprintf(os.Stderr, "\nUSAGE:\n  %s [OPTIONS] <ZFS_DATASET_NAME>\n\n", zfsSnapDiffBin)
 			fmt.Fprintf(os.Stderr, "  <ZFS_DATASET_NAMES>: %s\n\n", names)
+			fmt.Fprintf(os.Stderr, "For more information use `%s -h`", zfsSnapDiffBin)
 		} else {
-			fmt.Fprintf(os.Stderr, "\nUSAGE:\n  %s [OPTIONS] <ZFS_DATASET_NAME>\n\n", zfsSnapDiffBin)
+			fmt.Fprintf(os.Stderr, "ERROR:\n\n  %v\n", err)
 		}
-		fmt.Fprintf(os.Stderr, "For more information use `%s -h`", zfsSnapDiffBin)
 		return
 	}
 

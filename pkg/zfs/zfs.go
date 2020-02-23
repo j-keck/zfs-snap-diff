@@ -53,6 +53,8 @@ func AvailableDatasetNames() ([]string, error) {
 	if stdout, _, err := cmd.Exec("list", "-H", "-t", "filesystem", "-o", "name"); err == nil {
 		datasetNames := strings.Split(stdout, "\n")
 		return datasetNames, nil
+	} else if _, ok := err.(ExecutableNotFound); ok {
+		return nil, errors.New("'zfs' executable not found. Try again with the '-use-sudo' flag")
 	} else {
 		return nil, err
 	}
@@ -61,22 +63,25 @@ func AvailableDatasetNames() ([]string, error) {
 func NewZFSForFilePath(path string) (ZFS, Dataset, error) {
 	cmd := NewZFSCmd(config.Get.ZFS.UseSudo)
 	stdout, _, err := cmd.Exec("list", "-Ho", "name")
-	if err != nil {
+	if err == nil {
+		for _, pool := range strings.Split(stdout, "\n") {
+			z, err := NewZFS(pool)
+			if err != nil {
+				continue
+			}
+			ds, err := z.FindDatasetForPath(path)
+			if err != nil {
+				continue
+			}
+
+			return z, ds, nil
+		}
+		return ZFS{}, Dataset{}, fmt.Errorf("dataset for file-path: %s not found", path)
+	} else if _, ok := err.(ExecutableNotFound); ok {
+		return ZFS{}, Dataset{}, errors.New("'zfs' executable not found. Try again with the '-use-sudo' flag")
+	} else {
 		return ZFS{}, Dataset{}, err
 	}
-	for _, pool := range strings.Split(stdout, "\n") {
-		z, err := NewZFS(pool)
-		if err != nil {
-			continue
-		}
-		ds, err := z.FindDatasetForPath(path)
-		if err != nil {
-			continue
-		}
-
-		return z, ds, nil
-	}
-	return ZFS{}, Dataset{}, fmt.Errorf("dataset for file-path: %s not found", path)
 }
 
 func (self *ZFS) Name() string {
