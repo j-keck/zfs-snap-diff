@@ -1,47 +1,59 @@
 *  ~zfs-snap-diff~
 
-This branch contains the next ~zfs-snap-diff~ version: ~1.0.0~.
-It's a complete rewrite:
+helps you with your zfs snapshots.
 
-  - backend is implemented in [[https://golang.org][Go]] (as before)
-  - frontend in [[http://purescript.org][PureScript]] (with [[https://pursuit.purescript.org/packages/purescript-react-basic][react-basic]])
+** Documentation
 
-For more information see: [[https://j-keck.github.io/zfs-snap-diff/]]
+See the [[https://j-keck.github.io/zfs-snap-diff/][website]] for more details.
 
-** Prebuild
+** Get it
 
-You can download a prebuild version from: [[https://j-keck.github.io/zfs-snap-diff/docs/install]]
+*** Prebuild
 
-** Build from source
+ You can download a prebuild version from: [[https://j-keck.github.io/zfs-snap-diff/docs/install]]
 
-You need only ~go~ to build this project.
-I compile the frontend code to javascript and decode it in ~pkg/webapp/bindata.go~.
+*** Build from source
 
-*** Build with ~go~
+ The backend from ~zfs-snap-diff~ is implemented in [[https://golang.org][Go]], the frontend in [[http://purescript.org][PureScript]].
 
-  - clone this repo: ~git clone -b dev https://github.com/j-keck/zfs-snap-diff~
-  - change to the checkout directory: ~cd zfs-snap-diff~
-  - build it: ~go build -ldflags="-X main.version=$(git describe)" ./cmd/zfs-snap-diff~
+**** Build with ~go~
 
-The optional ~-ldflags="-X main.version=$(git describe)"~ flag updates the ~version~ string in the binary.
+ I use [[https://github.com/go-bindata/go-bindata][go-bindata]] to decode the frontend code and all dependencies to a
+ go source file so you need only the go compiler to compile it yourself.
 
-*** Build with ~nix~
+ The minimum supported go version is =go1.12=.
 
-The ~nix~ build also compiles the frontend to javascript and decode it in ~pkg/webapp/bindata.go~.
+   - clone this repo: ~git clone https://github.com/j-keck/zfs-snap-diff~
+   - ~cd zfs-snap-diff~
+   - build it: ~go build -ldflags="-X main.version=$(git describe)" ./cmd/zfs-snap-diff~
 
-  - clone this repo: ~git clone -b dev https://github.com/j-keck/zfs-snap-diff~
-  - change to the checkout directory: ~cd zfs-snap-diff~
-  - build it: ~nix-build -A zfs-snap-diff~
+ The optional ~-ldflags="-X main.version=$(git describe)"~ flag updates the ~version~ string in the binary.
 
-To crosscompile the binary for
 
-  - FreeBSD: ~nix-build -A zfs-snap-diff --argstr goos freebsd~
-  - MacOS: ~nix-build -A zfs-snap-diff --argstr goos darwin~
-  - Solaris: ~nix-build -A zfs-snap-diff --argstr goos solaris~
+**** Build with ~nix~
+
+I use [[https://nixos.org/nix/][nix]] to build my projects. The ~nix~ build also compiles the frontend
+to javascript and decode it in ~pkg/webapp/bindata.go~.
+
+   - clone this repo: ~git clone https://github.com/j-keck/zfs-snap-diff~
+   - ~cd zfs-snap-diff~
+   - build it: ~nix-build -A zfs-snap-diff~
+
+The build artifacts ~zfs-snap-diff~ and ~zsd~ are in ~./result/bin/~.
+
+ To crosscompile the binary for
+
+   - FreeBSD: ~nix-build -A zfs-snap-diff --argstr goos freebsd~
+   - MacOS: ~nix-build -A zfs-snap-diff --argstr goos darwin~
+   - Solaris: ~nix-build -A zfs-snap-diff --argstr goos solaris~
 
 
 ** Run it
 
-    ~./zfs-snap-diff <POOL>~
+ #+BEGIN_SRC sh
+ ./zfs-snap-diff [OPTIONS] <ZFS_DATASET_NAME>
+ #+END_SRC
+
+ This starts a embedded webserver and serves the included web-app at http://127.0.0.1:12345.
 
  [[./doc/site/static/images/browse-filesystem.png][file:./doc/site/static/images/browse-filesystem.png]]

@@ -5,13 +5,16 @@ creator = "Emacs 26.3 (Org mode 9.1.9 + ox-hugo)"
 weight = 50
 +++
 
-## 1.0.0-beta (unreleased) {#1-dot-0-dot-0-beta--unreleased}
+## 1.0.0 {#1-dot-0-dot-0}
 
 {{< hint info >}}
 This version is a complete rewrite.
 
 The backend is implemented in [Go](https://golang.org) (as before) and the frontend in [PureScript](http://purescript.org).
 {{< /hint >}}
+
+If you have any questions, trouble or other input, feel free to open an
+issue, contact me per mail (see my github profile), or [keybase.io](https://keybase.io/jkeck).
 
 -   create and destroy snapshots from the webapp
 
@@ -29,7 +32,7 @@ The backend is implemented in [Go](https://golang.org) (as before) and the front
 
 -   works now also with 'legacy' mountpoints
 
-[all commits from 0.0.10...dev](https://github.com/j-keck/zfs-snap-diff/compare/0.0.10...dev)
+[all commits from 0.0.10...1.0.0](https://github.com/j-keck/zfs-snap-diff/compare/0.0.10...1.0.0)
 
 
 ## 0.0.10 {#0-dot-0-dot-10}

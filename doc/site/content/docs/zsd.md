@@ -5,10 +5,6 @@ creator = "Emacs 26.3 (Org mode 9.1.9 + ox-hugo)"
 weight = 35
 +++
 
-{{< hint danger >}}
-This describes the currently ****unreleased beta version****.
-{{< /hint >}}
-
 `zsd` - cli tool to find older versions of a given file in your zfs snapshots.
 
 With `zsd` you can
@@ -37,7 +33,11 @@ USAGE:
 OPTIONS:
   -V	print version and exit
   -d int
-        days to scan (default 7)
+        days to scan (default 2)
+ -mount-snapshots
+        mount snapshot (only necessary if it's not mounted by zfs automatically
+ -use-sudo
+        use sudo when executing 'zfs' commands
   -v	debug output
   -vv
         trace output with caller location

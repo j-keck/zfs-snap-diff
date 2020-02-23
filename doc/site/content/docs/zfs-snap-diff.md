@@ -5,11 +5,7 @@ creator = "Emacs 26.3 (Org mode 9.1.9 + ox-hugo)"
 weight = 30
 +++
 
-{{< hint danger >}}
-This describes the currently ****unreleased beta version****.
-{{< /hint >}}
-
-`zfs-snap-diff` - web application to find older versions of a given file in your zfs snapshots.
+`zfs-snap-diff` - web application to find older file versions in zfs snapshots and zfs snapshot management tool.
 
 With `zfs-snap-diff` you can
 
@@ -38,7 +34,7 @@ With `zfs-snap-diff` you can
 
 ```text
 main⟩ zfs-snap-diff -h
-zfs-snap-diff - web application to find older versions of a given file in your zfs snapshots.
+zfs-snap-diff - web application to find older file versions in zfs snapshots and zfs snapshot management tool.
 
 USAGE:
   ./zfs-snap-diff [OPTIONS] <ZFS_DATASET_NAME>
@@ -53,7 +49,7 @@ OPTIONS:
   -d int
         days to scan (default 7)
   -diff-context-size int
-        show N lines before and after each diff (default 5)
+        show N lines before and after each diff (default 2)
   -key string
         TLS private key file
   -l string
@@ -92,7 +88,7 @@ Project home page: https://j-keck.github.io/zfs-snap-diff
 ./zfs-snap-diff [OPTIONS] <ZFS_DATASET_NAME>
 ```
 
-This starts a embedded webserver and serves the included web-app.
+This starts a embedded webserver and serves the included web-app at <http://127.0.0.1:12345>.
 
 -   open your webbrowser at
 

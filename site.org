@@ -15,27 +15,35 @@
 :export_hugo_type: docs
 :END:
 
-{{< hint danger >}}
-This describes the currently **unreleased beta version**.
-{{< /hint >}}
+~zfs-snap-diff~ helps you with your zfs snapshots.
 
-~zfs-snap-diff~ searches different file versions in your zfs snapshots for you.
+** Find file versions
 
-If you have hundreds or thousands of zfs snapshots, ~zfs-snap-diff~ searched
-the snapshots and shows you only the snapshots where a given file was modified.
+ ~zfs-snap-diff~ searches different file versions in your zfs snapshots for you.
 
-To speedup this process, it performs the search incremental when you request an older file version.
+ If you have hundreds or thousands of zfs snapshots, ~zfs-snap-diff~ searched
+ the snapshots and shows you only the snapshots where a given file was modified.
 
-You can inspect a diff from the actual file version to the older file version in the
-snapshot, revert a single change or restore a whole file.
-
-~zfs-snap-diff~ has a web frontend, so it can run on your local work machine or on your
-remote file / backup server (no Xserver necesarry). To keep it portable it's made
-as a single static compiled executable.
+ You can inspect a diff from the actual file version to the older file version in the
+ snapshot, revert a single change or restore a whole file.
 
 
- #+attr_html: :alt Example session from zfs-snap-diff
- [[/images/zfs-snap-diff.gif][file:/images/zfs-snap-diff.gif]]
+** Management
+
+You can create and destroy zfs snapshots, use the integrated directory browser to
+navigate in your snapshots (directory history) and download a directory as a zip-archive.
+
+
+** Simply use
+
+ [[/docs/zfs-snap-diff][~zfs-snap-diff~]] has a web frontend, so it can run on your local work machine or on your
+ remote file / backup server (no Xserver necesarry). To keep it portable it's made
+ as a single static compiled executable.
+
+ For a quick file version lookup / restore in the terminal, it contains the independent [[/docs/zsd][~zsd~]] cli tool.
+
+  #+attr_html: :alt Example session from zfs-snap-diff
+  [[/images/zfs-snap-diff.gif][file:/images/zfs-snap-diff.gif]]
 
 
 
@@ -46,40 +54,49 @@ as a single static compiled executable.
   :export_hugo_section: docs
   :END:
 
-
-{{< hint danger >}}
-This describes the currently **unreleased beta version**.
-{{< /hint >}}
-
 ** Binary packages
 
-You can download the latest binary package from here or
-from the [[https://github.com/j-keck/zfs-snap-diff/releases][githup release page]].
+{{< hint warning >}}
+This is the first release after a complete rewrite. You find older versions on the [[https://github.com/j-keck/zfs-snap-diff/releases][GitHub release page]].
+
+If you have any questions, trouble or other input, feel free to open an
+issue, contact me per mail (see my github profile), or [[https://keybase.io/jkeck][keybase.io]].
+{{< /hint >}}
+
+{{< hint info >}}
+The tar archive contains currently only the executables. In the following releases
+i will provide distribution specific packages.
+{{< /hint >}}
+
+
+You can download the latest binary package from here or from the [[https://github.com/j-keck/zfs-snap-diff/releases][GitHub release page]].
 
  #+BEGIN_SRC elisp :results output raw :exports results
    (defun version-string ()
        "Lookup the actual `zfs-snap-diff' version."
-       (s-trim-right (shell-command-to-string "git describe ")));; --abbrev=0 --match 'v[0-9].[0-9].[0-9]'")))
+       (s-trim-right (shell-command-to-string "git describe --tags --match 'v[0-9].[0-9].[0-9]'")))
 
-     (defun archive-name-string (platform)
+     (defun archive-name-string (platform version)
        "Generate the archive name for the given PLATFORM."
-       (format "zfs-snap-diff-%s-%s.tgz" platform (version-string)))
+       (format "zfs-snap-diff-%s-%s.tgz" platform version))
 
-
-     (defun section-for (platform artifact)
+     (defun section-for (platform artifact version)
        (format (concat "{{< tab \"%s\" >}}\n"
                        "Download the beta version for **%s amd64** here:\n\n"
-                       "[[/%s][%s]]\n"
+                       "[[https://github.com/j-keck/zfs-snap-diff/releases/download/%s/%s][%s]]\n"
                        "{{< /tab >}}\n\n"
-               ) platform platform artifact artifact))
+               ) platform platform version artifact artifact))
 
-     (princ "\n\n{{<tabs \"install\">}}")
-     (princ (section-for "Linux" (archive-name-string "linux")))
-     (princ (section-for "FreeBSD" (archive-name-string "freebsd")))
-     (princ (section-for "macOS" (archive-name-string "darwin")))
-     (princ (section-for "Solaris" (archive-name-string "solaris")))
-     (princ "{{< /tabs >}}\n\n")
+     (let ((v (version-string)))
+       (princ "\n\n{{<tabs \"install\">}}\n")
+       (princ (section-for "Linux" (archive-name-string "linux" v) v))
+       (princ (section-for "FreeBSD" (archive-name-string "freebsd" v) v))
+       (princ (section-for "macOS" (archive-name-string "darwin" v) v))
+       (princ (section-for "Solaris" (archive-name-string "solaris" v) v))
+       (princ "{{< /tabs >}}\n\n"))
  #+END_SRC
+
+ #+RESULTS:
 
 
 
@@ -96,14 +113,17 @@ platform, feel free to contact me!
 
 ** Build from source
 
-You need only [[https://go-lang.org][go]] to build this project.
+ The backend from ~zfs-snap-diff~ is implemented in [[https://golang.org][Go]], the frontend in [[http://purescript.org][PureScript]].
 
 *** ~go~
 
+ I use [[https://github.com/go-bindata/go-bindata][go-bindata]] to decode the frontend code and all dependencies to a
+ go source file so you need only the go compiler to compile it yourself.
+
 The minimum supported go version is =go1.12=.
 
-  - clone this repo: ~git clone -b dev https://github.com/j-keck/zfs-snap-diff~
-  - change to the checkout directory: ~cd zfs-snap-diff~
+  - clone this repo: ~git clone https://github.com/j-keck/zfs-snap-diff~
+  - ~cd zfs-snap-diff~
   - build it: ~go build -ldflags="-X main.version=$(git describe)" ./cmd/zfs-snap-diff~
 
 The optional ~-ldflags="-X main.version=$(git describe)"~ flag updates the ~version~ string in the binary.
@@ -134,11 +154,7 @@ To crosscompile the binary use:
   :export_hugo_section: docs
   :END:
 
-{{< hint danger >}}
-This describes the currently **unreleased beta version**.
-{{< /hint >}}
-
-~zfs-snap-diff~ - web application to find older versions of a given file in your zfs snapshots.
+~zfs-snap-diff~ - web application to find older file versions in zfs snapshots and zfs snapshot management tool.
 
 
 With ~zfs-snap-diff~ you can
@@ -167,7 +183,7 @@ With ~zfs-snap-diff~ you can
 ** Usage
 #+BEGIN_EXAMPLE
 main⟩ zfs-snap-diff -h
-zfs-snap-diff - web application to find older versions of a given file in your zfs snapshots.
+zfs-snap-diff - web application to find older file versions in zfs snapshots and zfs snapshot management tool.
 
 USAGE:
   ./zfs-snap-diff [OPTIONS] <ZFS_DATASET_NAME>
@@ -182,7 +198,7 @@ OPTIONS:
   -d int
         days to scan (default 7)
   -diff-context-size int
-        show N lines before and after each diff (default 5)
+        show N lines before and after each diff (default 2)
   -key string
         TLS private key file
   -l string
@@ -215,17 +231,18 @@ Project home page: https://j-keck.github.io/zfs-snap-diff
 ** Startup
 
    - startup a server instance
+
  #+BEGIN_SRC sh
  ./zfs-snap-diff [OPTIONS] <ZFS_DATASET_NAME>
  #+END_SRC
 
- This starts a embedded webserver and serves the included web-app.
+ This starts a embedded webserver and serves the included web-app at http://127.0.0.1:12345.
 
    - open your webbrowser at
+
  #+BEGIN_SRC sh
  http://127.0.0.1:12345
  #+END_SRC
-
 
 
 ** Browse the actual filesytem
@@ -295,16 +312,13 @@ actual filesystem or from a snapshot.
 The archive size is restricted by default. You can configure per
 [[/docs/configuration/#max-archive-unpacked-size-mb][~max-archive-unpacked-size-mb~]].
 
+
 * zsd
   :PROPERTIES:
   :export_file_name: zsd
   :export_hugo_weight: 35
   :export_hugo_section: docs
   :END:
-
-{{< hint danger >}}
-This describes the currently **unreleased beta version**.
-{{< /hint >}}
 
 ~zsd~ - cli tool to find older versions of a given file in your zfs snapshots.
 
@@ -333,7 +347,11 @@ USAGE:
 OPTIONS:
   -V	print version and exit
   -d int
-        days to scan (default 7)
+        days to scan (default 2)
+ -mount-snapshots
+        mount snapshot (only necessary if it's not mounted by zfs automatically
+ -use-sudo
+        use sudo when executing 'zfs' commands
   -v	debug output
   -vv
         trace output with caller location
@@ -459,7 +477,7 @@ $HOME/Library/Application Support/zfs-snap-diff/zfs-snap-diff.toml
 if it does not find a configuration, it will create the following default configuration:
 #+BEGIN_EXAMPLE
 use-cache-dir-for-backups = true
-days-to-scan = 7
+days-to-scan = 2
 max-archive-unpacked-size-mb = 200
 snapshot-name-template = "zfs-snap-diff-%FT%H:%M"
 compare-method = "auto"
@@ -477,8 +495,6 @@ diff-context-size = 5
   mount-snapshots = false
 #+END_EXAMPLE
 
-** Keys
-
 *** ~use-cache-dir-for-backups~
 
 If it's set to ~true~, the file backups will be stored in the users cache-directory.
@@ -494,15 +510,19 @@ If it's ~false~, it will create the backup file under the actual directory in th
 
 *** ~days-to-scan~
 
-Configures the day range for each scan. If you have a many daily snapshots set this to ~1~.
+To speedup the scan for other file versions, ~zfs-snap-diff~ performs the scan incremental
+when you request an older file version. This parameter determines how many days are scanned
+if you request a older versions.
 
 *** ~max-archive-unpacked-size-mb~
 
-Maximal unpacked archive size in megabytes.
-Set this to ~-1~ to disable the size-check.
+The maximal (unpacked) archive size is restricted by default.
+Set this to ~-1~ to allow disable this restriction.
 
 *** ~snapshot-name-template~
 
+Snapshot name template. Used to create snapshots in the web-app.
+The template supports the following format sequences:
  #+BEGIN_EXAMPLE
  Format sequences are alike the `date` command
    %d: day of month (e.g., 01)
@@ -519,9 +539,9 @@ Set this to ~-1~ to disable the size-check.
 
 *** ~compare-method~
 
-Method how to determine two file versions are the same version.
+Used compare method to find different file versions.
 This is used when scanning the zfs snapshots to determine
-a file was changed in a snapshot.
+if a file was modified in a snapshot.
 
 **** auto
 Uses ~md5~ for text files and ~size+mtime~ for others
@@ -559,13 +579,16 @@ Diff context size in the webui.
 :END:
 
 
-** 1.0.0-beta (unreleased)
+** 1.0.0
 
 {{< hint info >}}
 This version is a complete rewrite.
 
 The backend is implemented in [[https://golang.org][Go]] (as before) and the frontend in [[http://purescript.org][PureScript]].
 {{< /hint >}}
+
+If you have any questions, trouble or other input, feel free to open an
+issue, contact me per mail (see my github profile), or [[https://keybase.io/jkeck][keybase.io]].
 
   - create and destroy snapshots from the webapp
 
@@ -583,7 +606,8 @@ The backend is implemented in [[https://golang.org][Go]] (as before) and the fro
 
   - works now also with 'legacy' mountpoints
 
-[[https://github.com/j-keck/zfs-snap-diff/compare/0.0.10...dev][all commits from 0.0.10...dev]]
+[[https://github.com/j-keck/zfs-snap-diff/compare/0.0.10...1.0.0][all commits from 0.0.10...1.0.0]]
+
 
 ** 0.0.10
 

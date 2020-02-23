@@ -25,7 +25,7 @@ type CliConfig struct {
 func main() {
 	zfsSnapDiffBin := os.Args[0]
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "zfs-snap-diff - web application to find older versions of a given file in your zfs snapshots.\n")
+		fmt.Fprintf(os.Stderr, "zfs-snap-diff - web application to find older file versions zfs snapshot and zfs snapshot management tool.\n")
 		fmt.Fprintf(os.Stderr, "\nUSAGE:\n  %s [OPTIONS] <ZFS_DATASET_NAME>\n\n", zfsSnapDiffBin)
 		fmt.Fprint(os.Stderr, "OPTIONS:\n")
 		flag.PrintDefaults()

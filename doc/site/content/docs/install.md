@@ -5,38 +5,45 @@ creator = "Emacs 26.3 (Org mode 9.1.9 + ox-hugo)"
 weight = 20
 +++
 
-{{< hint danger >}}
-This describes the currently ****unreleased beta version****.
-{{< /hint >}}
-
-
 ## Binary packages {#binary-packages}
 
-You can download the latest binary package from here or
-from the [githup release page](https://github.com/j-keck/zfs-snap-diff/releases).
+{{< hint warning >}}
+This is the first release after a complete rewrite. You find older versions on the [GitHub release page](https://github.com/j-keck/zfs-snap-diff/releases).
 
-{{<tabs "install">}}{{< tab "Linux" >}}
+If you have any questions, trouble or other input, feel free to open an
+issue, contact me per mail (see my github profile), or [keybase.io](https://keybase.io/jkeck).
+{{< /hint >}}
+
+{{< hint info >}}
+The tar archive contains currently only the executables. In the following releases
+i will provide distribution specific packages.
+{{< /hint >}}
+
+You can download the latest binary package from here or from the [GitHub release page](https://github.com/j-keck/zfs-snap-diff/releases).
+
+{{<tabs "install">}}
+{{< tab "Linux" >}}
 Download the beta version for ****Linux amd64**** here:
 
-[zfs-snap-diff-linux-v1.0.0-beta-16-g1bae2c4.tgz](/zfs-snap-diff-linux-v1.0.0-beta-16-g1bae2c4.tgz)
+[zfs-snap-diff-linux-v1.0.0.tgz](https://github.com/j-keck/zfs-snap-diff/releases/download/v1.0.0/zfs-snap-diff-linux-v1.0.0.tgz)
 {{< /tab >}}
 
 {{< tab "FreeBSD" >}}
 Download the beta version for ****FreeBSD amd64**** here:
 
-[zfs-snap-diff-freebsd-v1.0.0-beta-16-g1bae2c4.tgz](/zfs-snap-diff-freebsd-v1.0.0-beta-16-g1bae2c4.tgz)
+[zfs-snap-diff-freebsd-v1.0.0.tgz](https://github.com/j-keck/zfs-snap-diff/releases/download/v1.0.0/zfs-snap-diff-freebsd-v1.0.0.tgz)
 {{< /tab >}}
 
 {{< tab "macOS" >}}
 Download the beta version for ****macOS amd64**** here:
 
-[zfs-snap-diff-darwin-v1.0.0-beta-16-g1bae2c4.tgz](/zfs-snap-diff-darwin-v1.0.0-beta-16-g1bae2c4.tgz)
+[zfs-snap-diff-darwin-v1.0.0.tgz](https://github.com/j-keck/zfs-snap-diff/releases/download/v1.0.0/zfs-snap-diff-darwin-v1.0.0.tgz)
 {{< /tab >}}
 
 {{< tab "Solaris" >}}
 Download the beta version for ****Solaris amd64**** here:
 
-[zfs-snap-diff-solaris-v1.0.0-beta-16-g1bae2c4.tgz](/zfs-snap-diff-solaris-v1.0.0-beta-16-g1bae2c4.tgz)
+[zfs-snap-diff-solaris-v1.0.0.tgz](https://github.com/j-keck/zfs-snap-diff/releases/download/v1.0.0/zfs-snap-diff-solaris-v1.0.0.tgz)
 {{< /tab >}}
 
 {{< /tabs >}}
@@ -53,15 +60,18 @@ platform, feel free to contact me!
 
 ## Build from source {#build-from-source}
 
-You need only [go](https://go-lang.org) to build this project.
+The backend from `zfs-snap-diff` is implemented in [Go](https://golang.org), the frontend in [PureScript](http://purescript.org).
 
 
 ### `go` {#go}
 
+I use [go-bindata](https://github.com/go-bindata/go-bindata) to decode the frontend code and all dependencies to a
+go source file so you need only the go compiler to compile it yourself.
+
 The minimum supported go version is `go1.12`.
 
--   clone this repo: `git clone -b dev https://github.com/j-keck/zfs-snap-diff`
--   change to the checkout directory: `cd zfs-snap-diff`
+-   clone this repo: `git clone https://github.com/j-keck/zfs-snap-diff`
+-   `cd zfs-snap-diff`
 -   build it: `go build -ldflags="-X main.version=$(git describe)" ./cmd/zfs-snap-diff`
 
 The optional `-ldflags="-X main.version=$(git describe)"` flag updates the `version` string in the binary.

@@ -29,7 +29,7 @@ if it does not find a configuration, it will create the following default config
 
 ```text
 use-cache-dir-for-backups = true
-days-to-scan = 7
+days-to-scan = 2
 max-archive-unpacked-size-mb = 200
 snapshot-name-template = "zfs-snap-diff-%FT%H:%M"
 compare-method = "auto"
@@ -48,10 +48,7 @@ diff-context-size = 5
 ```
 
 
-## Keys {#keys}
-
-
-### `use-cache-dir-for-backups` {#use-cache-dir-for-backups}
+## `use-cache-dir-for-backups` {#use-cache-dir-for-backups}
 
 If it's set to `true`, the file backups will be stored in the users cache-directory.
 
@@ -64,18 +61,23 @@ If it's set to `true`, the file backups will be stored in the users cache-direct
 If it's `false`, it will create the backup file under the actual directory in the `./zfs-snap-diff/` folder.
 
 
-### `days-to-scan` {#days-to-scan}
+## `days-to-scan` {#days-to-scan}
 
-Configures the day range for each scan. If you have a many daily snapshots set this to `1`.
-
-
-### `max-archive-unpacked-size-mb` {#max-archive-unpacked-size-mb}
-
-Maximal unpacked archive size in megabytes.
-Set this to `-1` to disable the size-check.
+To speedup the scan for other file versions, `zfs-snap-diff` performs the scan incremental
+when you request an older file version. This parameter determines how many days are scanned
+if you request a older versions.
 
 
-### `snapshot-name-template` {#snapshot-name-template}
+## `max-archive-unpacked-size-mb` {#max-archive-unpacked-size-mb}
+
+The maximal (unpacked) archive size is restricted by default.
+Set this to `-1` to allow disable this restriction.
+
+
+## `snapshot-name-template` {#snapshot-name-template}
+
+Snapshot name template. Used to create snapshots in the web-app.
+The template supports the following format sequences:
 
 ```text
 Format sequences are alike the `date` command
@@ -92,48 +94,48 @@ Format sequences are alike the `date` command
 ```
 
 
-### `compare-method` {#compare-method}
+## `compare-method` {#compare-method}
 
-Method how to determine two file versions are the same version.
+Used compare method to find different file versions.
 This is used when scanning the zfs snapshots to determine
-a file was changed in a snapshot.
+if a file was modified in a snapshot.
 
 
-#### auto {#auto}
+### auto {#auto}
 
 Uses `md5` for text files and `size+mtime` for others
 
 
-#### size {#size}
+### size {#size}
 
 If two files versions have the same filesize,
 it's interpreted as the same version.
 
 
-#### mtime {#mtime}
+### mtime {#mtime}
 
 If two files versions have the same mtime,
 it's interpreted as the same version.
 
 
-#### size+mtime {#size-plus-mtime}
+### size+mtime {#size-plus-mtime}
 
 If two files versions have the same size AND mtime,
 it's interpreted as the same version.
 
 
-#### content {#content}
+### content {#content}
 
 If two files versions have the same content,
 it's interpreted as the same version.
 
 
-#### md5 {#md5}
+### md5 {#md5}
 
 If two files versions have the same md5 sum,
 it's interpreted as the same version.
 
 
-### `diff-context-size` {#diff-context-size}
+## `diff-context-size` {#diff-context-size}
 
 Diff context size in the webui.
