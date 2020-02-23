@@ -1,6 +1,7 @@
 package zfs
 
 import (
+	"errors"
 	"fmt"
 	"github.com/j-keck/plog"
 	"github.com/j-keck/zfs-snap-diff/pkg/config"
@@ -9,7 +10,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"errors"
 )
 
 var log = plog.GlobalLogger()
@@ -194,7 +194,6 @@ func (self *ZFS) scanDatasets(name string) (Datasets, error) {
 	return datasets, nil
 }
 
-
 func (self *ZFS) MountSnapshot(snap Snapshot) error {
 	log.Debugf("mount snapshot: %s", snap.Name)
 	stdout, stderr, err := self.cmd.Exec("mount", snap.FullName)
@@ -202,7 +201,6 @@ func (self *ZFS) MountSnapshot(snap Snapshot) error {
 	log.Tracef("mount snapshot stderr: %s", stderr)
 	return err
 }
-
 
 type SortByPathDesc Datasets
 

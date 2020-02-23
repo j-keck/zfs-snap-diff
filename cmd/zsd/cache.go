@@ -1,12 +1,12 @@
 package main
 
 import (
-	"github.com/j-keck/zfs-snap-diff/pkg/scanner"
 	"encoding/json"
-	"github.com/j-keck/zfs-snap-diff/pkg/fs"
-	"os"
 	"errors"
 	"fmt"
+	"github.com/j-keck/zfs-snap-diff/pkg/fs"
+	"github.com/j-keck/zfs-snap-diff/pkg/scanner"
+	"os"
 )
 
 func cacheFileVersions(versions []scanner.FileVersion) error {

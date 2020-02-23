@@ -2,13 +2,13 @@ package fs
 
 import (
 	"fmt"
+	"github.com/j-keck/zfs-snap-diff/pkg/config"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
-	"time"
 	"path/filepath"
-	"github.com/j-keck/zfs-snap-diff/pkg/config"
+	"time"
 )
 
 // FileHandle represents a file
@@ -57,13 +57,11 @@ func (self *FileHandle) Read() ([]byte, error) {
 	return buf, nil
 }
 
-
 // ReadString returns the whole file content as a string.
 func (self *FileHandle) ReadString() (string, error) {
 	buf, err := self.Read()
 	return string(buf), err
 }
-
 
 // CopyTo copies the whole file content into a given writer.
 func (self *FileHandle) CopyTo(w io.Writer) error {
@@ -139,7 +137,6 @@ func (self *FileHandle) Backup() (string, error) {
 		}
 		backupPath = backupDir.Path
 	}
-
 
 	// copy the file in the backup location
 	now := time.Now().Format("20060102_150405")

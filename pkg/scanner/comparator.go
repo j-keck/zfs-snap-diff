@@ -51,7 +51,7 @@ func NewComparator(method string, fh fs.FileHandle) (Comparator, error) {
 //
 // by size
 type CompareBySize struct {
-	current    fs.FileHandle
+	current   fs.FileHandle
 	otherSize int64
 }
 
@@ -71,7 +71,7 @@ func (self *CompareBySize) HasChanged(other fs.FileHandle) bool {
 
 // by modification time
 type CompareByMTime struct {
-	current     fs.FileHandle
+	current    fs.FileHandle
 	otherMTime time.Time
 }
 
@@ -113,7 +113,7 @@ func (self *CompareBySizeAndModTime) HasChanged(other fs.FileHandle) bool {
 type CompareByContent struct {
 	current        fs.FileHandle
 	currentContent []byte
-	otherContent  []byte
+	otherContent   []byte
 }
 
 func (self *CompareByContent) init(current fs.FileHandle) {
@@ -146,7 +146,7 @@ func (self *CompareByContent) HasChanged(other fs.FileHandle) bool {
 type CompareByMD5 struct {
 	current     fs.FileHandle
 	currentHash []byte
-	otherHash  []byte
+	otherHash   []byte
 }
 
 func (self *CompareByMD5) init(current fs.FileHandle) {

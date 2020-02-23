@@ -2,9 +2,9 @@ package zfs
 
 import (
 	"bytes"
+	"errors"
 	"os/exec"
 	"strings"
-	"errors"
 )
 
 type Stdout = string

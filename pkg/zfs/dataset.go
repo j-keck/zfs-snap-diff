@@ -71,7 +71,7 @@ func (self *Dataset) CreateSnapshot(name string) (string, error) {
 		return "", errors.New("snapshot-name can't be empty")
 	}
 
-	if ! strings.HasPrefix(name, self.Name) {
+	if !strings.HasPrefix(name, self.Name) {
 		name = self.Name + "@" + name
 	}
 
@@ -83,7 +83,7 @@ func (self *Dataset) CreateSnapshot(name string) (string, error) {
 }
 
 func (self *Dataset) DestroySnapshot(name string) (string, error) {
-	if ! strings.HasPrefix(name, self.Name) {
+	if !strings.HasPrefix(name, self.Name) {
 		name = self.Name + "@" + name
 	}
 
@@ -93,7 +93,6 @@ func (self *Dataset) DestroySnapshot(name string) (string, error) {
 	log.Tracef("destroy snapshot stderr: %s", stderr)
 	return name, err
 }
-
 
 // Datasets are a list of Dataset
 type Datasets []Dataset

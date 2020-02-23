@@ -6,15 +6,15 @@ import (
 
 type WebserverConfig struct {
 	// listen
-	ListenIp    string `toml:"listen-ip"`
-	ListenPort  int    `toml:"listen-port"`
+	ListenIp   string `toml:"listen-ip"`
+	ListenPort int    `toml:"listen-port"`
 
 	// tls
-	UseTLS      bool   `toml:"use-tls"`
-	CertFile    string `toml:"cert-file"`
-	KeyFile     string `toml:"key-file"`
+	UseTLS   bool   `toml:"use-tls"`
+	CertFile string `toml:"cert-file"`
+	KeyFile  string `toml:"key-file"`
 	// webapp
-	WebappDir   string `toml:"webapp-dir,omitempty"`
+	WebappDir string `toml:"webapp-dir,omitempty"`
 }
 
 func (self *WebserverConfig) ListenAddress() string {
@@ -23,8 +23,8 @@ func (self *WebserverConfig) ListenAddress() string {
 
 func NewDefaultWebserverConfig() WebserverConfig {
 	return WebserverConfig{
-		ListenIp:              "127.0.0.1",
-		ListenPort:            12345,
-		UseTLS:                false,
+		ListenIp:   "127.0.0.1",
+		ListenPort: 12345,
+		UseTLS:     false,
 	}
 }

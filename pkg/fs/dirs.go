@@ -1,12 +1,11 @@
 package fs
 
 import (
-	"path/filepath"
-	"os"
-	"runtime"
 	"errors"
+	"os"
+	"path/filepath"
+	"runtime"
 )
-
 
 // ConfigDir returns the user-local config directory
 func ConfigDir() (DirHandle, error) {
@@ -27,7 +26,7 @@ func ConfigDir() (DirHandle, error) {
 		if basePath == "" {
 			basePath = os.Getenv("HOME")
 			if basePath == "" {
-				return DirHandle{},  errors.New("neither $XDG_CONFIG_HOME nor $HOME are defined")
+				return DirHandle{}, errors.New("neither $XDG_CONFIG_HOME nor $HOME are defined")
 			}
 			basePath += "/.config"
 		}
@@ -49,7 +48,6 @@ func CacheDir() (DirHandle, error) {
 	path := filepath.Join(basePath, "zfs-snap-diff")
 	return GetOrCreateDirHandle(path, 0770)
 }
-
 
 // TempDir returns the directory for temporary files
 func TempDir() (DirHandle, error) {

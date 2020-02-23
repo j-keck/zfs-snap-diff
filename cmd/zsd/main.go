@@ -1,21 +1,21 @@
 package main
 
 import (
-	"github.com/j-keck/zfs-snap-diff/pkg/zfs"
-	"github.com/j-keck/zfs-snap-diff/pkg/diff"
-	"github.com/j-keck/zfs-snap-diff/pkg/scanner"
+	"errors"
+	"flag"
+	"fmt"
 	"github.com/j-keck/plog"
+	"github.com/j-keck/zfs-snap-diff/pkg/config"
+	"github.com/j-keck/zfs-snap-diff/pkg/diff"
+	"github.com/j-keck/zfs-snap-diff/pkg/fs"
+	"github.com/j-keck/zfs-snap-diff/pkg/scanner"
+	"github.com/j-keck/zfs-snap-diff/pkg/zfs"
+	"math"
 	"os"
 	"path/filepath"
-	"fmt"
-	"time"
-	"flag"
-	"math"
-	"strings"
 	"strconv"
-	"errors"
-	"github.com/j-keck/zfs-snap-diff/pkg/config"
-	"github.com/j-keck/zfs-snap-diff/pkg/fs"
+	"strings"
+	"time"
 )
 
 var version string = "SNAPSHOT"
@@ -34,13 +34,12 @@ func main() {
 		flag.PrintDefaults()
 		fmt.Fprintf(os.Stderr, "\nACTIONS:\n")
 		fmt.Fprintf(os.Stderr, "  list                : list zfs snapshots where the given file was modified\n")
-		fmt.Fprintf(os.Stderr, "  cat     <#|SNAPSHOT>: show the file content from the given snapshot\n");
+		fmt.Fprintf(os.Stderr, "  cat     <#|SNAPSHOT>: show the file content from the given snapshot\n")
 		fmt.Fprintf(os.Stderr, "  diff    <#|SNAPSHOT>: show a diff from the selected snapshot to the actual version\n")
 		fmt.Fprintf(os.Stderr, "  restore <#|SNAPSHOT>: restore the file from the given snapshot\n")
 		fmt.Fprintf(os.Stderr, "\nYou can use the snapshot number from the `list` output or the snapshot name to select a snapshot.\n")
 		fmt.Fprintf(os.Stderr, "\nProject home page: https://j-keck.github.io/zfs-snap-diff\n")
 	}
-
 
 	initLogger()
 	cliCfg := parseFlags()
@@ -56,7 +55,6 @@ func main() {
 		return
 	}
 
-
 	// file path
 	fileName := flag.Arg(0)
 	filePath, err := filepath.Abs(fileName)
@@ -66,7 +64,6 @@ func main() {
 	}
 	log.Debugf("full path: %s", filePath)
 
-
 	// init zfs handler
 	zfs, ds, err := zfs.NewZFSForFilePath(filePath)
 	if err != nil {
@@ -75,8 +72,7 @@ func main() {
 	}
 	log.Debugf("work on dataset: %s", ds.Name)
 
-
-    // action
+	// action
 	action := flag.Arg(1)
 	switch action {
 	case "list":
@@ -120,7 +116,7 @@ func main() {
 		}
 
 		file, err := fs.GetFileHandle(version.Backup.Path)
-		if err !=nil {
+		if err != nil {
 			log.Errorf("unable to find file in the snapshot - %v", err)
 			return
 		}
@@ -168,7 +164,6 @@ func main() {
 			return
 		}
 
-
 		backupPath, err := version.Actual.Backup()
 		if err != nil {
 			log.Errorf("unable to backup the acutal version - %v", err)
@@ -186,7 +181,6 @@ func main() {
 	}
 }
 
-
 func lookupRequestedVersion(filePath, versionName string) (*scanner.FileVersion, error) {
 
 	// load file-versions from cache file
@@ -194,7 +188,6 @@ func lookupRequestedVersion(filePath, versionName string) (*scanner.FileVersion,
 	if err != nil {
 		return nil, err
 	}
-
 
 	// `versionName` can be the snapshot number from the `list` output or the name
 	var version *scanner.FileVersion
@@ -222,7 +215,6 @@ func lookupRequestedVersion(filePath, versionName string) (*scanner.FileVersion,
 		return nil, errors.New("file mismatch - perform a `list` action at first")
 	}
 }
-
 
 func humanDuration(dur time.Duration) string {
 	s := int(dur.Seconds())

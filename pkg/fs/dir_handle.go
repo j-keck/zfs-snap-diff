@@ -1,13 +1,13 @@
 package fs
 
 import (
+	"archive/zip"
+	"fmt"
+	"github.com/j-keck/zfs-snap-diff/pkg/config"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"archive/zip"
 	"strings"
-	"github.com/j-keck/zfs-snap-diff/pkg/config"
-	"fmt"
 )
 
 // DirHandle represents a directory
@@ -27,7 +27,6 @@ func GetDirHandle(path string) (DirHandle, error) {
 	return handle.AsDirHandle()
 }
 
-
 // GetOrCreateDirHandle returns a handle to a existing or a new created directory.
 func GetOrCreateDirHandle(path string, perm os.FileMode) (DirHandle, error) {
 	if dir, err := GetDirHandle(path); err == nil {
@@ -44,7 +43,6 @@ func GetOrCreateDirHandle(path string, perm os.FileMode) (DirHandle, error) {
 		return DirHandle{}, err
 	}
 }
-
 
 // GetSubDirHandle returns a child-dir of the current dir-handle.
 // This operation fails if the requested directory does not exists.
@@ -64,7 +62,6 @@ func (self *DirHandle) GetFileHandle(name string) (FileHandle, error) {
 	path := filepath.Join(self.Path, name)
 	return GetFileHandle(path)
 }
-
 
 // ReadFile reads a child-file of the current dir-handle.
 func (self *DirHandle) ReadFile(name string) ([]byte, error) {
@@ -113,14 +110,14 @@ func (self *DirHandle) CreateArchive(name string) (FileHandle, error) {
 
 	var add func(*FSHandle, string, *zip.Writer, *int) error
 	add = func(h *FSHandle, basePath string, w *zip.Writer, archiveSize *int) error {
-		if maxSizeMB > 0 && *archiveSize / 1024 / 1024 > maxSizeMB {
+		if maxSizeMB > 0 && *archiveSize/1024/1024 > maxSizeMB {
 			return fmt.Errorf("abort - maximum configured archive size reached (%dMB > %dMB)",
-				*archiveSize / 1024 / 1024,
+				*archiveSize/1024/1024,
 				maxSizeMB)
 		}
 		switch h.Kind {
 		case FILE:
-			relPath := strings.TrimPrefix(h.Path, basePath + "/")
+			relPath := strings.TrimPrefix(h.Path, basePath+"/")
 			log.Tracef("add %s to archive", relPath)
 			f, err := w.Create(relPath)
 			if err != nil {

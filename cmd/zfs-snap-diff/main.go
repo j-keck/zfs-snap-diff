@@ -5,20 +5,20 @@ import (
 	"fmt"
 	"github.com/j-keck/plog"
 	"github.com/j-keck/zfs-snap-diff/pkg/config"
+	"github.com/j-keck/zfs-snap-diff/pkg/fs"
 	"github.com/j-keck/zfs-snap-diff/pkg/webapp"
 	"github.com/j-keck/zfs-snap-diff/pkg/zfs"
 	"os"
 	"strings"
-	"github.com/j-keck/zfs-snap-diff/pkg/fs"
 )
 
 var version string = "SNAPSHOT"
 
 type CliConfig struct {
-	logLevel      plog.LogLevel
-	logTimestamps bool
-	logLocations  bool
-	printVersion  bool
+	logLevel              plog.LogLevel
+	logTimestamps         bool
+	logLocations          bool
+	printVersion          bool
 	listenOnAllInterfaces bool
 }
 
@@ -54,7 +54,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "\nABORT:\n  paramter <ZFS_DATASET_NAME> missing\n")
 		if datasetNames, err := zfs.AvailableDatasetNames(); err == nil {
 			names := strings.Join(datasetNames, " | ")
-			fmt.Fprintf(os.Stderr, "\nUSAGE:\n  %s [OPTIONS] <ZFS_DATASET_NAME>\n\n",  zfsSnapDiffBin)
+			fmt.Fprintf(os.Stderr, "\nUSAGE:\n  %s [OPTIONS] <ZFS_DATASET_NAME>\n\n", zfsSnapDiffBin)
 			fmt.Fprintf(os.Stderr, "  <ZFS_DATASET_NAMES>: %s\n\n", names)
 		} else {
 			fmt.Fprintf(os.Stderr, "\nUSAGE:\n  %s [OPTIONS] <ZFS_DATASET_NAME>\n\n", zfsSnapDiffBin)
@@ -62,7 +62,6 @@ func main() {
 		fmt.Fprintf(os.Stderr, "For more information use `%s -h`", zfsSnapDiffBin)
 		return
 	}
-
 
 	if z, err := zfs.NewZFS(datasetName); err == nil {
 		webapp := webapp.NewWebApp(z)
@@ -73,7 +72,6 @@ func main() {
 		fmt.Fprintf(os.Stderr, "\nABORT:\n  ")
 		fmt.Fprintf(os.Stderr, err.Error())
 	}
-
 
 }
 
@@ -130,7 +128,6 @@ func loadConfig() {
 	configPath := configDir.Path + "/zfs-snap-diff.toml"
 	config.LoadConfig(configPath)
 }
-
 
 func initLogger() {
 	consoleLogger := plog.NewConsoleLogger(" | ")

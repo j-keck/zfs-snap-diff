@@ -2,6 +2,7 @@ package webapp
 
 import (
 	"fmt"
+	"github.com/j-keck/zfs-snap-diff/pkg/config"
 	"github.com/j-keck/zfs-snap-diff/pkg/diff"
 	"github.com/j-keck/zfs-snap-diff/pkg/fs"
 	"github.com/j-keck/zfs-snap-diff/pkg/scanner"
@@ -10,18 +11,17 @@ import (
 	"path/filepath"
 	"strconv"
 	"time"
-	"github.com/j-keck/zfs-snap-diff/pkg/config"
 )
 
 /// responds the configuration
 func (self *WebApp) configHndl(w http.ResponseWriter, r *http.Request) {
-	respond(w, r, struct{
-		Datasets             zfs.Datasets  `json:"datasets"`
-		DaysToScan           int           `json:"daysToScan"`
-		SnapshotNameTemplate string `json:"snapshotNameTemplate"`
+	respond(w, r, struct {
+		Datasets             zfs.Datasets `json:"datasets"`
+		DaysToScan           int          `json:"daysToScan"`
+		SnapshotNameTemplate string       `json:"snapshotNameTemplate"`
 	}{
-		Datasets: self.zfs.Datasets(),
-		DaysToScan: config.Get.DaysToScan,
+		Datasets:             self.zfs.Datasets(),
+		DaysToScan:           config.Get.DaysToScan,
 		SnapshotNameTemplate: config.Get.SnapshotNameTemplate,
 	})
 }
@@ -50,7 +50,6 @@ func (self *WebApp) statHndl(w http.ResponseWriter, r *http.Request) {
 	}
 	respond(w, r, fh)
 }
-
 
 /// responds with a directory listing
 ///
@@ -109,7 +108,7 @@ func (self *WebApp) findFileVersionsHndl(w http.ResponseWriter, r *http.Request)
 
 	dateRange := scanner.NDaysBack(config.Get.DaysToScan, time.Now())
 	compareMethod := config.Get.CompareMethod
-	defaults := Payload{CompareMethod: compareMethod, DateRange: dateRange }
+	defaults := Payload{CompareMethod: compareMethod, DateRange: dateRange}
 	payload, ok := decodeJsonPayload(w, r, &defaults).(*Payload)
 	if !ok {
 		return
@@ -171,7 +170,6 @@ func (self *WebApp) snapshotsForDatasetHndl(w http.ResponseWriter, r *http.Reque
 
 	respond(w, r, snaps)
 }
-
 
 func (self *WebApp) createSnapshotHndl(w http.ResponseWriter, r *http.Request) {
 	// decode the payload
@@ -264,7 +262,7 @@ func (self *WebApp) mimeTypeHndl(w http.ResponseWriter, r *http.Request) {
 	// open the file handle
 	fh, err := fs.GetFileHandle(payload.Path)
 	if err != nil {
-        msg := fmt.Sprintf("Unable to open the file: %s - %v", payload.Path, err)
+		msg := fmt.Sprintf("Unable to open the file: %s - %v", payload.Path, err)
 		log.Error(msg)
 		http.Error(w, msg, 500)
 		return
@@ -373,7 +371,7 @@ func (self *WebApp) diffHndl(w http.ResponseWriter, r *http.Request) {
 
 	// decode the payload
 	type Payload struct {
-		CurrentPath      string `json:"currentPath"`
+		CurrentPath     string `json:"currentPath"`
 		BackupPath      string `json:"backupPath"`
 		DiffContextSize int    `json:"diffContextSize"`
 	}
@@ -415,8 +413,8 @@ func (self *WebApp) revertChangeHndl(w http.ResponseWriter, r *http.Request) {
 	// decode the payload
 	type Payload struct {
 		CurrentPath string `json:"currentPath"`
-		BackupPath string `json:"backupPath"`
-		DeltaIdx   int    `json:"deltaIdx"`
+		BackupPath  string `json:"backupPath"`
+		DeltaIdx    int    `json:"deltaIdx"`
 	}
 
 	payload, ok := decodeJsonPayload(w, r, &Payload{}).(*Payload)
@@ -478,7 +476,7 @@ func (self *WebApp) restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 	// decode the payload
 	type Payload struct {
 		CurrentPath string `json:"currentPath"`
-		BackupPath string `json:"backupPath"`
+		BackupPath  string `json:"backupPath"`
 	}
 
 	payload, ok := decodeJsonPayload(w, r, &Payload{}).(*Payload)
@@ -539,7 +537,6 @@ func (self *WebApp) restoreFileHndl(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(msg))
 }
 
-
 /// create a archive
 ///
 /// expected request parameters: /api/archive?path=/path/to/dir[&name=other-name.zip]
@@ -571,7 +568,6 @@ func (self *WebApp) prepareArchiveHndl(w http.ResponseWriter, r *http.Request) {
 		payload = *p
 	}
 
-
 	// validate the payload
 	if len(payload.Path) == 0 {
 		msg := fmt.Sprintf("Unable to prepare archive - Paramater 'path' missing")
@@ -580,13 +576,11 @@ func (self *WebApp) prepareArchiveHndl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
 	// valiate path
 	if err := self.checkPathIsAllowed(payload.Path); err != nil {
 		http.Error(w, err.Error(), 400)
 		return
 	}
-
 
 	dir, err := fs.GetDirHandle(payload.Path)
 	if err != nil {
@@ -599,7 +593,6 @@ func (self *WebApp) prepareArchiveHndl(w http.ResponseWriter, r *http.Request) {
 	if len(payload.Name) == 0 {
 		payload.Name = dir.Name + ".zip"
 	}
-
 
 	// create archive
 	_, err = dir.CreateArchive(payload.Name)
@@ -632,7 +625,7 @@ func (self *WebApp) downloadArchiveHndl(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, msg, 500)
 		return
 	}
-	log.Infof("serve archive: %s",archive.Path)
+	log.Infof("serve archive: %s", archive.Path)
 
 	contentLength := strconv.FormatInt(archive.Size, 10)
 	contentDisposition := "attachment; filename=" + name

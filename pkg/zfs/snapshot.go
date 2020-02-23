@@ -8,10 +8,10 @@ import (
 
 // Snapshot - zfs snapshot
 type Snapshot struct {
-	Name        string       `json:"name"`
-	FullName    string       `json:"fullName"`
-	Created     time.Time    `json:"created"`
-	MountPoint  fs.DirHandle `json:"mountPoint"`
+	Name       string       `json:"name"`
+	FullName   string       `json:"fullName"`
+	Created    time.Time    `json:"created"`
+	MountPoint fs.DirHandle `json:"mountPoint"`
 }
 
 // Check if the snaphot is mounted

@@ -33,7 +33,7 @@ func Test1DaysBack(t *testing.T) {
 
 func TestIsBefore(t *testing.T) {
 	from := date(2020, 1, 1)
-	to   := date(2020, 1, 2)
+	to := date(2020, 1, 2)
 	dr, err := NewDateRange(from, to)
 	if err != nil {
 		t.Errorf("%v", err)
@@ -43,14 +43,14 @@ func TestIsBefore(t *testing.T) {
 		t.Errorf("Date IS in DateRange - range: %v, date: %v", dr, to)
 	}
 
-	if ! dr.IsBefore(date(2020, 1, 3)) {
+	if !dr.IsBefore(date(2020, 1, 3)) {
 		t.Errorf("01-01-2020->02-01-2020 is before 03-01-2020 - but was not detected")
 	}
 }
 
 func TestIsAfter(t *testing.T) {
 	from := date(2020, 1, 2)
-	to   := date(2020, 1, 3)
+	to := date(2020, 1, 3)
 	dr, err := NewDateRange(from, to)
 	if err != nil {
 		t.Errorf("%v", err)
@@ -60,12 +60,10 @@ func TestIsAfter(t *testing.T) {
 		t.Errorf("Date IS in DateRange - range: %v, date: %v", dr, to)
 	}
 
-	if ! dr.IsAfter(date(2020, 1, 1)) {
+	if !dr.IsAfter(date(2020, 1, 1)) {
 		t.Errorf("02-01-2020->03-01-2020 is after 01-01-2020 - but was not detected")
 	}
 }
-
-
 
 func TestUnmarshalWithTo(t *testing.T) {
 	var dr DateRange

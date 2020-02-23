@@ -6,19 +6,19 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"time"
 	"strings"
+	"time"
 )
 
 // FSHandle represents a handle to a filesystem entry
 //
 // This can be a file, a directory or anything else.
 type FSHandle struct {
-	Name    string    `json:"name"`
-	Path    string    `json:"path"`
-	Kind    Kind      `json:"kind"`
-	Size    int64     `json:"size"`
-	MTime   time.Time `json:"mtime"`
+	Name  string    `json:"name"`
+	Path  string    `json:"path"`
+	Kind  Kind      `json:"kind"`
+	Size  int64     `json:"size"`
+	MTime time.Time `json:"mtime"`
 }
 
 // GetFSHandle

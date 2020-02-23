@@ -2,8 +2,8 @@ package fs
 
 import (
 	"encoding/json"
-	"os"
 	"fmt"
+	"os"
 )
 
 type Kind int

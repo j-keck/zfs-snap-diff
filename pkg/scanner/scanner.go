@@ -2,12 +2,12 @@ package scanner
 
 import (
 	"github.com/j-keck/plog"
+	"github.com/j-keck/zfs-snap-diff/pkg/config"
 	"github.com/j-keck/zfs-snap-diff/pkg/fs"
 	"github.com/j-keck/zfs-snap-diff/pkg/zfs"
 	"path"
 	"strings"
 	"time"
-	"github.com/j-keck/zfs-snap-diff/pkg/config"
 )
 
 var log = plog.GlobalLogger()

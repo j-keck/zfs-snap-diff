@@ -31,16 +31,16 @@ func decodeJsonPayload(w http.ResponseWriter, r *http.Request, payload interface
 func respond(w http.ResponseWriter, r *http.Request, payload interface{}) {
 	if js, err := json.Marshal(payload); err == nil {
 		/* disable response body tracing.
-           this generates a lot of unecessary output which makes the logs hard to read
-		if log.IsTraceEnabled() {
-			log.Tracef("respond to request at: %s", r.URL)
+		           this generates a lot of unecessary output which makes the logs hard to read
+				if log.IsTraceEnabled() {
+					log.Tracef("respond to request at: %s", r.URL)
 
-			// format the json response and log it
-			var buf bytes.Buffer
-			json.Indent(&buf, js, "                                ", "  ")
-			log.Tracef("  json: %s", buf.String())
-		}
-        */
+					// format the json response and log it
+					var buf bytes.Buffer
+					json.Indent(&buf, js, "                                ", "  ")
+					log.Tracef("  json: %s", buf.String())
+				}
+		*/
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(js)
 	} else {

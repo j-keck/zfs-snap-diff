@@ -15,9 +15,9 @@ type DateRange struct {
 
 func NewDateRange(from time.Time, to time.Time) (DateRange, error) {
 	if from.After(to) {
-		return DateRange{from, to}, fmt.Errorf("invalid DateRange - from: %v is AFTER to: %v", from , to)
+		return DateRange{from, to}, fmt.Errorf("invalid DateRange - from: %v is AFTER to: %v", from, to)
 	}
-	return DateRange { from, to }, nil
+	return DateRange{from, to}, nil
 }
 
 func NDaysBack(n int, to time.Time) DateRange {
