@@ -74,7 +74,7 @@ You can download the latest binary package from here or from the [[https://githu
  #+BEGIN_SRC elisp :results output raw :exports results
    (defun version-string ()
        "Lookup the actual `zfs-snap-diff' version."
-       (s-trim-right (shell-command-to-string "git describe --tags --match 'v[0-9].[0-9].[0-9]'")))
+       (s-trim-right (shell-command-to-string "git describe --abbrev=0 --match 'v[0-9].[0-9].[0-9]'")))
 
      (defun archive-name-string (platform version)
        "Generate the archive name for the given PLATFORM."

@@ -25,25 +25,25 @@ You can download the latest binary package from here or from the [GitHub release
 {{< tab "Linux" >}}
 Download the beta version for ****Linux amd64**** here:
 
-[zfs-snap-diff-linux-v1.0.0-1-gd6da447.tgz](https://github.com/j-keck/zfs-snap-diff/releases/download/v1.0.0-1-gd6da447/zfs-snap-diff-linux-v1.0.0-1-gd6da447.tgz)
+[zfs-snap-diff-linux-v1.0.0.tgz](https://github.com/j-keck/zfs-snap-diff/releases/download/v1.0.0/zfs-snap-diff-linux-v1.0.0.tgz)
 {{< /tab >}}
 
 {{< tab "FreeBSD" >}}
 Download the beta version for ****FreeBSD amd64**** here:
 
-[zfs-snap-diff-freebsd-v1.0.0-1-gd6da447.tgz](https://github.com/j-keck/zfs-snap-diff/releases/download/v1.0.0-1-gd6da447/zfs-snap-diff-freebsd-v1.0.0-1-gd6da447.tgz)
+[zfs-snap-diff-freebsd-v1.0.0.tgz](https://github.com/j-keck/zfs-snap-diff/releases/download/v1.0.0/zfs-snap-diff-freebsd-v1.0.0.tgz)
 {{< /tab >}}
 
 {{< tab "macOS" >}}
 Download the beta version for ****macOS amd64**** here:
 
-[zfs-snap-diff-darwin-v1.0.0-1-gd6da447.tgz](https://github.com/j-keck/zfs-snap-diff/releases/download/v1.0.0-1-gd6da447/zfs-snap-diff-darwin-v1.0.0-1-gd6da447.tgz)
+[zfs-snap-diff-darwin-v1.0.0.tgz](https://github.com/j-keck/zfs-snap-diff/releases/download/v1.0.0/zfs-snap-diff-darwin-v1.0.0.tgz)
 {{< /tab >}}
 
 {{< tab "Solaris" >}}
 Download the beta version for ****Solaris amd64**** here:
 
-[zfs-snap-diff-solaris-v1.0.0-1-gd6da447.tgz](https://github.com/j-keck/zfs-snap-diff/releases/download/v1.0.0-1-gd6da447/zfs-snap-diff-solaris-v1.0.0-1-gd6da447.tgz)
+[zfs-snap-diff-solaris-v1.0.0.tgz](https://github.com/j-keck/zfs-snap-diff/releases/download/v1.0.0/zfs-snap-diff-solaris-v1.0.0.tgz)
 {{< /tab >}}
 
 {{< /tabs >}}
