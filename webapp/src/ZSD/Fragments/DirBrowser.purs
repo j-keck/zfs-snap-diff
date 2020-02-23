@@ -3,7 +3,7 @@ module ZSD.Fragments.DirBrowser where
 import Prelude
 
 import Data.Array as A
-import Data.Either (either)
+import Data.Either (Either(..), either)
 import Data.Foldable (foldMap)
 import Data.Maybe (Maybe(..), maybe)
 import Data.Monoid (guard)
@@ -121,13 +121,18 @@ update self = case _ of
       _ -> pure unit
 
 
-  SwitchRoot old new ->
-    let fh = switchMountPoint old new self.state.currentDir
-    in     Spinner.display
-        *> update self (ReadDir fh)
-        *> self.setState _ { currentDir = fh }
-        *> rebuildBreadcrumb self fh
-        *> Spinner.remove
+  SwitchRoot old new -> Spinner.display *> do
+    launchAff_ $ do
+      let fh = switchMountPoint old new self.state.currentDir
+      res <- FH.ls fh
+      liftEffect $ case res of
+        Right ls ->    self.setState _ { dirListing = ls, currentDir = fh }
+                    *> rebuildBreadcrumb self fh
+                    *> Spinner.remove
+        Left err ->    (Messages.error
+                           $ "Directory " <> (unwrap >>> _.name) fh
+                          <> " does not exist in the snapshot " <> (unwrap >>> unwrap >>> _.name $ new))
+                    *> update self (StartAt $ unwrap new)
 
 
   DownloadArchive ->
