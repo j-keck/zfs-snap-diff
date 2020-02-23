@@ -60,7 +60,7 @@ navigate in your snapshots (directory history) and download a directory as a zip
 This is the first release after a complete rewrite. You find older versions on the [[https://github.com/j-keck/zfs-snap-diff/releases][GitHub release page]].
 
 If you have any questions, trouble or other input, feel free to open an
-issue, contact me per mail (see my github profile), or [[https://keybase.io/jkeck][keybase.io]].
+issue, contact me per mail (see my github profile), or over [[https://keybase.io/jkeck][keybase.io]].
 {{< /hint >}}
 
 {{< hint info >}}
@@ -588,7 +588,7 @@ The backend is implemented in [[https://golang.org][Go]] (as before) and the fro
 {{< /hint >}}
 
 If you have any questions, trouble or other input, feel free to open an
-issue, contact me per mail (see my github profile), or [[https://keybase.io/jkeck][keybase.io]].
+issue, contact me per mail (see my github profile), or over [[https://keybase.io/jkeck][keybase.io]].
 
   - create and destroy snapshots from the webapp
 
@@ -606,7 +606,7 @@ issue, contact me per mail (see my github profile), or [[https://keybase.io/jkec
 
   - works now also with 'legacy' mountpoints
 
-[[https://github.com/j-keck/zfs-snap-diff/compare/0.0.10...1.0.0][all commits from 0.0.10...1.0.0]]
+[[https://github.com/j-keck/zfs-snap-diff/compare/0.0.10...v1.0.0][all commits from 0.0.10...v1.0.0]]
 
 
 ** 0.0.10

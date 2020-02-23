@@ -14,7 +14,7 @@ The backend is implemented in [Go](https://golang.org) (as before) and the front
 {{< /hint >}}
 
 If you have any questions, trouble or other input, feel free to open an
-issue, contact me per mail (see my github profile), or [keybase.io](https://keybase.io/jkeck).
+issue, contact me per mail (see my github profile), or over [keybase.io](https://keybase.io/jkeck).
 
 -   create and destroy snapshots from the webapp
 
@@ -32,7 +32,7 @@ issue, contact me per mail (see my github profile), or [keybase.io](https://keyb
 
 -   works now also with 'legacy' mountpoints
 
-[all commits from 0.0.10...1.0.0](https://github.com/j-keck/zfs-snap-diff/compare/0.0.10...1.0.0)
+[all commits from 0.0.10...v1.0.0](https://github.com/j-keck/zfs-snap-diff/compare/0.0.10...v1.0.0)
 
 
 ## 0.0.10 {#0-dot-0-dot-10}
