@@ -1,7 +1,6 @@
 module Main where
 
 import Prelude
-
 import Data.Either (either)
 import Data.Maybe (maybe)
 import Effect (Effect)
@@ -16,13 +15,12 @@ import Web.HTML.Window (document)
 import ZSD.Model.Config as Config
 import ZSD.WebApp (webApp)
 
-
 main :: Effect Unit
 main = do
   element <- lookupElement >>= maybe (throw "node with id 'webapp' not found") pure
-  launchAff_ $ do
-    config <- Config.fetch >>= either (show >>> throw >>> liftEffect) pure
-    liftEffect $ render (webApp { config }) element
-
+  launchAff_
+    $ do
+        config <- Config.fetch >>= either (show >>> throw >>> liftEffect) pure
+        liftEffect $ render (webApp { config }) element
   where
-    lookupElement = getElementById "webapp" =<< (map toNonElementParentNode $ document =<< window)
+  lookupElement = getElementById "webapp" =<< (map toNonElementParentNode $ document =<< window)

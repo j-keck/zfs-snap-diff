@@ -1,14 +1,13 @@
 module ZSD.Views.Messages
-       ( info
-       , warning
-       , error
-       , appError
-       , messages
-       , toasts
-       ) where
+  ( info
+  , warning
+  , error
+  , appError
+  , messages
+  , toasts
+  ) where
 
 import Prelude
-
 import Data.Array as A
 import Data.DateTime (DateTime, adjust)
 import Data.Time.Duration (Milliseconds(..), Seconds(..))
@@ -22,21 +21,20 @@ import Effect.Unsafe (unsafePerformEffect)
 import React.Basic (JSX, createComponent, make, readState)
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture_)
-
 import ZSD.Components.Table (table)
 import ZSD.Components.Spinner as Spinner
 import ZSD.Model.AppError (AppError)
 import ZSD.Utils.Ops (unsafeFromJust)
 
-type Message =
-  { ts :: DateTime, level :: Level, msg :: String }
+type Message
+  = { ts :: DateTime, level :: Level, msg :: String }
 
-data Level =
-    Info
+data Level
+  = Info
   | Warning
   | Error
-derive instance eqLevel :: Eq Level
 
+derive instance eqLevel :: Eq Level
 
 -- | Info message
 info :: String -> Effect Unit
@@ -54,88 +52,90 @@ error = push Error
 appError :: AppError -> Effect Unit
 appError = push Error <<< show
 
-
 push :: Level -> String -> Effect Unit
 push level msg = do
   Spinner.remove
   ts <- nowDateTime
   Ref.modify_ (_ `A.snoc` { ts, level, msg }) history
 
-
 history :: Ref (Array Message)
 history = unsafePerformEffect $ Ref.new []
-
 
 toasts :: JSX
 toasts = unit # make component { initialState, didMount, render }
   where
-    component = createComponent "Messages.toasts"
+  component = createComponent "Messages.toasts"
 
-    initialState = { taken: 0, msgs: [] :: Array Message }
+  initialState = { taken: 0, msgs: [] :: Array Message }
 
-    didMount = update
+  didMount = update
 
-    update self = do
-      state <- readState self
-      newMsgs <- A.drop state.taken <$> Ref.read history
-      ts <- unsafeFromJust <<< adjust (Seconds $ negate 5.0) <$>  nowDateTime
-      self.setStateThen (_ { taken = state.taken + A.length newMsgs
-                           , msgs = A.concat
-                                    [ A.filter (\m -> m.ts >= ts) state.msgs
-                                    , newMsgs
-                                    ]
-                           }) $ launchAff_ $
-        delay (Milliseconds 500.0) *> liftEffect (update self)
+  update self = do
+    state <- readState self
+    newMsgs <- A.drop state.taken <$> Ref.read history
+    ts <- unsafeFromJust <<< adjust (Seconds $ negate 5.0) <$> nowDateTime
+    self.setStateThen
+      ( _
+          { taken = state.taken + A.length newMsgs
+          , msgs =
+            A.concat
+              [ A.filter (\m -> m.ts >= ts) state.msgs
+              , newMsgs
+              ]
+          }
+      )
+      $ launchAff_
+      $ delay (Milliseconds 500.0)
+      *> liftEffect (update self)
 
-    render self =
-      R.div
+  render self =
+    R.div
       { className: "fixed-bottom px-5"
       , children: map (mkAlertBox self) self.state.msgs
       }
 
-    mkAlertBox self n@{ ts, level, msg } =
-      R.div
+  mkAlertBox self n@{ ts, level, msg } =
+    R.div
       { className: "alert alert-" <> level2bs level <> " fade show"
       , children:
         [ R.text msg
         , R.button
-          { className: "close"
-          , onClick: capture_ $ self.setState \s -> s { msgs = A.filter ((/=) n) s.msgs }
-          , dangerouslySetInnerHTML: { __html: "&times;" }
-          }
+            { className: "close"
+            , onClick: capture_ $ self.setState \s -> s { msgs = A.filter ((/=) n) s.msgs }
+            , dangerouslySetInnerHTML: { __html: "&times;" }
+            }
         ]
       }
-
 
 messages :: JSX
 messages = unit # make component { initialState, didMount, render }
   where
-    component = createComponent "Messages.messages"
+  component = createComponent "Messages.messages"
 
-    initialState :: Array Message
-    initialState = []
+  initialState :: Array Message
+  initialState = []
 
-    didMount = update
+  didMount = update
 
-    update self = do
-      msgs <- Ref.read history
-      self.setState (const msgs)
-      launchAff_ $ delay (Milliseconds 500.0) *> liftEffect (update self)
+  update self = do
+    msgs <- Ref.read history
+    self.setState (const msgs)
+    launchAff_ $ delay (Milliseconds 500.0) *> liftEffect (update self)
 
-    render self =
-      table
-      { header: [R.text "Level", R.text "Message"]
+  render self =
+    table
+      { header: [ R.text "Level", R.text "Message" ]
       , rows: self.state
-      , mkRow: \{ts, level, msg}  ->
-          [ R.span { className: "badge badge-" <> level2bs level
-                   , children: [ R.text $ level2name level ]
-                   }
+      , mkRow:
+        \{ ts, level, msg } ->
+          [ R.span
+              { className: "badge badge-" <> level2bs level
+              , children: [ R.text $ level2name level ]
+              }
           , R.text msg
           ]
       , onRowSelected: const $ pure unit
       }
-
-
 
 -- | returns the level name
 level2name :: Level -> String
@@ -143,7 +143,6 @@ level2name = case _ of
   Info -> "Info"
   Warning -> "Warning"
   Error -> "Error"
-
 
 -- | returns the boostrap contextual varations name
 level2bs :: Level -> String

@@ -1,10 +1,9 @@
 module ZSD.Utils.LocalStorage
-       ( getItem
-       , setItem
-       ) where
+  ( getItem
+  , setItem
+  ) where
 
 import Prelude
-
 import Data.Either (hush)
 import Data.Maybe (Maybe)
 import Effect (Effect)
@@ -12,6 +11,7 @@ import Effect.Uncurried (EffectFn1, EffectFn2, runEffectFn1, runEffectFn2)
 import Simple.JSON (class ReadForeign, class WriteForeign, readJSON, writeJSON)
 
 foreign import setItem_ :: EffectFn2 String String Unit
+
 foreign import getItem_ :: EffectFn1 String String
 
 setItem :: forall a. WriteForeign a => String -> a -> Effect Unit

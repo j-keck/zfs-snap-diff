@@ -1,7 +1,6 @@
 module ZSD.Model.FH where
 
 import Prelude
-
 import Affjax.ResponseFormat as ARF
 import Data.Either (Either)
 import Data.Foldable (foldMap)
@@ -24,24 +23,20 @@ import ZSD.Model.Snapshot (Snapshot)
 import ZSD.Utils.HTTP as HTTP
 import ZSD.Utils.Ops ((<$$>), (</>))
 
-
-newtype FH = FH
-  { name     :: String
-  , path     :: String
-  , kind     :: Kind
-  , size     :: Number
-  , mtime    :: DateTime
+newtype FH
+  = FH
+  { name :: String
+  , path :: String
+  , kind :: Kind
+  , size :: Number
+  , mtime :: DateTime
   }
 
-
 fromMountPoint :: MountPoint -> FH
-fromMountPoint (MountPoint rec) =
-  FH $ Record.merge rec {kind: Dir }
-
+fromMountPoint (MountPoint rec) = FH $ Record.merge rec { kind: Dir }
 
 ls :: FH -> Aff (Either AppError (Array FH))
 ls dir = HTTP.post' "api/dir-listing" { path: (unwrap >>> _.path) dir }
-
 
 stat :: String -> Aff (Either AppError FH)
 stat path = FH <$$> HTTP.post' "api/stat" { path }
@@ -49,53 +44,58 @@ stat path = FH <$$> HTTP.post' "api/stat" { path }
 stat' :: Array String -> Aff (Either AppError (Array FH))
 stat' = map T.sequence <<< T.traverse stat
 
-
-
 fetchMimeType :: FH -> Aff (Either AppError MimeType)
 fetchMimeType fh = HTTP.post' "api/mime-type" { path: (unwrap >>> _.path) fh }
-
 
 downloadText :: FH -> Aff (Either AppError String)
 downloadText fh = HTTP.post ARF.string "api/download" { path: (unwrap >>> _.path) fh }
 
-
 downloadBlob :: FH -> Aff (Either AppError Blob)
 downloadBlob fh = HTTP.post ARF.blob "api/download" { path: (unwrap >>> _.path) fh }
 
-
 prepareArchive :: FH -> Maybe Snapshot -> Aff (Either AppError String)
 prepareArchive (FH { path, name: fhName }) snap =
-  let name = foldMap (\s -> fhName <> "-" <> s.name <> ".zip") snap
-  in HTTP.post ARF.string "api/prepare-archive" { path, name }
+  let
+    name = foldMap (\s -> fhName <> "-" <> s.name <> ".zip") snap
+  in
+    HTTP.post ARF.string "api/prepare-archive" { path, name }
 
+newtype From
+  = From MountPoint
 
-newtype From = From MountPoint
 derive instance newtypeFrom :: Newtype From _
+
 derive instance genericFrom :: Generic From _
+
 instance showFrom :: Show From where
   show = genericShow
 
-newtype To = To MountPoint
+newtype To
+  = To MountPoint
+
 derive instance newtypeTo :: Newtype To _
+
 derive instance genericTo :: Generic To _
+
 instance showTo :: Show To where
   show = genericShow
 
 switchMountPoint :: From -> To -> FH -> FH
-switchMountPoint (From (MountPoint from)) (To (MountPoint to)) =
-  over FH (\fh -> fh { path = switch fh.path })
-  where switch p = maybe to.path (to.path </> _) $
-                             S.stripPrefix (S.Pattern from.path) p
-                         >>= S.stripPrefix (S.Pattern "/")
-
-
-
+switchMountPoint (From (MountPoint from)) (To (MountPoint to)) = over FH (\fh -> fh { path = switch fh.path })
+  where
+  switch p =
+    maybe to.path (to.path </> _)
+      $ S.stripPrefix (S.Pattern from.path) p
+      >>= S.stripPrefix (S.Pattern "/")
 
 derive newtype instance showFH :: Show FH
+
 derive instance newtypeFH :: Newtype FH _
+
 derive newtype instance readForeignFH :: ReadForeign FH
+
 derive newtype instance writeForeignFH :: WriteForeign FH
+
 instance eqFH :: Eq FH where
   -- fs entries are equal if their have the same path
-  eq (FH { path: p1 }) (FH { path: p2 } ) =
-    eq p1 p2
+  eq (FH { path: p1 }) (FH { path: p2 }) = eq p1 p2

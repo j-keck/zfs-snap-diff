@@ -5,23 +5,21 @@ import Prelude (Unit, unit)
 import React.Basic (Component, JSX, createComponent, make)
 import React.Basic.DOM as R
 
-type Props = { content :: String }
+type Props
+  = { content :: String }
 
 foreign import highlightCode :: Effect Unit
 
 viewText :: Props -> JSX
 viewText = make component { initialState, render, didMount, didUpdate }
-
   where
-    
-    component :: Component Props
-    component = createComponent "ViewText"
+  component :: Component Props
+  component = createComponent "ViewText"
 
-    initialState = unit
-    
-    didMount _ = highlightCode
+  initialState = unit
 
-    didUpdate _ _ = highlightCode
+  didMount _ = highlightCode
 
-    render self = 
-      R.pre_ [ R.code_ [ R.text self.props.content ] ]
+  didUpdate _ _ = highlightCode
+
+  render self = R.pre_ [ R.code_ [ R.text self.props.content ] ]

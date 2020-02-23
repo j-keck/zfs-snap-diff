@@ -23,7 +23,7 @@ let
   buildInputs =
     (with pkgs; [ hugo dhall nodejs utillinux]) ++
     (with pkgs.nodePackages; [ parcel-bundler node2nix ]) ++
-    (with easy-ps; [ purs spago spago2nix ]);
+    (with easy-ps; [ purs spago spago2nix purty ]);
 
 
   version =

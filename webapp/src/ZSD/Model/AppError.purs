@@ -3,23 +3,23 @@ module ZSD.Model.AppError where
 import Affjax (URL)
 import Prelude (class Show, show, (<>))
 
-
-data AppError =
-    HTTPError URL HTTPErrors
+data AppError
+  = HTTPError URL HTTPErrors
   | GenericError String
   | Bug String
 
 instance showAppError :: Show AppError where
   show = case _ of
-    HTTPError url err -> "Error at endpoint: '"
-                         <> url <> "' - "
-                         <> show err
+    HTTPError url err ->
+      "Error at endpoint: '"
+        <> url
+        <> "' - "
+        <> show err
     GenericError msg -> msg
     Bug msg -> "Unexpected interal state: " <> msg
 
-
-data HTTPErrors =
-    BadRequest String
+data HTTPErrors
+  = BadRequest String
   | Unauthorized
   | Forbidden
   | NotFound
