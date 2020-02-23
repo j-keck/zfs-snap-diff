@@ -8,29 +8,28 @@ module ZSD.Model.DateRange
        -- )
        where
 
-import Data.Date
+import Prelude
 
+import Data.Array ((..))
 import Control.Monad.Except (except)
 import Data.Bifunctor (lmap)
+import Data.Date (Date)
 import Data.Date as Date
 import Data.DateTime as DT
+import Data.Enum (class BoundedEnum, fromEnum, toEnum)
 import Data.Formatter.DateTime (FormatterCommand(..), format, unformatDateTime)
 import Data.Int (floor)
 import Data.List as L
 import Data.List.NonEmpty as LNE
 import Data.Maybe (fromMaybe)
 import Data.Newtype (class Newtype, over, unwrap)
-import Data.Ord ((<))
-import Data.Enum (fromEnum, class BoundedEnum)
-import Data.Show (show)
 import Data.Time.Duration (Days(..), Milliseconds)
+import Debug.Trace (spy)
 import Effect (Effect)
 import Effect.Now as Effect
 import Foreign (F, ForeignError(..))
-import Prelude (class Eq, class Semigroup, class Show, bind, bottom, const, identity, negate, otherwise, pure, ($), (/), (<$>), (>>=), (>>>))
 import Simple.JSON (class ReadForeign, class WriteForeign)
 import Simple.JSON as F
-import Data.Semigroup ((<>))
 
 newtype DateRange = DateRange
   { from :: Date
@@ -41,18 +40,20 @@ newtype DateRange = DateRange
 lastNDays :: Days -> Effect DateRange
 lastNDays days = do
   now <- Effect.nowDate
-  pure $ adjustFrom days $ DateRange { from: now, to: now }
+  let from = adjustDate (over Days negate days) now
+  pure $ DateRange { from, to: now }
 
 
 dayCount :: DateRange -> Int
 dayCount (DateRange { from, to }) =
   let (days :: Milliseconds) = Date.diff to from
-  in floor $ (unwrap days) / 86400000.0
+  in add 1 <<< floor $ (unwrap days) / 86400000.0
 
 
 slide :: Days -> DateRange -> DateRange
-slide days d = mapDates (adjustDate days >>> sub1) (const $ sub1 (unwrap d).from) d
-  where sub1 = adjustDate (Days $ -1.0)
+slide days d = mapDates (adjustDate $ over Days negate days)
+                        (const $ (unwrap >>> _.from >>> adjustDate (Days (-1.0))) d)
+                        d
 
 
 adjustFrom :: Days -> DateRange -> DateRange
@@ -63,15 +64,14 @@ adjustTo :: Days -> DateRange -> DateRange
 adjustTo days = mapDates identity (adjustDate days)
 
 
-adjustDate :: Days -> Date -> Date
-adjustDate days d = fromMaybe d $ Date.adjust days d
-
-
 mapDates :: (Date -> Date) -> (Date -> Date) -> DateRange -> DateRange
 mapDates updFrom updTo = over DateRange (\rec -> rec { from = updFrom rec.from
                                                      , to = updTo rec.to
                                                      })
 
+
+adjustDate :: Days -> Date -> Date
+adjustDate days d = fromMaybe d $ Date.adjust days d
 
 
 instance showDateRange :: Show DateRange where

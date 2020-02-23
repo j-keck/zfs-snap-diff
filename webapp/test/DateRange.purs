@@ -2,20 +2,47 @@ module Test.DateRange where
 
 import Prelude
 
-import Test.Unit (TestSuite, suite, test)
-import Test.Unit.QuickCheck (quickCheck)
-import Test.QuickCheck (class Arbitrary, (===))
-import Test.QuickCheck.Gen (chooseInt, choose, Gen)
 import Data.Date as D
 import Data.DateTime as DT
-import Data.Time.Duration (Days(..))
 import Data.Enum (toEnum, class BoundedEnum)
+import Data.JSDate as JSDate
 import Data.Maybe (fromMaybe)
+import Data.Time.Duration (Days(..))
+import Effect.Class (liftEffect)
+import Test.QuickCheck (class Arbitrary, (===))
+import Test.QuickCheck.Gen (chooseInt, choose, Gen)
+import Test.Unit (TestSuite, suite, test)
+import Test.Unit.Assert as Assert
+import Test.Unit.QuickCheck (quickCheck)
 import ZSD.Model.DateRange (DateRange(..))
+import ZSD.Model.DateRange as DateRange
+import ZSD.Utils.Ops (unsafeFromJust)
 
 
 tests :: TestSuite
 tests = suite "DateRange" do
+  test "last0Days" do
+    dr <- liftEffect $ DateRange.lastNDays (Days 0.0)
+    Assert.equal 1 $ DateRange.dayCount dr
+
+  test "last1Days" do
+    dr <- liftEffect $ DateRange.lastNDays (Days 1.0)
+    Assert.equal 2 $ DateRange.dayCount dr
+
+  test "last2Days" do
+    dr <- liftEffect $ DateRange.lastNDays (Days 2.0)
+    Assert.equal 3 $ DateRange.dayCount dr
+
+
+  test "days" do
+    let unsafeDate = JSDate.parse
+                     >>> map (JSDate.toDate >>> unsafeFromJust)
+                     >>> liftEffect
+    from <- unsafeDate "2020-01-01"
+    to   <- unsafeDate "2020-01-02"
+    let dr = DateRange { from, to }
+    Assert.equal 2 $ DateRange.dayCount dr
+
   test "semigroup" $ quickCheck
     \(ArbDateRange a) (ArbDateRange b) ->
       (a <> b) === (b <> a)
@@ -38,4 +65,3 @@ instance arbDateRange :: Arbitrary ArbDateRange where
       lift = map (fromMaybe bottom <<< toEnum)
 
       addDays n d = fromMaybe d $ D.adjust (Days n) d
-

@@ -58,7 +58,7 @@ update :: React.Self Props State -> Action -> Effect Unit
 update self = case _ of
   DidMount -> do
     self.setState _ { versions = [ CurrentVersion self.props.file ] }
-    update self $ Scan (Days <<< toNumber <<< negate $ self.props.daysToScan) (SelectVersionByIdx 0)
+    update self $ Scan (Days <<< toNumber $ self.props.daysToScan) (SelectVersionByIdx 0)
 
   Scan days next -> Spinner.display *> do
     range <- readState self >>= \state ->
@@ -82,7 +82,7 @@ update self = case _ of
       Just next ->    self.setState _ { selectedIdx = idx, selectedVersion = Just next }
                    *> self.props.onVersionSelected next
       Nothing -> guard (hasOlderSnapshots state) $
-                        update self $ Scan (Days <<< toNumber <<< negate $ self.props.daysToScan) (SelectVersionByIdx idx)
+                        update self $ Scan (Days <<< toNumber $ self.props.daysToScan) (SelectVersionByIdx idx)
 
   NoOp -> pure unit
 
@@ -163,7 +163,7 @@ fileVersionSelector = make component { initialState, didMount, render }
                { content: R.text $ "Scan " <> show self.state.scanDays <> " days back"
                , title: "Scan for other file versions for " <> show self.state.scanDays <> " days on the server"
                , disabled: not $ hasOlderSnapshots self.state
-               , onClick: update self $ Scan (Days $ negate (toNumber self.state.scanDays)) NoOp
+               , onClick: update self $ Scan (Days $ toNumber self.state.scanDays) NoOp
                , entries:
                      let forDays n = Tuple (R.text $ show n) (self.setState _ { scanDays = n })
                      in map forDays [1, 7, 14, 30, 60, 180 ]
