@@ -8,51 +8,31 @@ import React.Basic (JSX, createComponent, makeStateless)
 import React.Basic.DOM as R
 import React.Basic.DOM.Textf as TF
 import ZSD.Model.DateRange (DateRange(..))
-import ZSD.Model.DateRange as DateRange
-import ZSD.Model.FileVersion (ScanResult(..))
+import ZSD.Model.FileVersion (FileVersion, ScanResult(..))
 import ZSD.Utils.Formatter as Formatter
 import ZSD.Utils.Ops (foldlSemigroup)
 
-type Props = Array ScanResult
+type Props =
+  { scanResults :: Array ScanResult
+  , versions    :: Array FileVersion
+  }
 
 stats :: Props -> JSX
 stats = makeStateless component \props ->
-  R.div
-  { className: "text-muted small text-center"
-  , children: let fmtDate = TF.date { format: [TF.dd, TF.s " ", TF.mmmm, TF.s " ", TF.yyyy], style: TF.fontBolder } in
-    [ flip foldMap (A.last props)
-        \(ScanResult { snapsScanned, dateRange: (DateRange range), scanDuration }) ->
-          R.div_
-          [ TF.textf
-            [ TF.text { style: TF.textUnderline } "This scan: "
-            , TF.text' "Scanned ", TF.int { style: TF.fontBolder } snapsScanned, TF.text' " snapshots in "
-            , TF.text { style: TF.fontBolder } (Formatter.duration scanDuration), TF.text' ". "
-            , TF.text' "Scanned ", TF.int { style: TF.fontBolder } (DateRange.dayCount $ DateRange range)
-            , TF.text' " days - from "
-            , fmtDate range.from, TF.text' " to "
-            , fmtDate range.to, TF.text' "."
-            ]
+  flip foldMap (foldlSemigroup props.scanResults) $
+    \(ScanResult { snapsScanned, snapsToScan, scanDuration, dateRange: (DateRange { from, to }) }) ->
+      R.div
+      { className: "text-muted small text-center"
+      , children: A.singleton $
+          TF.textf
+          [ TF.text' "Scanned ", TF.int { style: TF.fontBold } snapsScanned, TF.text' " from "
+          , TF.int {style: TF.fontBold } (snapsScanned + snapsToScan), TF.text' " snapshots in "
+          , TF.text { style: TF.fontBold } (Formatter.duration scanDuration), TF.text' ".", TF.jsx (R.br {})
+          , TF.int { style: TF.fontBold } (A.length props.versions), TF.text' " file versions between "
+          , datef from, TF.text' " and ", datef to, TF.text' " found."
           ]
-    , flip foldMap (foldlSemigroup props)
-        \(ScanResult { snapsScanned, snapsToScan, snapsFileMissing, dateRange: (DateRange range), scanDuration }) ->
-          R.div_
-          [ TF.textf
-            [ TF.text { style: TF.textUnderline } "Overall: "
-            , TF.text' "Scanned ", TF.int { style: TF.fontBolder } snapsScanned, TF.text' " snapshots in "
-            , TF.text { style: TF.fontBolder } (Formatter.duration scanDuration), TF.text' ". "
-            , TF.text' "Date range: "
-            , fmtDate range.from, TF.text' " - "
-            , fmtDate range.to, TF.text' "."
-            ]
-         ] <>
-         R.div_
-         [ TF.textf
-           [ TF.int { style: TF.fontBolder } snapsToScan, TF.text' " snapshots to scan."
-           , TF.text' " In ", TF.int { style: TF.fontBolder } snapsFileMissing, TF.text' " snapshots was the file not found."
-           ]
-         ]
-    ]
-  }
+      }
 
   where
     component = createComponent "Stats"
+    datef = TF.date { format: [TF.dd, TF.s " ", TF.mmmm, TF.s " ", TF.yyyy], style: TF.fontBold }

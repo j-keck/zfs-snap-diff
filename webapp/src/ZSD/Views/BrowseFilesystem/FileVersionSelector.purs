@@ -171,7 +171,10 @@ fileVersionSelector = make component { initialState, didMount, render }
                }
              ]
          , showBody: false
-         , footer: stats self.state.scanResults
+         , footer: stats
+                   { scanResults: self.state.scanResults
+                   , versions: self.state.versions
+                   }
          }
        ]
 
