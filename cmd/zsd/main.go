@@ -35,7 +35,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "\nACTIONS:\n")
 		fmt.Fprintf(os.Stderr, "  list                : list zfs snapshots where the given file was modified\n")
 		fmt.Fprintf(os.Stderr, "  cat     <#|SNAPSHOT>: show the file content from the given snapshot\n")
-		fmt.Fprintf(os.Stderr, "  diff    <#|SNAPSHOT>: show a diff from the selected snapshot to the actual version\n")
+		fmt.Fprintf(os.Stderr, "  diff    <#|SNAPSHOT>: show a diff from the selected snapshot to the current version\n")
 		fmt.Fprintf(os.Stderr, "  restore <#|SNAPSHOT>: restore the file from the given snapshot\n")
 		fmt.Fprintf(os.Stderr, "\nYou can use the snapshot number from the `list` output or the snapshot name to select a snapshot.\n")
 		fmt.Fprintf(os.Stderr, "\nProject home page: https://j-keck.github.io/zfs-snap-diff\n")
@@ -77,7 +77,7 @@ func main() {
 	switch action {
 	case "list":
 		fmt.Printf("scan the last %d days for other file versions\n", config.Get.DaysToScan)
-		dr := scanner.NewDateRange(time.Now(), config.Get.DaysToScan)
+		dr := scanner.NDaysBack(config.Get.DaysToScan, time.Now())
 		sc := scanner.NewScanner(dr, "auto", ds, zfs)
 		scanResult, err := sc.FindFileVersions(filePath)
 		if err != nil {
@@ -164,15 +164,15 @@ func main() {
 			return
 		}
 
-		backupPath, err := version.Actual.Backup()
+		backupPath, err := version.Current.Backup()
 		if err != nil {
-			log.Errorf("unable to backup the acutal version - %v", err)
+			log.Errorf("unable to backup the current version - %v", err)
 			return
 		}
 		fmt.Printf("backup from the actual version created at: %s\n", backupPath)
 
 		// restore the backup version
-		version.Backup.Copy(version.Actual.Path)
+		version.Backup.Copy(version.Current.Path)
 		fmt.Printf("version restored from snapshot: %s\n", version.Snapshot.Name)
 
 	default:
@@ -209,7 +209,7 @@ func lookupRequestedVersion(filePath, versionName string) (*scanner.FileVersion,
 		}
 	}
 
-	if version.Actual.Path == filePath {
+	if version.Current.Path == filePath {
 		return version, nil
 	} else {
 		return nil, errors.New("file mismatch - perform a `list` action at first")
