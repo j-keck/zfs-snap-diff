@@ -1,14 +1,15 @@
 name: GitHub Pages
 on:
   push:
-    branches: [master]
+    branches: [dev]
 
 jobs:
   gh-pages:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - uses: cachix/install-nix-action@6
+      - uses: actions/checkout@v2
+      - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+      - uses: cachix/install-nix-action@v6
 
       - name: build
         run: nix-build -A site

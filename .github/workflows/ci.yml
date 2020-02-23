@@ -1,0 +1,40 @@
+name: ci
+
+on: [push]
+
+jobs:
+  build:
+    name: build tgz
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+
+      - uses: cachix/install-nix-action@v6
+      - uses: cachix/cachix-action@v3
+        with:
+          name: zfs-snap-diff
+          signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
+
+      - name: build
+        run: |
+          set -x
+          VERSION=$(git describe --always)
+          for GOOS in linux freebsd darwin solaris; do
+            echo "BUILD: $GOOS"
+            BUILD=$(nix-build --no-out-link --no-build-output -A zfs-snap-diff --argstr goos $GOOS)
+            cp -fv $BUILD/bin/zfs-snap-diff .
+            cp -fv $BUILD/bin/zsd .
+            cp -fv $BUILD/share/LICENSE .
+
+            ARCHIVE=zfs-snap-diff-$GOOS-$VERSION.tgz
+            tar cvfz $ARCHIVE zfs-snap-diff zsd LICENSE
+          done
+
+      - name: upload assets
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          files: zfs-snap-diff*.tgz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
