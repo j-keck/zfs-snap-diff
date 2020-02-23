@@ -107,7 +107,7 @@ func (self *WebApp) findFileVersionsHndl(w http.ResponseWriter, r *http.Request)
 		DateRange     scanner.DateRange `json:"dateRange"`
 	}
 
-	dateRange := scanner.NewDateRange(time.Now(), config.Get.DaysToScan)
+	dateRange := scanner.NDaysBack(config.Get.DaysToScan, time.Now())
 	compareMethod := config.Get.CompareMethod
 	defaults := Payload{CompareMethod: compareMethod, DateRange: dateRange }
 	payload, ok := decodeJsonPayload(w, r, &defaults).(*Payload)

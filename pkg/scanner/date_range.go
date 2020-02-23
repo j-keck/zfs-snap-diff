@@ -5,14 +5,24 @@ import (
 	"time"
 )
 
+// DateRange with from and to dates.
+//   - time is ignored
+//   - dates are inclusive
 type DateRange struct {
 	From time.Time `json:"from"`
 	To   time.Time `json:"to"`
 }
 
-func NewDateRange(to time.Time, rangeInDays int) DateRange {
+func NewDateRange(from time.Time, to time.Time) (DateRange, error) {
+	if from.After(to) {
+		return DateRange{from, to}, fmt.Errorf("invalid DateRange - from: %v is AFTER to: %v", from , to)
+	}
+	return DateRange { from, to }, nil
+}
+
+func NDaysBack(n int, to time.Time) DateRange {
 	self := DateRange{To: truncateTime(to.UTC())}
-	dur := time.Duration(-rangeInDays*24) * time.Hour
+	dur := time.Duration(-n*24) * time.Hour
 	self.From = truncateTime(to.Add(dur).UTC())
 	return self
 }

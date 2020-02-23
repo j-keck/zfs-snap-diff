@@ -6,16 +6,66 @@ import (
 	"time"
 )
 
-func TestNewDateRange(t *testing.T) {
-	expectedFrom := date(2019, 1, 1)
-	to := date(2019, 1, 2)
+func TestNewDate(t *testing.T) {
+	dr, err := NewDateRange(date(2020, 1, 1), date(2019, 1, 1))
+	if err == nil {
+		t.Errorf("invalid DateRange constructed: %v", dr)
+	}
+}
 
-	dr := NewDateRange(to, 1)
+func Test0DaysBack(t *testing.T) {
+	expectedFrom := date(2020, 1, 1)
+	dr := NDaysBack(0, date(2020, 1, 1))
 	if dr.From != expectedFrom {
 		t.Errorf("Unexpected 'From': %s, expected: %s",
 			dr.From, expectedFrom)
 	}
 }
+
+func Test1DaysBack(t *testing.T) {
+	expectedFrom := date(2020, 1, 1)
+	dr := NDaysBack(1, date(2020, 1, 2))
+	if dr.From != expectedFrom {
+		t.Errorf("Unexpected 'From': %s, expected: %s",
+			dr.From, expectedFrom)
+	}
+}
+
+func TestIsBefore(t *testing.T) {
+	from := date(2020, 1, 1)
+	to   := date(2020, 1, 2)
+	dr, err := NewDateRange(from, to)
+	if err != nil {
+		t.Errorf("%v", err)
+	}
+
+	if dr.IsBefore(from) {
+		t.Errorf("Date IS in DateRange - range: %v, date: %v", dr, to)
+	}
+
+	if ! dr.IsBefore(date(2020, 1, 3)) {
+		t.Errorf("01-01-2020->02-01-2020 is before 03-01-2020 - but was not detected")
+	}
+}
+
+func TestIsAfter(t *testing.T) {
+	from := date(2020, 1, 2)
+	to   := date(2020, 1, 3)
+	dr, err := NewDateRange(from, to)
+	if err != nil {
+		t.Errorf("%v", err)
+	}
+
+	if dr.IsAfter(to) {
+		t.Errorf("Date IS in DateRange - range: %v, date: %v", dr, to)
+	}
+
+	if ! dr.IsAfter(date(2020, 1, 1)) {
+		t.Errorf("02-01-2020->03-01-2020 is after 01-01-2020 - but was not detected")
+	}
+}
+
+
 
 func TestUnmarshalWithTo(t *testing.T) {
 	var dr DateRange
@@ -41,8 +91,8 @@ func TestUnmarshalWithFrom(t *testing.T) {
 	}
 }
 
-func TestJSON(t *testing.T) {
-	dr := NewDateRange(time.Now(), 1)
+func TestJSONMarshalUnmarshal(t *testing.T) {
+	dr := NDaysBack(1, time.Now())
 	js, err := json.Marshal(dr)
 	if err != nil {
 		t.Error(err)
@@ -58,6 +108,7 @@ func TestJSON(t *testing.T) {
 		t.Errorf("instances were differnt:\n    %+v\n    %+v", dr, dr2)
 	}
 }
+
 func date(y int, m time.Month, d int) time.Time {
 	return time.Date(y, m, d, 0, 0, 0, 0, time.UTC)
 }

@@ -34,7 +34,7 @@ func TestNewComparator(t *testing.T) {
 
 	// 'auto' should return CompareByMD5 for text files
 	textFilePath := "testdata/text.txt"
-	textFile, err := fs.NewFileHandle(textFilePath)
+	textFile, err := fs.GetFileHandle(textFilePath)
 	if err != nil {
 		t.Errorf("%s not found - err: %v", textFilePath, err)
 		return
@@ -45,7 +45,7 @@ func TestNewComparator(t *testing.T) {
 
 	// 'auto' should return CompareByMD5 for binary files
 	pdfFilePath := "testdata/gospec.pdf"
-	pdfFile, err := fs.NewFileHandle(pdfFilePath)
+	pdfFile, err := fs.GetFileHandle(pdfFilePath)
 	if err != nil {
 		t.Errorf("%s not found - err: %v", pdfFilePath, err)
 		return
