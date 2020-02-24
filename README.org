@@ -23,7 +23,7 @@ See the [[https://j-keck.github.io/zfs-snap-diff/][website]] for more details.
 
  The minimum supported go version is =go1.12=.
 
-   - clone this repo: ~git clone https://github.com/j-keck/zfs-snap-diff~
+   - clone this repo: ~git clone --depth 1 https://github.com/j-keck/zfs-snap-diff~
    - ~cd zfs-snap-diff~
    - build it: ~go build -ldflags="-X main.version=$(git describe)" ./cmd/zfs-snap-diff~
 
@@ -35,7 +35,7 @@ See the [[https://j-keck.github.io/zfs-snap-diff/][website]] for more details.
 I use [[https://nixos.org/nix/][nix]] to build my projects. The ~nix~ build also compiles the frontend
 to javascript and decode it in ~pkg/webapp/bindata.go~.
 
-   - clone this repo: ~git clone https://github.com/j-keck/zfs-snap-diff~
+   - clone this repo: ~git clone --depth 1 https://github.com/j-keck/zfs-snap-diff~
    - ~cd zfs-snap-diff~
    - build it: ~nix-build -A zfs-snap-diff~
 

@@ -23,27 +23,35 @@ You can download the latest binary package from here or from the [GitHub release
 
 {{<tabs "install">}}
 {{< tab "Linux" >}}
-Download the beta version for ****Linux amd64**** here:
+  1.) ****Download**** the latest version for ****Linux amd64****: [zfs-snap-diff-linux-v1.0.0.tgz](https://github.com/j-keck/zfs-snap-diff/releases/download/v1.0.0/zfs-snap-diff-linux-v1.0.0.tgz)
 
-[zfs-snap-diff-linux-v1.0.0.tgz](https://github.com/j-keck/zfs-snap-diff/releases/download/v1.0.0/zfs-snap-diff-linux-v1.0.0.tgz)
+2.) Unpack the archive: `tar xvf zfs-snap-diff-linux-v1.0.0.tgz`
+
+  3.) Run it:  `./zfs-snap-diff [OPTIONS] <ZFS_DATASET_NAME>`
 {{< /tab >}}
 
 {{< tab "FreeBSD" >}}
-Download the beta version for ****FreeBSD amd64**** here:
+  1.) ****Download**** the latest version for ****FreeBSD amd64****: [zfs-snap-diff-freebsd-v1.0.0.tgz](https://github.com/j-keck/zfs-snap-diff/releases/download/v1.0.0/zfs-snap-diff-freebsd-v1.0.0.tgz)
 
-[zfs-snap-diff-freebsd-v1.0.0.tgz](https://github.com/j-keck/zfs-snap-diff/releases/download/v1.0.0/zfs-snap-diff-freebsd-v1.0.0.tgz)
+2.) Unpack the archive: `tar xvf zfs-snap-diff-freebsd-v1.0.0.tgz`
+
+  3.) Run it:  `./zfs-snap-diff [OPTIONS] <ZFS_DATASET_NAME>`
 {{< /tab >}}
 
 {{< tab "macOS" >}}
-Download the beta version for ****macOS amd64**** here:
+  1.) ****Download**** the latest version for ****macOS amd64****: [zfs-snap-diff-darwin-v1.0.0.tgz](https://github.com/j-keck/zfs-snap-diff/releases/download/v1.0.0/zfs-snap-diff-darwin-v1.0.0.tgz)
 
-[zfs-snap-diff-darwin-v1.0.0.tgz](https://github.com/j-keck/zfs-snap-diff/releases/download/v1.0.0/zfs-snap-diff-darwin-v1.0.0.tgz)
+2.) Unpack the archive: `tar xvf zfs-snap-diff-darwin-v1.0.0.tgz`
+
+  3.) Run it:  `./zfs-snap-diff [OPTIONS] <ZFS_DATASET_NAME>`
 {{< /tab >}}
 
 {{< tab "Solaris" >}}
-Download the beta version for ****Solaris amd64**** here:
+  1.) ****Download**** the latest version for ****Solaris amd64****: [zfs-snap-diff-solaris-v1.0.0.tgz](https://github.com/j-keck/zfs-snap-diff/releases/download/v1.0.0/zfs-snap-diff-solaris-v1.0.0.tgz)
 
-[zfs-snap-diff-solaris-v1.0.0.tgz](https://github.com/j-keck/zfs-snap-diff/releases/download/v1.0.0/zfs-snap-diff-solaris-v1.0.0.tgz)
+2.) Unpack the archive: `tar xvf zfs-snap-diff-solaris-v1.0.0.tgz`
+
+  3.) Run it:  `./zfs-snap-diff [OPTIONS] <ZFS_DATASET_NAME>`
 {{< /tab >}}
 
 {{< /tabs >}}
@@ -70,7 +78,7 @@ go source file so you need only the go compiler to compile it yourself.
 
 The minimum supported go version is `go1.12`.
 
--   clone this repo: `git clone https://github.com/j-keck/zfs-snap-diff`
+-   clone this repo: `git clone --depth 1 https://github.com/j-keck/zfs-snap-diff`
 -   `cd zfs-snap-diff`
 -   build it: `go build -ldflags="-X main.version=$(git describe)" ./cmd/zfs-snap-diff`
 
@@ -82,7 +90,7 @@ The optional `-ldflags="-X main.version=$(git describe)"` flag updates the `vers
 I use [nix](https://nixos.org/nix/) to build my projects. The `nix` build also compiles the frontend
 to javascript and decode it in `pkg/webapp/bindata.go`.
 
--   clone this repo: `git clone -b dev https://github.com/j-keck/zfs-snap-diff`
+-   clone this repo: `git clone --depth 1 https://github.com/j-keck/zfs-snap-diff`
 -   change to the checkout directory: `cd zfs-snap-diff`
 -   build it: `nix-build -A zfs-snap-diff`
 

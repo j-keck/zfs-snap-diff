@@ -82,10 +82,12 @@ You can download the latest binary package from here or from the [[https://githu
 
      (defun section-for (platform artifact version)
        (format (concat "{{< tab \"%s\" >}}\n"
-                       "Download the beta version for **%s amd64** here:\n\n"
-                       "[[https://github.com/j-keck/zfs-snap-diff/releases/download/%s/%s][%s]]\n"
+                       "  1.) **Download** the latest version for **%s amd64**: "
+                       "[[https://github.com/j-keck/zfs-snap-diff/releases/download/%s/%s][%s]]\n\n"
+                       "  2.) Unpack the archive: ~tar xvf %s~\n\n"
+                       "  3.) Run it:  ~./zfs-snap-diff [OPTIONS] <ZFS_DATASET_NAME>~\n"
                        "{{< /tab >}}\n\n"
-               ) platform platform version artifact artifact))
+               ) platform platform version artifact artifact artifact))
 
      (let ((v (version-string)))
        (princ "\n\n{{<tabs \"install\">}}\n")
@@ -95,9 +97,6 @@ You can download the latest binary package from here or from the [[https://githu
        (princ (section-for "Solaris" (archive-name-string "solaris" v) v))
        (princ "{{< /tabs >}}\n\n"))
  #+END_SRC
-
- #+RESULTS:
-
 
 
 {{< hint warning >}}
@@ -122,7 +121,7 @@ platform, feel free to contact me!
 
 The minimum supported go version is =go1.12=.
 
-  - clone this repo: ~git clone https://github.com/j-keck/zfs-snap-diff~
+  - clone this repo: ~git clone --depth 1 https://github.com/j-keck/zfs-snap-diff~
   - ~cd zfs-snap-diff~
   - build it: ~go build -ldflags="-X main.version=$(git describe)" ./cmd/zfs-snap-diff~
 
@@ -134,7 +133,7 @@ The optional ~-ldflags="-X main.version=$(git describe)"~ flag updates the ~vers
 I use [[https://nixos.org/nix/][nix]] to build my projects. The ~nix~ build also compiles the frontend
 to javascript and decode it in ~pkg/webapp/bindata.go~.
 
-  - clone this repo: ~git clone -b dev https://github.com/j-keck/zfs-snap-diff~
+  - clone this repo: ~git clone --depth 1 https://github.com/j-keck/zfs-snap-diff~
   - change to the checkout directory: ~cd zfs-snap-diff~
   - build it: ~nix-build -A zfs-snap-diff~
 
