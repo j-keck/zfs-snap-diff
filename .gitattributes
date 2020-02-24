@@ -1,0 +1,7 @@
+# GitHub linguist annotations.
+# ignore generated nix files
+
+webapp/default.nix         linguist-generated=true
+webapp/node-env.nix        linguist-generated=true
+webapp/node-packages.nix   linguist-generated=true
+webapp/spago-packages.nix  linguist-generated=true
