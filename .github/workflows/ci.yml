@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   build:
-    name: build tgz
+    name: test / build / publish
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -14,9 +14,22 @@ jobs:
       - uses: cachix/cachix-action@v3
         with:
           name: zfs-snap-diff
+          attributes: bindata
           signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
 
-      - name: build
+      - name: test
+        run: |
+          echo "testing backend code"
+          for PKG in $(\ls -1d pkg/*); do
+            go test ./$PKG
+          done
+
+          echo "testing frontend code"
+          nix-shell --run 'cd webapp; spago test'
+
+
+      - name: build for all platforms
+        if: startsWith(github.ref, 'refs/tags/v')
         run: |
           set -x
           VERSION=$(git describe --always)
@@ -32,8 +45,8 @@ jobs:
           done
 
       - name: upload assets
-        uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v1
         with:
           files: zfs-snap-diff*.tgz
         env:
