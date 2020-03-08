@@ -16,27 +16,29 @@ type Props
 confirm :: Props -> JSX
 confirm =
   makeStateless component \props ->
-    div "modal modal-show"
-      $ div "modal-dialog modal-lg modal-dialog-centered"
-      $ div "modal-content"
-      $ fragment
-          [ div "modal-header" $ props.header
-          , div "modal-body" $ props.body
-          , div "modal-footer"
-              $ fragment
-                  [ R.button
-                      { className: "btn btn-secondary"
-                      , onClick: capture_ props.onCancel
-                      , children: [ R.text "Cancel" ]
-                      }
-                  , R.button
-                      { className: "btn btn-primary"
-                      , onClick: capture_ props.onOk
-                      , children: [ R.text "Ok" ]
-                      }
-                  ]
-          ]
-      <> R.div { className: "modal-backdrop fade show" }
+    fragment
+    [ div "modal modal-show"
+        $ div "modal-dialog modal-lg modal-dialog-centered"
+        $ div "modal-content"
+        $ fragment
+            [ div "modal-header" $ props.header
+            , div "modal-body" $ props.body
+            , div "modal-footer"
+                $ fragment
+                    [ R.button
+                        { className: "btn btn-secondary"
+                        , onClick: capture_ props.onCancel
+                        , children: [ R.text "Cancel" ]
+                        }
+                    , R.button
+                        { className: "btn btn-primary"
+                        , onClick: capture_ props.onOk
+                        , children: [ R.text "Ok" ]
+                        }
+                    ]
+            ]
+    , R.div { className: "modal-backdrop fade show" }
+    ]
   where
   component :: Component Props
   component = createComponent "Confirm"
