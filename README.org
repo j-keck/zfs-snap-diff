@@ -10,42 +10,13 @@ See the [[https://j-keck.github.io/zfs-snap-diff/][website]] for more details.
 
 *** Prebuild
 
- You can download a prebuild version from: [[https://j-keck.github.io/zfs-snap-diff/docs/install]]
+ You can download a prebuild version from: [[https://j-keck.github.io/zfs-snap-diff/docs/install][here]].
 
 *** Build from source
 
- The backend from ~zfs-snap-diff~ is implemented in [[https://golang.org][Go]], the frontend in [[http://purescript.org][PureScript]].
+  You only need go to build this project.
 
-**** Build with ~go~
-
- I use [[https://github.com/go-bindata/go-bindata][go-bindata]] to decode the frontend code and all dependencies to a
- go source file so you need only the go compiler to compile it yourself.
-
- The minimum supported go version is =go1.12=.
-
-   - clone this repo: ~git clone --depth 1 https://github.com/j-keck/zfs-snap-diff~
-   - ~cd zfs-snap-diff~
-   - build it: ~go build -ldflags="-X main.version=$(git describe)" ./cmd/zfs-snap-diff~
-
- The optional ~-ldflags="-X main.version=$(git describe)"~ flag updates the ~version~ string in the binary.
-
-
-**** Build with ~nix~
-
-I use [[https://nixos.org/nix/][nix]] to build my projects. The ~nix~ build also compiles the frontend
-to javascript and decode it in ~pkg/webapp/bindata.go~.
-
-   - clone this repo: ~git clone --depth 1 https://github.com/j-keck/zfs-snap-diff~
-   - ~cd zfs-snap-diff~
-   - build it: ~nix-build -A zfs-snap-diff~
-
-The build artifacts ~zfs-snap-diff~ and ~zsd~ are in ~./result/bin/~.
-
- To crosscompile the binary for
-
-   - FreeBSD: ~nix-build -A zfs-snap-diff --argstr goos freebsd~
-   - MacOS: ~nix-build -A zfs-snap-diff --argstr goos darwin~
-   - Solaris: ~nix-build -A zfs-snap-diff --argstr goos solaris~
+  Check: [[https://j-keck.github.io/zfs-snap-diff/docs/install/#build-from-source][the docs]] for more information.
 
 
 ** Run it
