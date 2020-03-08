@@ -1,4 +1,4 @@
-{ goos ? "linux" }:
+{ goos ? "linux", with-dev-tools ? false }:
 let
 
   fetchNixpkgs = {rev, sha256}: builtins.fetchTarball {
@@ -108,18 +108,13 @@ let
     '';
 
     installPhase = ''
-      mkdir -p $out
+      mkdir -p $out/bin
 
       BIN_PATH=${if goos == pkgs.stdenv.buildPlatform.parsed.kernel.name
                  then "$GOPATH/bin"
                  else "$GOPATH/bin/${goos}_$GOARCH"}
-
-      mkdir -p $out/bin
       cp $BIN_PATH/zfs-snap-diff $out/bin
       cp $BIN_PATH/zsd $out/bin
-
-      mkdir -p $out/share
-      cp LICENSE $out/share
     '';
   };
 
@@ -147,12 +142,14 @@ in
 
 if pkgs.lib.inNixShell then pkgs.mkShell {
 
-  buildInputs = buildInputs ++ (with pkgs;
-                [ go_1_12
-                  ((emacsPackagesGen emacs).emacsWithPackages (epkgs:
+  buildInputs = buildInputs ++
+    (if with-dev-tools
+       then [ pkgs.go_1_12 pkgs.ispell
+                ((pkgs.emacsPackagesGen pkgs.emacs).emacsWithPackages (epkgs:
                     (with epkgs.melpaStablePackages; [ magit go-mode nix-mode ivy swiper ]) ++
                     (with epkgs.melpaPackages; [ purescript-mode psc-ide ])))
-                ]);
+            ]
+       else []);
 
   shellHooks = ''
     alias serv="parcel serve --host 0.0.0.0 index.html"
