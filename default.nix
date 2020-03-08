@@ -108,13 +108,18 @@ let
     '';
 
     installPhase = ''
-      mkdir -p $out/bin
+      mkdir -p $out
 
       BIN_PATH=${if goos == pkgs.stdenv.buildPlatform.parsed.kernel.name
                  then "$GOPATH/bin"
                  else "$GOPATH/bin/${goos}_$GOARCH"}
+
+      mkdir -p $out/bin
       cp $BIN_PATH/zfs-snap-diff $out/bin
       cp $BIN_PATH/zsd $out/bin
+
+      mkdir -p $out/share
+      cp LICENSE $out/share
     '';
   };
 
