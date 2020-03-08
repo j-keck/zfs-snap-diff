@@ -5,6 +5,13 @@ creator = "Emacs 26.3 (Org mode 9.1.9 + ox-hugo)"
 weight = 50
 +++
 
+## 1.0.1 {#1-dot-0-dot-1}
+
+-   fix destroy snapshot
+
+[all commits from v1.0.0...v1.0.1](https://github.com/j-keck/zfs-snap-diff/compare/v1.0.0...v1.0.1)
+
+
 ## 1.0.0 {#1-dot-0-dot-0}
 
 {{< hint info >}}

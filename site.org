@@ -578,6 +578,12 @@ Diff context size in the webui.
 :END:
 
 
+** 1.0.1
+
+  - fix destroy snapshot
+
+[[https://github.com/j-keck/zfs-snap-diff/compare/v1.0.0...v1.0.1][all commits from v1.0.0...v1.0.1]]
+
 ** 1.0.0
 
 {{< hint info >}}
