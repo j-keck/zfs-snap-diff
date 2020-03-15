@@ -1,7 +1,6 @@
 module ZSD.BrowseSnapshots.RollbackSnapshot where
 
 import Prelude
-
 import Data.Array as A
 import Data.Either (either)
 import Effect (Effect)
@@ -16,60 +15,62 @@ import ZSD.Model.Dataset as Dataset
 import ZSD.Model.Snapshot (Snapshot)
 import ZSD.Views.Messages as Messages
 
-type Props =
-  { dataset :: Dataset
-  , snap :: Snapshot
-  , onOk :: Effect Unit
-  , onCancel :: Effect Unit
-  }
+type Props
+  = { dataset :: Dataset
+    , snap :: Snapshot
+    , onOk :: Effect Unit
+    , onCancel :: Effect Unit
+    }
 
-type RollbackSnapshotArgs = Array String
-type State = RollbackSnapshotArgs
+type RollbackSnapshotArgs
+  = Array String
 
-data Action = RollbackSnapshot Snapshot
+type State
+  = RollbackSnapshotArgs
+
+data Action
+  = RollbackSnapshot Snapshot
 
 update :: Self Props State -> Action -> Effect Unit
 update self = case _ of
-
-  RollbackSnapshot snap -> launchAff_ do
-    res <- Dataset.rollbackSnapshot self.props.dataset snap self.state
-    liftEffect do
-      either Messages.appError Messages.info res
-      self.props.onOk
-
+  RollbackSnapshot snap ->
+    launchAff_ do
+      res <- Dataset.rollbackSnapshot self.props.dataset snap self.state
+      liftEffect do
+        either Messages.appError Messages.info res
+        self.props.onOk
 
 rollbackSnapshot :: Props -> JSX
 rollbackSnapshot = make component { initialState, render }
-
   where
+  component :: Component Props
+  component = createComponent "RollbackSnapshot"
 
-    component :: Component Props
-    component = createComponent "RollbackSnapshot"
+  initialState = []
 
-    initialState = []
-
-    render self =
-      Confirm.confirm
+  render self =
+    Confirm.confirm
       { header: R.text "Rollback snapshot"
       , body:
         R.form
-        { className: "m-2"
-        , children:
-          [ R.b_ [ R.text self.props.snap.fullName ]
-          , flag "-R"
+          { className: "m-2"
+          , children:
+            [ R.b_ [ R.text self.props.snap.fullName ]
+            , flag "-R"
                 "Destroy any more recent snapshots and bookmarks, as well as any clones of those snapshots."
                 (addOrRemoveFlag self "-R")
-          , flag "-f"
+            , flag "-f"
                 "Used with the -R option to force an unmount of any clone file systems that are to be destroyed."
                 (addOrRemoveFlag self "-f")
-          , flag "-r"
+            , flag "-r"
                 "Destroy any snapshots and bookmarks more recent than the one specified."
                 (addOrRemoveFlag self "-r")
-          ]
-        }
+            ]
+          }
       , onOk: update self (RollbackSnapshot self.props.snap)
       , onCancel: self.props.onCancel
       }
 
-    addOrRemoveFlag self flag true  = self.setState (const $ A.snoc self.state flag)
-    addOrRemoveFlag self flag false = self.setState (const $ A.filter ((/=) flag) self.state)
+  addOrRemoveFlag self flag true = self.setState (const $ A.snoc self.state flag)
+
+  addOrRemoveFlag self flag false = self.setState (const $ A.filter ((/=) flag) self.state)

@@ -1,7 +1,6 @@
 module ZSD.Views.BrowseSnapshots.SnapshotSelector where
 
 import Prelude
-
 import Data.Array as A
 import Data.Either (either)
 import Data.Foldable (foldMap)
@@ -54,63 +53,63 @@ data Command
 
 update :: React.Self Props State -> Command -> Effect Unit
 update self = case _ of
-
   FetchSnapshots ->
-    self.props.onDatasetChanges *>
-    Spinner.display
+    self.props.onDatasetChanges
+      *> Spinner.display
       *> launchAff_
           ( Snapshots.fetchForDataset self.props.dataset.name
               >>= either Messages.appError (\snaps -> self.setState _ { snapshots = snaps } *> Spinner.remove)
               >>> liftEffect
           )
-
   SelectSnapshotByIdx idx ->
     Spinner.display
       *> self.setState _ { selectedIdx = Just idx }
       *> foldMap self.props.onSnapshotSelected (A.index self.state.snapshots idx)
       *> Spinner.remove
-
-
   DestroySnapshot snap ->
-    self.setState _ {
-      modal = DestroySnapshot.destroySnapshot
-              { dataset: self.props.dataset
-              , snap
-              , onOk: update self FetchSnapshots *> self.setState _ { modal = empty }
-              , onCancel: self.setState _ { modal = empty }
-              }
-      }
-
+    self.setState
+      _
+        { modal =
+          DestroySnapshot.destroySnapshot
+            { dataset: self.props.dataset
+            , snap
+            , onOk: update self FetchSnapshots *> self.setState _ { modal = empty }
+            , onCancel: self.setState _ { modal = empty }
+            }
+        }
   RenameSnapshot snap ->
-    self.setState _ {
-      modal = RenameSnapshot.renameSnapshot
-              { dataset: self.props.dataset
-              , snap
-              , onOk: update self FetchSnapshots *> self.setState _ { modal = empty }
-              , onCancel: self.setState _ { modal = empty }
-              }
-      }
-
+    self.setState
+      _
+        { modal =
+          RenameSnapshot.renameSnapshot
+            { dataset: self.props.dataset
+            , snap
+            , onOk: update self FetchSnapshots *> self.setState _ { modal = empty }
+            , onCancel: self.setState _ { modal = empty }
+            }
+        }
   CloneSnapshot snap ->
-    self.setState _ {
-      modal = CloneSnapshot.cloneSnapshot
-              { dataset: self.props.dataset
-              , snap
-              , onOk: self.props.onDatasetChanges *> self.setState _ { modal = empty }
-              , onCancel: self.setState _ { modal = empty }
-              }
-      }
-
+    self.setState
+      _
+        { modal =
+          CloneSnapshot.cloneSnapshot
+            { dataset: self.props.dataset
+            , snap
+            , onOk: self.props.onDatasetChanges *> self.setState _ { modal = empty }
+            , onCancel: self.setState _ { modal = empty }
+            }
+        }
   RollbackSnapshot snap ->
-    self.setState _ {
-      modal = RollbackSnapshot.rollbackSnapshot
-              { dataset: self.props.dataset
-              , snap
-              , onOk: update self FetchSnapshots *> self.setState _ { modal = empty }
-              , onCancel: self.setState _ { modal = empty }
-              }
-      }
-
+    self.setState
+      _
+        { modal =
+          RollbackSnapshot.rollbackSnapshot
+            { dataset: self.props.dataset
+            , snap
+            , onOk: update self FetchSnapshots *> self.setState _ { modal = empty }
+            , onCancel: self.setState _ { modal = empty }
+            }
+        }
 
 snapshotSelector :: Props -> JSX
 snapshotSelector = make component { initialState, didMount, didUpdate, render }
@@ -189,40 +188,38 @@ snapshotSelector = make component { initialState, didMount, didUpdate, render }
 
   snapshotActions self snap =
     R.div
-    { className: "dropleft"
-    , children:
-      [ R.div
-        { className: "dropdown"
-        , _data: O.fromHomogeneous { toggle: "dropdown" }
-        , onClick: capture_ $ pure unit -- prevent the row action
-        , children:
-          [ R.div
-            { className: "mx-auto"
-            , style: R.css { width: "10px" }
-            , children: [ R.span { className: "fas fa-ellipsis-v" } ]
+      { className: "dropleft"
+      , children:
+        [ R.div
+            { className: "dropdown"
+            , _data: O.fromHomogeneous { toggle: "dropdown" }
+            , onClick: capture_ $ pure unit -- prevent the row action
+            , children:
+              [ R.div
+                  { className: "mx-auto"
+                  , style: R.css { width: "10px" }
+                  , children: [ R.span { className: "fas fa-ellipsis-v" } ]
+                  }
+              ]
             }
-          ]
-        }
-      , R.div
-        { className: "dropdown-menu"
-        , children:
-          [ dropdownItem self "Rename snapshot" $ RenameSnapshot snap
-          , dropdownItem self "Destroy snapshot" $ DestroySnapshot snap
-          , dropdownItem self "Clone" $ CloneSnapshot snap
-          , dropdownItem self "Rollback" $ RollbackSnapshot snap
-          ]
-        }
-      ]
-    }
-
+        , R.div
+            { className: "dropdown-menu"
+            , children:
+              [ dropdownItem self "Rename snapshot" $ RenameSnapshot snap
+              , dropdownItem self "Destroy snapshot" $ DestroySnapshot snap
+              , dropdownItem self "Clone" $ CloneSnapshot snap
+              , dropdownItem self "Rollback" $ RollbackSnapshot snap
+              ]
+            }
+        ]
+      }
 
   dropdownItem self name cmd =
     R.button
-    { className: "dropdown-item"
-    , onClick: capture_ $ update self cmd
-    , children: [ R.text name ]
-    }
-
+      { className: "dropdown-item"
+      , onClick: capture_ $ update self cmd
+      , children: [ R.text name ]
+      }
 
 hasNewerSnapshots :: State -> Boolean
 hasNewerSnapshots state = state.selectedIdx /= Just 0

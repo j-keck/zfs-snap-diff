@@ -1,7 +1,6 @@
 module ZSD.Fragments.CreateSnapshotModal where
 
 import Prelude
-
 import Data.Either (either)
 import Data.Foldable (foldMap)
 import Data.Maybe (Maybe(..), isNothing)
@@ -23,16 +22,19 @@ type Props
     , onRequestClose :: Effect Unit
     }
 
-type State = { snapshotName :: Maybe String }
-data Action = CreateSnapshot
+type State
+  = { snapshotName :: Maybe String }
 
+data Action
+  = CreateSnapshot
 
 update :: Self Props State -> Action -> Effect Unit
 update self = case _ of
-
-  CreateSnapshot -> flip foldMap self.state.snapshotName \name ->  launchAff_ $
-           Dataset.createSnapshot self.props.dataset name
-      >>= (\res -> liftEffect $ either Messages.appError Messages.info res *> self.props.onRequestClose)
+  CreateSnapshot ->
+    flip foldMap self.state.snapshotName \name ->
+      launchAff_
+        $ Dataset.createSnapshot self.props.dataset name
+        >>= (\res -> liftEffect $ either Messages.appError Messages.info res *> self.props.onRequestClose)
 
 createSnapshotModal :: Props -> JSX
 createSnapshotModal = make component { initialState, render }
@@ -51,11 +53,12 @@ createSnapshotModal = make component { initialState, render }
                 $ div "modal-content"
                 $ fragment
                     [ div "modal-header" $ R.text "Create ZFS Snapshot"
-                    , div "modal-body m-1" $ SnapshotNameForm.snapshotNameForm
-                                             { dataset: self.props.dataset
-                                             , defaultTemplate: self.props.snapshotNameTemplate
-                                             , onNameChange: \n -> self.setState _ { snapshotName = n }
-                                             }
+                    , div "modal-body m-1"
+                        $ SnapshotNameForm.snapshotNameForm
+                            { dataset: self.props.dataset
+                            , defaultTemplate: self.props.snapshotNameTemplate
+                            , onNameChange: \n -> self.setState _ { snapshotName = n }
+                            }
                     , div "modal-footer"
                         $ fragment
                             [ R.button

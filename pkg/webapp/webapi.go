@@ -15,8 +15,8 @@ import (
 /// responds the configuration
 func (self *WebApp) configHndl(w http.ResponseWriter, r *http.Request) {
 	respond(w, r, struct {
-		DaysToScan           int          `json:"daysToScan"`
-		SnapshotNameTemplate string       `json:"snapshotNameTemplate"`
+		DaysToScan           int    `json:"daysToScan"`
+		SnapshotNameTemplate string `json:"snapshotNameTemplate"`
 	}{
 		DaysToScan:           config.Get.DaysToScan,
 		SnapshotNameTemplate: config.Get.SnapshotNameTemplate,

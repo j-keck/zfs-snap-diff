@@ -2,7 +2,6 @@
 module ZSD.Views.BrowseSnapshots where
 
 import Prelude
-
 import Data.Foldable (foldMap)
 import Data.Maybe (Maybe(..))
 import Data.Either (either)
@@ -47,12 +46,11 @@ data Command
   | FileSelected FH
   | DirSelected FH
 
-
 update :: (React.Self Props State) -> Command -> Effect Unit
 update self = case _ of
-
   FetchDatasets ->
-    Spinner.display *> launchAff_
+    Spinner.display
+      *> launchAff_
           ( Dataset.fetch
               >>= either Messages.appError (\ds -> self.setState _ { datasets = ds } *> Spinner.remove)
               >>> liftEffect
@@ -70,7 +68,6 @@ update self = case _ of
         }
     self.setState _ { selectedDataset = Just ds }
     self.props.onDatasetSelected ds
-
   SnapshotSelected snap ->
     self.setState
       _
@@ -82,7 +79,6 @@ update self = case _ of
             pure $ switchMountPoint (From oldSnap.mountPoint) (To snap.mountPoint) file
         }
   FileSelected fh -> self.setState _ { selectedFile = Just fh }
-
   DirSelected fh ->
     self.setState
       _
@@ -104,9 +100,7 @@ browseSnapshots = make component { initialState, didMount, render }
     , selectedDir: Nothing
     }
 
-  didMount self =
-    self.setStateThen _ { selectedDataset = self.props.activeDataset } $ update self FetchDatasets
-
+  didMount self = self.setStateThen _ { selectedDataset = self.props.activeDataset } $ update self FetchDatasets
 
   render self =
     R.div_

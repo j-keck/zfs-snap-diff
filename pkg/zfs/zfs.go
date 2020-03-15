@@ -111,7 +111,6 @@ func (self *ZFS) ScanDatasets() (Datasets, error) {
 	return datasets, nil
 }
 
-
 func (self *ZFS) RescanDatasets() error {
 	datasets, _, err := self.scanDatasets(self.name)
 	if err != nil {
@@ -121,7 +120,6 @@ func (self *ZFS) RescanDatasets() error {
 	self.datasets = datasets
 	return nil
 }
-
 
 // FindDatasetByName searches and returns the dataset with the given name
 func (self *ZFS) FindDatasetByName(name string) (Dataset, error) {

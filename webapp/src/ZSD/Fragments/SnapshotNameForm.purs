@@ -1,7 +1,6 @@
 module ZSD.Fragments.SnapshotNameForm where
 
 import Prelude
-
 import Data.Array ((..))
 import Data.Array as A
 import Data.DateTime (DateTime)
@@ -34,21 +33,24 @@ type State
     , showHelp :: Boolean
     }
 
-data Action = ConvertTemplate String
+data Action
+  = ConvertTemplate String
 
 update :: Self Props State -> Action -> Effect Unit
 update self = case _ of
-
   ConvertTemplate s -> do
     self.setState _ { snapshotTemplate = s }
     ts <- nowDateTime
     either
-      (\error ->    self.setState _ { error = error }
-                *> self.props.onNameChange Nothing)
-      (\name ->    self.setState _ { snapshotName = name, error = "" }
-               *> self.props.onNameChange (Just name))
+      ( \error ->
+          self.setState _ { error = error }
+            *> self.props.onNameChange Nothing
+      )
+      ( \name ->
+          self.setState _ { snapshotName = name, error = "" }
+            *> self.props.onNameChange (Just name)
+      )
       (convert ts s >>= validateName)
-
 
 snapshotNameForm :: Props -> JSX
 snapshotNameForm = make component { initialState, didMount, render }
@@ -84,10 +86,15 @@ snapshotNameForm = make component { initialState, didMount, render }
             <> R.small
                 { className: "form-text pointer text-primary"
                 , onClick: capture_ $ self.setState \s -> s { showHelp = not s.showHelp }
-                , children: let txt = if self.state.showHelp
-                                      then "Hide supported format sequences."
-                                      else "Show supported format sequences."
-                            in [ R.text txt ]
+                , children:
+                  let
+                    txt =
+                      if self.state.showHelp then
+                        "Hide supported format sequences."
+                      else
+                        "Show supported format sequences."
+                  in
+                    [ R.text txt ]
                 }
             <> R.pre
                 { className: "slide" <> guard (not self.state.showHelp) " d-none"

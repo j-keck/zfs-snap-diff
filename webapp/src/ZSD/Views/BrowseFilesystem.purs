@@ -1,7 +1,6 @@
 module ZSD.Views.BrowseFilesystem where
 
 import Prelude
-
 import Data.Foldable (foldMap)
 import Data.Maybe (Maybe(..))
 import Data.Monoid (guard)
@@ -83,15 +82,22 @@ browseFilesystem props = make component { initialState, didMount, render } props
     , selectedVersion: Nothing
     }
 
---didMount self = log "DID_MOUNT" *> self.setState _ { selectedDataset = self.props.activeDataset }
-  didMount self = Spinner.display *> launchAff_
+  --didMount self = log "DID_MOUNT" *> self.setState _ { selectedDataset = self.props.activeDataset }
+  didMount self =
+    Spinner.display
+      *> launchAff_
           ( Dataset.fetch
-              >>= either Messages.appError (\ds -> self.setState _ { datasets = ds
-                                                                   , selectedDataset = self.props.activeDataset
-                                                                   } *> Spinner.remove)
+              >>= either Messages.appError
+                  ( \ds ->
+                      self.setState
+                        _
+                          { datasets = ds
+                          , selectedDataset = self.props.activeDataset
+                          }
+                        *> Spinner.remove
+                  )
               >>> liftEffect
           )
-
 
   render self =
     R.div_
