@@ -26,25 +26,11 @@ func NewZFS(name string) (ZFS, error) {
 	self := ZFS{}
 	self.name = name
 	self.cmd = NewZFSCmd(config.Get.ZFS.UseSudo)
-
-	datasets, err := self.scanDatasets(name)
+	ds, err := self.ScanDatasets()
 	if err != nil {
-
-		if _, ok := err.(ExecutableNotFound); ok {
-			return self, errors.New("'zfs' executable not found. Try again with the '-use-sudo' flag")
-		}
-
-		if _, ok := err.(ExecZFSError); ok {
-			// lookup all dataset names and print them as a hint for the user
-			if datasetNames, e := AvailableDatasetNames(); e == nil {
-				names := strings.Join(datasetNames, ", ")
-				return self, fmt.Errorf("%v\n\n  Possible dataset names: %s", err, names)
-			}
-		}
 		return self, err
 	}
-
-	self.datasets = datasets
+	self.datasets = ds
 	return self, nil
 }
 
@@ -94,6 +80,49 @@ func (self *ZFS) Datasets() Datasets {
 	return datasets
 }
 
+func (self *ZFS) ScanDatasets() (Datasets, error) {
+	datasets, ignored, err := self.scanDatasets(self.name)
+	if err != nil {
+
+		if _, ok := err.(ExecutableNotFound); ok {
+			return nil, errors.New("'zfs' executable not found. Try again with the '-use-sudo' flag")
+		}
+
+		if _, ok := err.(ExecZFSError); ok {
+			// lookup all dataset names and print them as a hint for the user
+			if datasetNames, e := AvailableDatasetNames(); e == nil {
+				names := strings.Join(datasetNames, ", ")
+				fmt.Errorf("%v\n\n  Possible dataset names: %s", err, names)
+			}
+		}
+		return nil, err
+	}
+
+	log.Debugf("%d datasets found:", len(datasets))
+	log.Debugf("    %-40s %s", "Name", "Mountpoint")
+	for _, ds := range datasets {
+		log.Debugf("    %-40s %s", ds.Name, ds.MountPoint.Path)
+	}
+
+	log.Debugf("%d not mounted datasets ignored:", len(ignored))
+	for _, n := range ignored {
+		log.Debugf("    %s", n)
+	}
+	return datasets, nil
+}
+
+
+func (self *ZFS) RescanDatasets() error {
+	datasets, _, err := self.scanDatasets(self.name)
+	if err != nil {
+		return err
+	}
+
+	self.datasets = datasets
+	return nil
+}
+
+
 // FindDatasetByName searches and returns the dataset with the given name
 func (self *ZFS) FindDatasetByName(name string) (Dataset, error) {
 	for _, dataset := range self.datasets {
@@ -121,13 +150,13 @@ func (self *ZFS) FindDatasetForPath(path string) (Dataset, error) {
 }
 
 // scanDatasets returns all datasets under a given pool name
-func (self *ZFS) scanDatasets(name string) (Datasets, error) {
+func (self *ZFS) scanDatasets(name string) (Datasets, []string, error) {
 	log.Debugf("search datasets under zfs: %s", name)
 
 	stdout, stderr, err := self.cmd.Exec("list -Hp -o name,used,avail,refer,mountpoint -r -t filesystem", name)
 	if err != nil {
 		log.Debugf("unable to search datasets: %s - %v", stderr, err)
-		return nil, err
+		return nil, nil, err
 	}
 
 	// parse a line from the zfs output
@@ -160,6 +189,7 @@ func (self *ZFS) scanDatasets(name string) (Datasets, error) {
 	// iterate over every line from the 'zfs list ...' output.
 	// each line describes a 'Dataset'.
 	var datasets Datasets
+	var ignored []string
 	for _, line := range strings.Split(stdout, "\n") {
 		if name, used, avail, refer, mountPoint, ok := parse(line); ok {
 			switch mountPoint {
@@ -170,21 +200,23 @@ func (self *ZFS) scanDatasets(name string) (Datasets, error) {
 				legacyMountPoint, err := findmnt(name)
 				if err != nil {
 					log.Tracef("%s ist not mounted - ignore", name)
+					ignored = append(ignored, name)
 				} else {
-					log.Debugf("mountpoint found for dataset: '%s', mountpoint: '%s'", name, legacyMountPoint)
+					log.Tracef("mountpoint found for dataset: '%s', mountpoint: '%s'", name, legacyMountPoint)
 					if dirHandle, err := fs.GetDirHandle(legacyMountPoint); err != nil {
-						return nil, err
+						return nil, nil, err
 					} else {
 						datasets = append(datasets, Dataset{name, used, avail, refer, dirHandle, self.cmd})
 					}
 				}
 
 			case "none":
-				log.Notef("ignore not mounted dataset: '%s'", name)
+				log.Tracef("ignore not mounted dataset: '%s'", name)
+				ignored = append(ignored, name)
 				continue
 
 			default:
-				log.Debugf("dataset found - name: '%s', mountpoint: '%s'", name, mountPoint)
+				log.Tracef("dataset found - name: '%s', mountpoint: '%s'", name, mountPoint)
 				if dirHandle, err := fs.GetDirHandle(mountPoint); err != nil {
 					log.Warnf("unable to stat directory for dataset: %s - err: %s", name, err)
 				} else {
@@ -192,11 +224,10 @@ func (self *ZFS) scanDatasets(name string) (Datasets, error) {
 				}
 			}
 		} else {
-			log.Debugf("ignore invalid formatted line: '%s'", line)
+			log.Tracef("ignore invalid formatted line: '%s'", line)
 		}
 	}
-	log.Debugf("%d datasets found", len(datasets))
-	return datasets, nil
+	return datasets, ignored, nil
 }
 
 func (self *ZFS) MountSnapshot(snap Snapshot) error {

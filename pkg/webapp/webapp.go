@@ -71,13 +71,16 @@ func (self *WebApp) registerAssetsEndpoint() {
 
 func (self *WebApp) registerApiEndpoints() {
 	http.HandleFunc("/api/config", self.configHndl)
-	http.HandleFunc("/api/datasets", self.datasetsHndl)
+	http.HandleFunc("/api/rescan-datasets", self.rescanDatasetsHndl)
 	http.HandleFunc("/api/stat", self.statHndl)
 	http.HandleFunc("/api/dir-listing", self.dirListingHndl)
 	http.HandleFunc("/api/find-file-versions", self.findFileVersionsHndl)
 	http.HandleFunc("/api/snapshots-for-dataset", self.snapshotsForDatasetHndl)
 	http.HandleFunc("/api/create-snapshot", self.createSnapshotHndl)
 	http.HandleFunc("/api/destroy-snapshot", self.destroySnapshotHndl)
+	http.HandleFunc("/api/rename-snapshot", self.renameSnapshotHndl)
+	http.HandleFunc("/api/clone-snapshot", self.cloneSnapshotHndl)
+	http.HandleFunc("/api/rollback-snapshot", self.rollbackSnapshotHndl)
 	http.HandleFunc("/api/mime-type", self.mimeTypeHndl)
 	http.HandleFunc("/api/download", self.downloadHndl)
 	http.HandleFunc("/api/diff", self.diffHndl)

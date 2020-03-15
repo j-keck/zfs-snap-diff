@@ -6,7 +6,6 @@ import (
 	"github.com/j-keck/zfs-snap-diff/pkg/diff"
 	"github.com/j-keck/zfs-snap-diff/pkg/fs"
 	"github.com/j-keck/zfs-snap-diff/pkg/scanner"
-	"github.com/j-keck/zfs-snap-diff/pkg/zfs"
 	"net/http"
 	"path/filepath"
 	"strconv"
@@ -16,18 +15,24 @@ import (
 /// responds the configuration
 func (self *WebApp) configHndl(w http.ResponseWriter, r *http.Request) {
 	respond(w, r, struct {
-		Datasets             zfs.Datasets `json:"datasets"`
 		DaysToScan           int          `json:"daysToScan"`
 		SnapshotNameTemplate string       `json:"snapshotNameTemplate"`
 	}{
-		Datasets:             self.zfs.Datasets(),
 		DaysToScan:           config.Get.DaysToScan,
 		SnapshotNameTemplate: config.Get.SnapshotNameTemplate,
 	})
 }
 
-/// responds with a list of all available datasets
-func (self *WebApp) datasetsHndl(w http.ResponseWriter, r *http.Request) {
+/// re-scan datasets
+func (self *WebApp) rescanDatasetsHndl(w http.ResponseWriter, r *http.Request) {
+	err := self.zfs.RescanDatasets()
+	if err != nil {
+		msg := fmt.Sprintf("Unable to scan datasets: %v", err)
+		log.Error(msg)
+		http.Error(w, msg, 400)
+		return
+	}
+
 	respond(w, r, self.zfs.Datasets())
 }
 
@@ -134,109 +139,6 @@ func (self *WebApp) findFileVersionsHndl(w http.ResponseWriter, r *http.Request)
 	}
 
 	respond(w, r, scanResult)
-}
-
-/// responds with a list of snapshots for the given dataset
-///
-/// expected payload: { datasetName: "name" }
-func (self *WebApp) snapshotsForDatasetHndl(w http.ResponseWriter, r *http.Request) {
-	// decode the payload
-	type Payload struct {
-		DatasetName string `json:"datasetName"`
-	}
-
-	payload, ok := decodeJsonPayload(w, r, &Payload{}).(*Payload)
-	if !ok {
-		return
-	}
-
-	// get the dataset
-	ds, err := self.zfs.FindDatasetByName(payload.DatasetName)
-	if err != nil {
-		msg := fmt.Sprintf("Dataset with name: %s not found - %v", payload.DatasetName, err)
-		log.Error(msg)
-		http.Error(w, msg, 400)
-		return
-	}
-
-	// snapshots
-	snaps, err := ds.ScanSnapshots()
-	if err != nil {
-		msg := fmt.Sprintf("Unable to scan snapshots for Dataset: %s - %v", payload.DatasetName, err)
-		log.Error(msg)
-		http.Error(w, msg, 400)
-		return
-	}
-
-	respond(w, r, snaps)
-}
-
-func (self *WebApp) createSnapshotHndl(w http.ResponseWriter, r *http.Request) {
-	// decode the payload
-	type Payload struct {
-		DatasetName  string `json:"datasetName"`
-		SnapshotName string `json:"snapshotName"`
-	}
-
-	payload, ok := decodeJsonPayload(w, r, &Payload{}).(*Payload)
-	if !ok {
-		return
-	}
-
-	// get the dataset
-	ds, err := self.zfs.FindDatasetByName(payload.DatasetName)
-	if err != nil {
-		msg := fmt.Sprintf("Dataset with name: %s not found - %v", payload.DatasetName, err)
-		log.Error(msg)
-		http.Error(w, msg, 400)
-		return
-	}
-
-	name, err := ds.CreateSnapshot(payload.SnapshotName)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to create snapshot: %s - %v", name, err)
-		log.Error(msg)
-		http.Error(w, msg, 500)
-		return
-	}
-
-	msg := fmt.Sprintf("Snapshot '%s' created", name)
-	log.Info(msg)
-	w.Write([]byte(msg))
-}
-
-func (self *WebApp) destroySnapshotHndl(w http.ResponseWriter, r *http.Request) {
-	// decode the payload
-	type Payload struct {
-		DatasetName  string `json:"datasetName"`
-		SnapshotName string `json:"snapshotName"`
-	}
-
-	payload, ok := decodeJsonPayload(w, r, &Payload{}).(*Payload)
-	if !ok {
-		return
-	}
-
-	// get the dataset
-	ds, err := self.zfs.FindDatasetByName(payload.DatasetName)
-	if err != nil {
-		msg := fmt.Sprintf("Dataset with name: %s not found - %v", payload.DatasetName, err)
-		log.Error(msg)
-		http.Error(w, msg, 400)
-		return
-	}
-
-	name, err := ds.DestroySnapshot(payload.SnapshotName)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to destroy snapshot: %s - %v", name, err)
-		log.Error(msg)
-		http.Error(w, msg, 500)
-		return
-	}
-
-	msg := fmt.Sprintf("Snapshot '%s' destroyed", name)
-	log.Info(msg)
-	w.Write([]byte(msg))
 }
 
 /// responds with the mime type of the request file

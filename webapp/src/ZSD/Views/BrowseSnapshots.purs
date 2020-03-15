@@ -2,10 +2,14 @@
 module ZSD.Views.BrowseSnapshots where
 
 import Prelude
+
 import Data.Foldable (foldMap)
 import Data.Maybe (Maybe(..))
+import Data.Either (either)
 import Data.Tuple.Nested (tuple2, tuple3, uncurry2, uncurry3)
 import Effect (Effect)
+import Effect.Aff (launchAff_)
+import Effect.Class (liftEffect)
 import React.Basic (Component, JSX, createComponent, make)
 import React.Basic as React
 import React.Basic.DOM as R
@@ -13,11 +17,14 @@ import ZSD.Fragments.DatasetSelector (datasetSelector)
 import ZSD.Fragments.DirBrowser (dirBrowser)
 import ZSD.Fragments.FileActions (fileAction)
 import ZSD.Model.Config (Config)
-import ZSD.Model.Dataset (Dataset)
+import ZSD.Model.Dataset (Dataset, Datasets)
+import ZSD.Model.Dataset as Dataset
 import ZSD.Model.FH (FH, From(..), To(..), switchMountPoint)
 import ZSD.Model.FileVersion (FileVersion(..))
 import ZSD.Model.Snapshot (Snapshot)
 import ZSD.Views.BrowseSnapshots.SnapshotSelector (snapshotSelector)
+import ZSD.Components.Spinner as Spinner
+import ZSD.Views.Messages as Messages
 
 type Props
   = { config :: Config
@@ -26,7 +33,8 @@ type Props
     }
 
 type State
-  = { selectedDataset :: Maybe Dataset
+  = { datasets :: Datasets
+    , selectedDataset :: Maybe Dataset
     , selectedSnapshot :: Maybe Snapshot
     , selectedFile :: Maybe FH
     , selectedDir :: Maybe FH
@@ -34,12 +42,21 @@ type State
 
 data Command
   = DatasetSelected Dataset
+  | FetchDatasets
   | SnapshotSelected Snapshot
   | FileSelected FH
   | DirSelected FH
 
+
 update :: (React.Self Props State) -> Command -> Effect Unit
 update self = case _ of
+
+  FetchDatasets ->
+    Spinner.display *> launchAff_
+          ( Dataset.fetch
+              >>= either Messages.appError (\ds -> self.setState _ { datasets = ds } *> Spinner.remove)
+              >>> liftEffect
+          )
   DatasetSelected ds -> do
     -- FIXME: when a snapshot are created from the 'DatasetSelector' fragment,
     -- the new snapshot was not shown. Resetting the 'selectedDataset' triggers
@@ -53,6 +70,7 @@ update self = case _ of
         }
     self.setState _ { selectedDataset = Just ds }
     self.props.onDatasetSelected ds
+
   SnapshotSelected snap ->
     self.setState
       _
@@ -64,6 +82,7 @@ update self = case _ of
             pure $ switchMountPoint (From oldSnap.mountPoint) (To snap.mountPoint) file
         }
   FileSelected fh -> self.setState _ { selectedFile = Just fh }
+
   DirSelected fh ->
     self.setState
       _
@@ -78,18 +97,21 @@ browseSnapshots = make component { initialState, didMount, render }
   component = createComponent "BrowseSnapshots"
 
   initialState =
-    { selectedDataset: Nothing
+    { datasets: []
+    , selectedDataset: Nothing
     , selectedSnapshot: Nothing
     , selectedFile: Nothing
     , selectedDir: Nothing
     }
 
-  didMount self = self.setState _ { selectedDataset = self.props.activeDataset }
+  didMount self =
+    self.setStateThen _ { selectedDataset = self.props.activeDataset } $ update self FetchDatasets
+
 
   render self =
     R.div_
       [ datasetSelector
-          { datasets: self.props.config.datasets
+          { datasets: self.state.datasets
           , activeDataset: self.props.activeDataset
           , onDatasetSelected: update self <<< DatasetSelected
           , snapshotNameTemplate: self.props.config.snapshotNameTemplate
@@ -100,6 +122,7 @@ browseSnapshots = make component { initialState, didMount, render }
               snapshotSelector
                 { dataset
                 , onSnapshotSelected: update self <<< SnapshotSelected
+                , onDatasetChanges: update self FetchDatasets
                 }
           )
           self.state.selectedDataset

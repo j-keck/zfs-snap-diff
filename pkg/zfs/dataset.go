@@ -82,16 +82,68 @@ func (self *Dataset) CreateSnapshot(name string) (string, error) {
 	return name, err
 }
 
-func (self *Dataset) DestroySnapshot(name string) (string, error) {
+func (self *Dataset) CloneSnapshot(snapName, fsName string, flags []string) error {
+	if len(fsName) == 0 {
+		return errors.New("filesystem-name can't be empty")
+	}
+
+	if !strings.HasPrefix(snapName, self.Name) {
+		snapName = self.Name + "@" + snapName
+	}
+
+	log.Debugf("clone snapshot: %s to %s", snapName)
+	args := append(flags, snapName, fsName)
+	stdout, stderr, err := self.cmd.Exec("clone", args...)
+	log.Tracef("clone snapshot stdout: %s", stdout)
+	log.Tracef("clone snapshot stderr: %s", stderr)
+	return err
+}
+
+// FIXME: check if the given name is a snapshot name
+func (self *Dataset) RenameSnapshot(oldName, newName string) error {
+	if len(newName) == 0 {
+		return errors.New("new snapshot-name can't be empty")
+	}
+
+	if !strings.HasPrefix(oldName, self.Name) {
+		oldName = self.Name + "@" + oldName
+	}
+
+	if !strings.HasPrefix(newName, self.Name) {
+		newName = self.Name + "@" + newName
+	}
+
+	log.Debugf("rename snapshot: %s -> %s", oldName, newName)
+	stdout, stderr, err := self.cmd.Exec("rename", oldName, newName)
+	log.Tracef("rename snapshot stdout: %s", stdout)
+	log.Tracef("rename snapshot stderr: %s", stderr)
+	return err
+}
+
+func (self *Dataset) DestroySnapshot(name string, flags []string) error {
 	if !strings.HasPrefix(name, self.Name) {
 		name = self.Name + "@" + name
 	}
 
 	log.Debugf("destroy snapshot: %s", name)
-	stdout, stderr, err := self.cmd.Exec("destroy", name)
+	args := append(flags, name)
+	stdout, stderr, err := self.cmd.Exec("destroy", args...)
 	log.Tracef("destroy snapshot stdout: %s", stdout)
 	log.Tracef("destroy snapshot stderr: %s", stderr)
-	return name, err
+	return err
+}
+
+func (self *Dataset) RollbackSnapshot(name string, flags []string) error {
+	if !strings.HasPrefix(name, self.Name) {
+		name = self.Name + "@" + name
+	}
+
+	log.Debugf("rollback snapshot: %s", name)
+	args := append(flags, name)
+	stdout, stderr, err := self.cmd.Exec("rollback", args...)
+	log.Tracef("rollback snapshot stdout: %s", stdout)
+	log.Tracef("rollback snapshot stderr: %s", stderr)
+	return err
 }
 
 // Datasets are a list of Dataset

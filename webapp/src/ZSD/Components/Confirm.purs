@@ -18,7 +18,7 @@ confirm =
   makeStateless component \props ->
     fragment
     [ div "modal modal-show"
-        $ div "modal-dialog modal-lg modal-dialog-centered"
+        $ div "modal-dialog modal modal-dialog-centered"
         $ div "modal-content"
         $ fragment
             [ div "modal-header" $ props.header

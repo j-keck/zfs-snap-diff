@@ -56,7 +56,7 @@ datasetSelector = make component { initialState, didMount, render }
                               { modal =
                                 createSnapshotModal
                                   { dataset: ds
-                                  , defaultTemplate: self.props.snapshotNameTemplate
+                                  , snapshotNameTemplate: self.props.snapshotNameTemplate
                                   , onRequestClose:
                                     self.setState _ { modal = empty }
                                       *> self.props.onDatasetSelected ds

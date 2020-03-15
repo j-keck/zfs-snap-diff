@@ -34,22 +34,12 @@ type State
     }
 
 webApp :: Props -> JSX
-webApp props = make component { initialState, didMount, render } props
+webApp props = make component { initialState, render } props
   where
   component :: Component Props
   component = createComponent "WebApp"
 
   initialState = { views: [], activeView: empty, activeDataset: Nothing }
-
-  didMount self = do
-    -- if the is only one dataset, select it
-    let
-      activeDataset =
-        if (A.length self.props.config.datasets == 1) then
-          A.head self.props.config.datasets
-        else
-          Nothing
-    self.setState _ { activeDataset = activeDataset }
 
   render self =
     fragment
