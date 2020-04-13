@@ -9,7 +9,6 @@ import Data.Tuple.Nested (tuple2, uncurry2)
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
-import Effect.Console (log)
 import React.Basic (Component, JSX, createComponent, make)
 import React.Basic as React
 import React.Basic.DOM as R

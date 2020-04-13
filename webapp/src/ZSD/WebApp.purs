@@ -4,8 +4,6 @@
 -- |
 module ZSD.WebApp where
 
-import Data.Array as A
-import Data.Eq ((==))
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Prelude (($))

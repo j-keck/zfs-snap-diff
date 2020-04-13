@@ -10,7 +10,6 @@ import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
-import Effect.Console (log)
 import Foreign.Object as O
 import React.Basic (Component, JSX, createComponent, empty, fragment, make)
 import React.Basic as React
@@ -20,12 +19,10 @@ import ZSD.BrowseSnapshots.CloneSnapshot as CloneSnapshot
 import ZSD.BrowseSnapshots.DestroySnapshot as DestroySnapshot
 import ZSD.BrowseSnapshots.RenameSnapshot as RenameSnapshot
 import ZSD.BrowseSnapshots.RollbackSnapshot as RollbackSnapshot
-import ZSD.Components.Confirm as Confirm
 import ZSD.Components.Panel (panel)
 import ZSD.Components.Spinner as Spinner
 import ZSD.Components.TableX (tableX)
 import ZSD.Model.Dataset (Dataset)
-import ZSD.Model.Dataset as Dataset
 import ZSD.Model.Snapshot (Snapshots, Snapshot)
 import ZSD.Model.Snapshot as Snapshots
 import ZSD.Utils.Formatter as Formatter

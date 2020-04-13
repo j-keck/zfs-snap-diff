@@ -6,7 +6,7 @@ import Data.Either (either)
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
-import React.Basic (Component, JSX, Self, createComponent, fragment, make)
+import React.Basic (Component, JSX, Self, createComponent, make)
 import React.Basic.DOM as R
 import ZSD.Components.Confirm as Confirm
 import ZSD.Fragments.FormCommandFlag (flag)
