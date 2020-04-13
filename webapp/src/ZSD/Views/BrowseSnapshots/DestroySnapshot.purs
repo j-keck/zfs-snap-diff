@@ -53,9 +53,8 @@ destroySnapshot = make component { initialState, render }
       { header: R.text "Destroy snapshot"
       , body:
         R.form
-          { className: "m-2"
-          , children:
-            [ R.b_ [ R.text self.props.snap.fullName ]
+          { children:
+            [ R.p { className: "font-weight-bold", children: [ R.text self.props.snap.fullName ] }
             , flag "-R"
                 "Recursively destroy all clones of these snapshots, including the clones, snapshots, and children.  If this flag is specified, the -d flag will have no effect."
                 (addOrRemoveFlag self "-R")

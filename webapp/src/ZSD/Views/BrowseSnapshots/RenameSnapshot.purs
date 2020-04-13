@@ -52,8 +52,7 @@ renameSnapshot = make component { initialState, render }
       { header: R.text "Rename snapshot"
       , body:
         fragment
-          [ R.b_ [ R.text self.props.snap.fullName ]
-          , R.br {}
+          [ R.p { className: "font-weight-bold", children: [ R.text self.props.snap.fullName ] }
           , SnapshotNameForm.snapshotNameForm
               { dataset: self.props.dataset
               , defaultTemplate: self.props.snap.name

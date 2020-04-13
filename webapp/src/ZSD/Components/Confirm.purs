@@ -1,10 +1,13 @@
 module ZSD.Components.Confirm where
 
 import Prelude
+
+import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import React.Basic (Component, JSX, createComponent, fragment, makeStateless)
 import React.Basic.DOM as R
-import React.Basic.DOM.Events (capture_)
+import React.Basic.DOM.Events (capture_, key)
+import React.Basic.Events (handler)
 
 type Props
   = { header :: JSX
@@ -17,12 +20,26 @@ confirm :: Props -> JSX
 confirm =
   makeStateless component \props ->
     fragment
-      [ div "modal modal-show"
-          $ div "modal-dialog modal modal-dialog-centered"
-          $ div "modal-content"
-          $ fragment
-              [ div "modal-header" $ props.header
-              , div "modal-body" $ props.body
+    [ div "modal modal-show"
+          $ div "modal-dialog modal modal-lg modal-dialog-centered"
+          $ R.div
+            { className: "modal-content"
+            , tabIndex: 0
+            , onKeyDown: handler key $
+              case _ of
+                Just "Enter" -> props.onOk
+                Just "Escape" -> props.onCancel
+                _ -> pure unit
+            , children:
+              [ div "modal-header" $
+                  R.h5
+                  { className: "modal-title"
+                  , children: [props.header]
+                  }
+              , R.div
+                { className: "modal-body mx-3"
+                , children: [ props.body ]
+                }
               , div "modal-footer"
                   $ fragment
                       [ R.button
@@ -37,10 +54,12 @@ confirm =
                           }
                       ]
               ]
+            }
       , R.div { className: "modal-backdrop fade show" }
       ]
-  where
-  component :: Component Props
-  component = createComponent "Confirm"
 
-  div className child = R.div { className, children: [ child ] }
+  where
+    component :: Component Props
+    component = createComponent "Confirm"
+
+    div className child = R.div { className, children: [ child ] }

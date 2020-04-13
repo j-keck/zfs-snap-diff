@@ -53,9 +53,8 @@ rollbackSnapshot = make component { initialState, render }
       { header: R.text "Rollback snapshot"
       , body:
         R.form
-          { className: "m-2"
-          , children:
-            [ R.b_ [ R.text self.props.snap.fullName ]
+          { children:
+            [ R.p { className: "font-weight-bold", children: [ R.text self.props.snap.fullName ] }
             , flag "-R"
                 "Destroy any more recent snapshots and bookmarks, as well as any clones of those snapshots."
                 (addOrRemoveFlag self "-R")

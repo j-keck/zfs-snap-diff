@@ -75,10 +75,9 @@ cloneSnapshot = make component { initialState, didMount, render }
       { header: R.text "Clone snapshot"
       , body:
         R.form
-          { className: "m-2"
-          , onSubmit: capture_ $ pure unit
+          { onSubmit: capture_ $ pure unit
           , children:
-            [ R.b_ [ R.text self.props.snap.fullName ]
+            [ R.p { className: "font-weight-bold", children: [ R.text self.props.snap.fullName ] }
             , flag "-p"
                 "Creates all the non-existing parent datasets.  Datasets created in this manner are automatically mounted according to the mountpoint property inherited from their parent.  If the target filesystem or volume already exists, the operation completes successfully."
                 (addOrRemoveFlag self "-p")

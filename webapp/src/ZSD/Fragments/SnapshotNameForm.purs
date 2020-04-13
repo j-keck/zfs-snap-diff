@@ -71,7 +71,7 @@ snapshotNameForm = make component { initialState, didMount, render }
 
   render self =
     R.form
-      { className: "m-3"
+      { className: "mx-3"
       , onSubmit: capture_ $ pure unit
       , children:
         [ div "form-group row"
@@ -95,35 +95,36 @@ snapshotNameForm = make component { initialState, didMount, render }
                 , value: self.state.snapshotTemplate
                 }
             <> foldMap (R.text >>> div "invalid-feedback") self.state.error
-            <> R.small
-                { className: "form-text pointer text-primary"
-                , onClick: capture_ $ self.setState \s -> s { showHelp = not s.showHelp }
-                , children:
-                  let
-                    txt =
-                      if self.state.showHelp then
-                        "Hide supported format sequences."
-                      else
-                        "Show supported format sequences."
-                  in
-                    [ R.text txt ]
-                }
-            <> R.pre
+        , div "form-group"
+            $ R.small
+              { className: "form-text pointer text-primary"
+              , onClick: capture_ $ self.setState \s -> s { showHelp = not s.showHelp }
+              , children:
+                let
+                  txt =
+                    if self.state.showHelp then
+                      "Hide supported format sequences."
+                    else
+                      "Show supported format sequences."
+                in
+                 [ R.text txt ]
+              }
+             <> R.pre
                 { className: "slide" <> guard (not self.state.showHelp) " d-none"
                 , children:
                   map ((<>) "\n" >>> R.text)
-                    [ "Format sequences are alike the `date` command"
-                    , "  %d: day of month (e.g., 01)"
-                    , "  %m: month (01..12)"
-                    , "  %y: last two digits of year (00..99)"
-                    , "  %Y: year"
-                    , "  %F: full date; like %Y-%m-%d"
-                    , "  %H: hour (00..23)"
-                    , "  %I: hour (01..12)"
-                    , "  %M: minute (00..59)"
-                    , "  %S: second (00..60)"
-                    , "  %s: seconds since 1970-01-01 00:00:00 UTC"
-                    ]
+                  [ "Format sequences are alike the `date` command"
+                  , "  %d: day of month (e.g., 01)"
+                  , "  %m: month (01..12)"
+                  , "  %y: last two digits of year (00..99)"
+                  , "  %Y: year"
+                  , "  %F: full date; like %Y-%m-%d"
+                  , "  %H: hour (00..23)"
+                  , "  %I: hour (01..12)"
+                  , "  %M: minute (00..59)"
+                  , "  %S: second (00..60)"
+                  , "  %s: seconds since 1970-01-01 00:00:00 UTC"
+                  ]
                 }
         , div "form-group row"
             $ R.label
