@@ -12,6 +12,7 @@ import Effect.Class (liftEffect)
 import React.Basic (Component, JSX, Self, createComponent, make)
 import React.Basic.DOM as R
 import ZSD.Components.Confirm as Confirm
+import ZSD.Components.Spinner as Spinner
 import ZSD.Fragments.SnapshotNameForm as SnapshotNameForm
 import ZSD.Model.Dataset (Dataset)
 import ZSD.Model.Dataset as Dataset
@@ -33,9 +34,14 @@ update :: Self Props State -> Action -> Effect Unit
 update self = case _ of
   CreateSnapshot ->
     flip foldMap self.state.snapshotName \name ->
-      launchAff_
-        $ Dataset.createSnapshot self.props.dataset name
-        >>= (\res -> liftEffect $ either Messages.appError Messages.info res *> self.props.onRequestClose)
+      Spinner.display
+      *> launchAff_ do
+          res <- Dataset.createSnapshot self.props.dataset name
+          liftEffect $ do
+            either Messages.appError Messages.info res
+            self.props.onRequestClose
+            Spinner.remove
+
 
 createSnapshotModal :: Props -> JSX
 createSnapshotModal = make component { initialState, render }

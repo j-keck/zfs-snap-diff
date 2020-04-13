@@ -52,13 +52,10 @@ update self = case _ of
       $ validateName name
   CloneSnapshot ->
     flip foldMap self.state.fsName \name ->
-       launchAff_ do
-          let
-            fsName = self.state.base <> "/" <> name
+       self.props.onOk *> launchAff_ do
+          let fsName = self.state.base <> "/" <> name
           res <- Dataset.cloneSnapshot self.props.dataset self.props.snap self.state.flags fsName
-          liftEffect do
-            either Messages.appError Messages.info res
-            self.props.onOk
+          liftEffect $ either Messages.appError Messages.info res
 
 cloneSnapshot :: Props -> JSX
 cloneSnapshot = make component { initialState, didMount, render }

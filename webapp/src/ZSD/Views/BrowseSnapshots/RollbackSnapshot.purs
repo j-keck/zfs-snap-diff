@@ -1,6 +1,7 @@
 module ZSD.BrowseSnapshots.RollbackSnapshot where
 
 import Prelude
+
 import Data.Array as A
 import Data.Either (either)
 import Effect (Effect)
@@ -9,6 +10,7 @@ import Effect.Class (liftEffect)
 import React.Basic (Component, JSX, Self, createComponent, make)
 import React.Basic.DOM as R
 import ZSD.Components.Confirm as Confirm
+import ZSD.Components.Spinner as Spinner
 import ZSD.Fragments.FormCommandFlag (flag)
 import ZSD.Model.Dataset (Dataset)
 import ZSD.Model.Dataset as Dataset
@@ -34,11 +36,12 @@ data Action
 update :: Self Props State -> Action -> Effect Unit
 update self = case _ of
   RollbackSnapshot snap ->
-    launchAff_ do
+    Spinner.display *> launchAff_ do
       res <- Dataset.rollbackSnapshot self.props.dataset snap self.state
       liftEffect do
         either Messages.appError Messages.info res
         self.props.onOk
+        Spinner.remove
 
 rollbackSnapshot :: Props -> JSX
 rollbackSnapshot = make component { initialState, render }

@@ -27,7 +27,6 @@ confirm =
             , tabIndex: 0
             , onKeyDown: handler key $
               case _ of
-                Just "Enter" -> props.onOk
                 Just "Escape" -> props.onCancel
                 _ -> pure unit
             , children:
