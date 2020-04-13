@@ -6,7 +6,7 @@ import Data.Array (foldMap, (..))
 import Data.Array as A
 import Data.Either (Either(..), either)
 import Data.Enum (toEnumWithDefaults)
-import Data.Maybe (Maybe(..), fromMaybe, isJust, isNothing)
+import Data.Maybe (Maybe(..), fromMaybe, isJust)
 import Data.Monoid (guard)
 import Data.String as S
 import Effect (Effect)
@@ -36,7 +36,7 @@ type Flags
 type State
   = { base :: String
     , flags :: Flags
-    , fsName :: String
+    , fsName :: Maybe String
     , error :: Maybe String
     }
 
@@ -47,14 +47,14 @@ data Action
 update :: Self Props State -> Action -> Effect Unit
 update self = case _ of
   UpdateFsName name ->
-    either (\error -> self.setState _ { error = Just error })
-      (\fsName -> self.setState _ { fsName = fsName, error = Nothing })
+    either (\error -> self.setState _ { error = Just error, fsName = Nothing })
+      (\fsName -> self.setState _ { fsName = Just fsName, error = Nothing })
       $ validateName name
   CloneSnapshot ->
-    guard (isNothing self.state.error)
-      $ launchAff_ do
+    flip foldMap self.state.fsName \name ->
+       launchAff_ do
           let
-            fsName = self.state.base <> "/" <> self.state.fsName
+            fsName = self.state.base <> "/" <> name
           res <- Dataset.cloneSnapshot self.props.dataset self.props.snap self.state.flags fsName
           liftEffect do
             either Messages.appError Messages.info res
@@ -66,7 +66,7 @@ cloneSnapshot = make component { initialState, didMount, render }
   component :: Component Props
   component = createComponent "CloneSnapshot"
 
-  initialState = { base: "", fsName: "", flags: [], error: Nothing }
+  initialState = { base: "", fsName: Nothing, flags: [], error: Nothing }
 
   didMount self = self.setState _ { base = S.takeWhile ((/=) $ S.codePointFromChar '/') self.props.dataset.name }
 
@@ -129,7 +129,9 @@ validateName name =
 
     invalidStrs = A.filter (flip A.elem validStrs >>> not) $ (S.singleton <$> S.toCodePointArray name)
   in
-    if A.null invalidStrs then
+    if S.null name then
+      Left $ "Name can't be empty"
+    else if A.null invalidStrs then
       Right name
     else
       Left $ "Invalid character found: " <> (S.joinWith ", " invalidStrs)

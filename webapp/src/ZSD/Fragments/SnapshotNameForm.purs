@@ -152,9 +152,11 @@ validateName name =
 
     invalidStrs = A.filter (flip A.elem validStrs >>> not) $ (S.singleton <$> S.toCodePointArray name)
   in
-    if A.null invalidStrs then
+   if S.null name then
+     Left $ "Name can't be empty"
+   else if A.null invalidStrs then
       Right name
-    else
+   else
       Left $ "Invalid character found: " <> (S.joinWith ", " invalidStrs)
 
 convert :: DateTime -> String -> Either String String
