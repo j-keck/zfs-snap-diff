@@ -41,14 +41,14 @@ let
   webapp =
     let
 
-      # regenerate spago packages per: (nix-shell --run 'cd webapp; spago2nix generate')
+      # regenerate spago packages per: nix-shell --run 'cd webapp; spago2nix generate'
       webapp_ps = (import (./webapp/spago-packages.nix) { inherit pkgs; }).mkBuildProjectOutput {
         src = pkgs.nix-gitignore.gitignoreSourcePure
                 [ "/.cache/" "/.spago/" "/node_modules" "/output/" "/dist/" ".psci_modules"] ./webapp;
         purs = easy-ps.purs;
       };
 
-      # regenerate node modules per: (nix-shell; cd webapp; node2nix --nodejs-12)
+      # regenerate node modules per: nix-shell  --run 'cd webapp; node2nix --nodejs-12'
       webapp_nm = (import ./webapp { inherit pkgs; }).package;
 
     in pkgs.stdenv.mkDerivation rec {
