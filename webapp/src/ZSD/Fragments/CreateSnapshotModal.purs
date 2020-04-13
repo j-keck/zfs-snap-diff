@@ -58,6 +58,8 @@ createSnapshotModal = make component { initialState, render }
                             { dataset: self.props.dataset
                             , defaultTemplate: self.props.snapshotNameTemplate
                             , onNameChange: \n -> self.setState _ { snapshotName = n }
+                            , onEnter: \_ -> update self CreateSnapshot
+                            , onEsc: self.props.onRequestClose
                             }
                     , div "modal-footer"
                         $ fragment

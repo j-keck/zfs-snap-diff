@@ -1,6 +1,7 @@
 module ZSD.BrowseSnapshots.RenameSnapshot where
 
 import Prelude
+
 import Data.Either (either)
 import Data.Foldable (foldMap)
 import Data.Maybe (Maybe(..))
@@ -57,6 +58,8 @@ renameSnapshot = make component { initialState, render }
               { dataset: self.props.dataset
               , defaultTemplate: self.props.snap.name
               , onNameChange: \name -> self.setState _ { newName = name }
+              , onEnter: \name -> update self (RenameSnapshot self.props.snap name)
+              , onEsc: self.props.onCancel
               }
           ]
       , onOk: flip foldMap self.state.newName \name -> update self (RenameSnapshot self.props.snap name)

@@ -1,6 +1,7 @@
 module ZSD.BrowseSnapshots.CloneSnapshot where
 
 import Prelude
+
 import Data.Array (foldMap, (..))
 import Data.Array as A
 import Data.Either (Either(..), either)
@@ -13,7 +14,8 @@ import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import React.Basic (Component, JSX, Self, createComponent, make)
 import React.Basic.DOM as R
-import React.Basic.DOM.Events (capture, targetValue)
+import React.Basic.DOM.Events (capture, capture_, key, targetValue)
+import React.Basic.Events (handler)
 import ZSD.Components.Confirm as Confirm
 import ZSD.Fragments.FormCommandFlag (flag)
 import ZSD.Model.Dataset (Dataset)
@@ -74,13 +76,14 @@ cloneSnapshot = make component { initialState, didMount, render }
       , body:
         R.form
           { className: "m-2"
+          , onSubmit: capture_ $ pure unit
           , children:
             [ R.b_ [ R.text self.props.snap.fullName ]
             , flag "-p"
                 "Creates all the non-existing parent datasets.  Datasets created in this manner are automatically mounted according to the mountpoint property inherited from their parent.  If the target filesystem or volume already exists, the operation completes successfully."
                 (addOrRemoveFlag self "-p")
             , R.div
-                { className: "input-group"
+                { className: "input-group mt-4"
                 , children:
                   [ R.div
                       { className: "input-group-prepend"
@@ -88,8 +91,15 @@ cloneSnapshot = make component { initialState, didMount, render }
                       }
                   , R.input
                       { className: "form-control" <> guard (isJust self.state.error) " is-invalid"
+                      , id: "fs-name"
                       , placeholder: "Filesystem name"
+                      , autoFocus: true
                       , onChange: capture targetValue (fromMaybe "" >>> UpdateFsName >>> update self)
+                      , onKeyDown: handler key $
+                        case _ of
+                          Just "Enter" -> update self CloneSnapshot
+                          Just "Escape" -> self.props.onCancel
+                          _ -> pure unit
                       }
                   , flip foldMap self.state.error
                       ( \error ->

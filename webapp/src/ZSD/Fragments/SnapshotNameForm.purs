@@ -1,15 +1,16 @@
 module ZSD.Fragments.SnapshotNameForm where
 
 import Prelude
+
 import Data.Array ((..))
 import Data.Array as A
 import Data.DateTime (DateTime)
 import Data.Either (Either(..), either)
 import Data.Enum (toEnumWithDefaults)
-import Data.Foldable (fold)
+import Data.Foldable (fold, foldMap)
 import Data.Formatter.DateTime (FormatterCommand(..), format)
 import Data.List as List
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe(..), fromMaybe, isJust)
 import Data.Monoid (guard)
 import Data.String as S
 import Data.Traversable (traverse)
@@ -17,19 +18,22 @@ import Effect (Effect)
 import Effect.Now (nowDateTime)
 import React.Basic (Component, JSX, Self, createComponent, make)
 import React.Basic.DOM as R
-import React.Basic.DOM.Events (capture, capture_, targetValue)
+import React.Basic.DOM.Events (capture, capture_, key, targetValue)
+import React.Basic.Events (handler)
 import ZSD.Model.Dataset (Dataset)
 
 type Props
   = { dataset :: Dataset
     , defaultTemplate :: String
     , onNameChange :: Maybe String -> Effect Unit
+    , onEnter :: String -> Effect Unit
+    , onEsc :: Effect Unit
     }
 
 type State
   = { snapshotTemplate :: String
-    , snapshotName :: String
-    , error :: String
+    , snapshotName :: Maybe String
+    , error :: Maybe String
     , showHelp :: Boolean
     }
 
@@ -38,16 +42,17 @@ data Action
 
 update :: Self Props State -> Action -> Effect Unit
 update self = case _ of
+
   ConvertTemplate s -> do
     self.setState _ { snapshotTemplate = s }
     ts <- nowDateTime
     either
       ( \error ->
-          self.setState _ { error = error }
+          self.setState _ { error = Just error, snapshotName = Nothing }
             *> self.props.onNameChange Nothing
       )
       ( \name ->
-          self.setState _ { snapshotName = name, error = "" }
+          self.setState _ { snapshotName = Just name, error = Nothing }
             *> self.props.onNameChange (Just name)
       )
       (convert ts s >>= validateName)
@@ -58,7 +63,7 @@ snapshotNameForm = make component { initialState, didMount, render }
   component :: Component Props
   component = createComponent "SnapshotNameForm"
 
-  initialState = { snapshotTemplate: "", snapshotName: "", error: "", showHelp: false }
+  initialState = { snapshotTemplate: "", snapshotName: Nothing, error: Nothing, showHelp: false }
 
   didMount self =
     self.setState _ { snapshotTemplate = self.props.defaultTemplate }
@@ -67,6 +72,7 @@ snapshotNameForm = make component { initialState, didMount, render }
   render self =
     R.form
       { className: "m-3"
+      , onSubmit: capture_ $ pure unit
       , children:
         [ div "form-group row"
             $ R.label
@@ -76,13 +82,19 @@ snapshotNameForm = make component { initialState, didMount, render }
             <> R.input
                 { className:
                   "form-control"
-                    <> guard (not $ S.null self.state.error) " is-invalid"
+                    <> guard (isJust self.state.error) " is-invalid"
                 , id: "template"
+                , autoFocus: true
                 , placeholder: "Snapshot name template"
                 , onChange: capture targetValue (fromMaybe "" >>> ConvertTemplate >>> update self)
+                , onKeyDown: handler key $
+                  case _ of
+                    Just "Enter" -> foldMap self.props.onEnter self.state.snapshotName
+                    Just "Escape" -> self.props.onEsc
+                    _ -> pure unit
                 , value: self.state.snapshotTemplate
                 }
-            <> div "invalid-feedback" (R.text self.state.error)
+            <> foldMap (R.text >>> div "invalid-feedback") self.state.error
             <> R.small
                 { className: "form-text pointer text-primary"
                 , onClick: capture_ $ self.setState \s -> s { showHelp = not s.showHelp }
@@ -122,7 +134,7 @@ snapshotNameForm = make component { initialState, didMount, render }
                 { className: "form-control"
                 , id: "name"
                 , readOnly: true
-                , value: self.state.snapshotName
+                , value: fromMaybe "" self.state.snapshotName
                 }
         ]
       }
