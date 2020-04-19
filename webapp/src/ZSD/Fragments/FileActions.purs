@@ -118,12 +118,13 @@ fileAction = make component { initialState, render, didMount, didUpdate }
         [ R.div
             { className: "btn-group"
             , children:
-              [ btn "View" "fas fa-eye" View
+              [ btn "View" "Display file content" "fas fa-eye" View
                   $ A.any (\f -> f self.state.mimeType) [ MimeType.isText, MimeType.isImage, MimeType.isPDF ]
-              , btn "Diff" "fas fa-random" Diff $ MimeType.isText self.state.mimeType
-              , btn "Download" "fas fa-download" Download true
+              , btn "Diff" "Display a diff to the actual version" "fas fa-random" Diff $ MimeType.isText self.state.mimeType
+              , btn "Download" "Download the selected version" "fas fa-download" Download true
               , actionButton
                   { text: "Restore"
+                  , title: "Restore the selected version"
                   , icon: "fas fa-archive"
                   , textConfirm: "Restore the old version of " <> (unwrap self.props.file).name
                   , action: update self Restore
@@ -161,12 +162,13 @@ fileAction = make component { initialState, render, didMount, didUpdate }
         ]
       }
     where
-    btn title icon action enabled =
+    btn name title icon action enabled =
       R.button
         { className:
           "btn btn-secondary" <> guard (not enabled) " disabled"
             <> guard (self.state.cmd == action) " active"
-        , id: "btn-" <> S.toLower title
+        , id: "btn-" <> S.toLower name
+        , title
         , onClick:
           capture_
             $ if (enabled) then
@@ -175,7 +177,7 @@ fileAction = make component { initialState, render, didMount, didUpdate }
                 pure unit
         , children:
           [ R.span { className: icon <> " p-1" }
-          , R.text title
+          , R.text name
           ]
         }
 

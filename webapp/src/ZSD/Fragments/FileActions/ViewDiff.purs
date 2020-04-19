@@ -120,6 +120,7 @@ viewDiff = make component { initialState, render, didMount, didUpdate }
               , children:
                 [ actionButton
                     { text: "Revert"
+                    , title: "Revert this change"
                     , textConfirm: "Revert this change"
                     , icon: ""
                     , action: update self (Revert idx)
@@ -138,6 +139,7 @@ viewDiff = make component { initialState, render, didMount, didUpdate }
               , children:
                 [ actionButton
                     { text: "Revert"
+                    , title: "Revert this change"
                     , textConfirm: "Revert this change"
                     , icon: ""
                     , action: update self (Revert idx)

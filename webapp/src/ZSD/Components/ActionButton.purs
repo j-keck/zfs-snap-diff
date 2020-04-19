@@ -11,6 +11,7 @@ import Data.Monoid (guard)
 
 type Props
   = { text :: String
+    , title :: String
     , textConfirm :: String
     , icon :: String
     , action :: Effect Unit
@@ -47,6 +48,7 @@ actionButton = make component { initialState, render }
         Clean ->
           R.button
             { className: className <> guard (not self.props.enabled) " disabled"
+            , title: self.props.title
             , onClick: capture_ $ update self Clicked
             , children:
               [ R.span { className: self.props.icon <> " p-1" }
@@ -56,6 +58,7 @@ actionButton = make component { initialState, render }
         Clicked ->
           R.button
             { className: className <> " btn-warning"
+            , title: self.props.title
             , onClick: capture_ $ update self Confirmed
             , children:
               [ R.span { className: "fas fa-exclamation p-1" }
