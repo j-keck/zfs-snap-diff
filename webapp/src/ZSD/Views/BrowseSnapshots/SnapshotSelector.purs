@@ -1,11 +1,13 @@
 module ZSD.Views.BrowseSnapshots.SnapshotSelector where
 
 import Prelude
+
 import Data.Array as A
 import Data.Either (either)
 import Data.Foldable (foldMap)
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Data.Monoid (guard)
+import Data.String as S
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Aff (launchAff_)
@@ -195,25 +197,26 @@ snapshotSelector = make component { initialState, didMount, didUpdate, render }
               [ R.div
                   { className: "mx-auto"
                   , style: R.css { width: "10px" }
-                  , children: [ R.span { className: "fas fa-ellipsis-v" } ]
+                  , children: [ R.span { className: "fas fa-ellipsis-v", id: "snapshot-actions" } ]
                   }
               ]
             }
         , R.div
             { className: "dropdown-menu"
             , children:
-              [ dropdownItem self "Rename snapshot" $ RenameSnapshot snap
-              , dropdownItem self "Destroy snapshot" $ DestroySnapshot snap
-              , dropdownItem self "Clone" $ CloneSnapshot snap
-              , dropdownItem self "Rollback" $ RollbackSnapshot snap
+              [ dropdownItem self "Rename"   snap $ RenameSnapshot snap
+              , dropdownItem self "Destroy"  snap $ DestroySnapshot snap
+              , dropdownItem self "Clone"    snap $ CloneSnapshot snap
+              , dropdownItem self "Rollback" snap $ RollbackSnapshot snap
               ]
             }
         ]
       }
 
-  dropdownItem self name cmd =
+  dropdownItem self name snap cmd =
     R.button
       { className: "dropdown-item"
+      , id: (S.toLower name) <> "-" <> snap.name
       , onClick: capture_ $ update self cmd
       , children: [ R.text name ]
       }

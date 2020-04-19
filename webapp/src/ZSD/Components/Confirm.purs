@@ -43,11 +43,13 @@ confirm =
                   $ fragment
                       [ R.button
                           { className: "btn btn-secondary"
+                          , id: "confirm-btn-cancel"
                           , onClick: capture_ props.onCancel
                           , children: [ R.text "Cancel" ]
                           }
                       , R.button
                           { className: "btn btn-primary"
+                          , id: "confirm-btn-ok"
                           , onClick: capture_ props.onOk
                           , children: [ R.text "Ok" ]
                           }

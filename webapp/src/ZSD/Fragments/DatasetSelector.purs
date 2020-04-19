@@ -49,6 +49,7 @@ datasetSelector = make component { initialState, didMount, render }
                   R.span
                     { className: "float-right fas fa-camera pointer p-1"
                     , title: "Create a snapshot for " <> ds.name
+                    , id: "create-snapshot"
                     , onClick:
                       capture_
                         $ self.setState

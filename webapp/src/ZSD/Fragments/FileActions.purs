@@ -1,10 +1,12 @@
 module ZSD.Fragments.FileActions where
 
 import Prelude
+
 import Data.Array as A
 import Data.Either (either)
 import Data.Monoid (guard)
 import Data.Newtype (unwrap)
+import Data.String as S
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
@@ -16,7 +18,6 @@ import Web.HTML (window)
 import Web.HTML.Location (assign)
 import Web.HTML.Window (location)
 import ZSD.Components.ActionButton (actionButton)
-import ZSD.Views.Messages as Messages
 import ZSD.Fragments.FileAction.ViewDiff (viewDiff)
 import ZSD.Fragments.FileActions.ViewBlob (viewBlob)
 import ZSD.Fragments.FileActions.ViewText (viewText)
@@ -27,6 +28,7 @@ import ZSD.Model.FileVersion as FileVersion
 import ZSD.Model.MimeType (MimeType(..))
 import ZSD.Model.MimeType as MimeType
 import ZSD.Utils.Ops (checkAny)
+import ZSD.Views.Messages as Messages
 
 type Props
   = { file :: FH, version :: FileVersion }
@@ -134,6 +136,7 @@ fileAction = make component { initialState, render, didMount, didUpdate }
             , children:
               [ R.div
                   { className: "card-header"
+                  , id: "file-actions-header"
                   , children:
                     case self.props.version of
                       CurrentVersion current ->
@@ -150,6 +153,7 @@ fileAction = make component { initialState, render, didMount, didUpdate }
                   }
               , R.div
                   { className: "card-body"
+                  , id: "file-actions-body"
                   , children: [ self.state.view ]
                   }
               ]
@@ -162,6 +166,7 @@ fileAction = make component { initialState, render, didMount, didUpdate }
         { className:
           "btn btn-secondary" <> guard (not enabled) " disabled"
             <> guard (self.state.cmd == action) " active"
+        , id: "btn-" <> S.toLower title
         , onClick:
           capture_
             $ if (enabled) then

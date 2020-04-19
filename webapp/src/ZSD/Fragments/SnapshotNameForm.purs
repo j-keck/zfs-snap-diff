@@ -76,14 +76,14 @@ snapshotNameForm = make component { initialState, didMount, render }
       , children:
         [ div "form-group row"
             $ R.label
-                { htmlFor: "template"
+                { htmlFor: "snapshot-name-template"
                 , children: [ R.text "Snapshot name template" ]
                 }
             <> R.input
                 { className:
                   "form-control"
                     <> guard (isJust self.state.error) " is-invalid"
-                , id: "template"
+                , id: "snapshot-name-template"
                 , autoFocus: true
                 , placeholder: "Snapshot name template"
                 , onChange: capture targetValue (fromMaybe "" >>> ConvertTemplate >>> update self)
