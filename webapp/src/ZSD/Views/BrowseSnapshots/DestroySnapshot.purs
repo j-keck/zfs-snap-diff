@@ -36,7 +36,7 @@ data Action
 update :: Self Props State -> Action -> Effect Unit
 update self = case _ of
   DestroySnapshot snap ->
-    self.props.onOk *> Spinner.display *> launchAff_ do
+    Spinner.display *> launchAff_ do
       res <- Dataset.destroySnapshot self.props.dataset snap self.state
       liftEffect $ either Messages.appError Messages.info res *> self.props.onOk *> Spinner.remove
 

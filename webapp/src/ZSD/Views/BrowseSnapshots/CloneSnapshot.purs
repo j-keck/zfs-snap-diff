@@ -17,6 +17,7 @@ import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture, capture_, key, targetValue)
 import React.Basic.Events (handler)
 import ZSD.Components.Confirm as Confirm
+import ZSD.Components.Spinner as Spinner
 import ZSD.Fragments.FormCommandFlag (flag)
 import ZSD.Model.Dataset (Dataset)
 import ZSD.Model.Dataset as Dataset
@@ -52,10 +53,10 @@ update self = case _ of
       $ validateName name
   CloneSnapshot ->
     flip foldMap self.state.fsName \name ->
-       self.props.onOk *> launchAff_ do
+       Spinner.display *> launchAff_ do
           let fsName = self.state.base <> "/" <> name
           res <- Dataset.cloneSnapshot self.props.dataset self.props.snap self.state.flags fsName
-          liftEffect $ either Messages.appError Messages.info res
+          liftEffect $ self.props.onOk *> Spinner.remove *> either Messages.appError Messages.info res
 
 cloneSnapshot :: Props -> JSX
 cloneSnapshot = make component { initialState, didMount, render }
