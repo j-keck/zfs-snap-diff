@@ -9,6 +9,8 @@ weight = 30
 
 With `zfs-snap-diff` you can
 
+-   create, destroy, rename, rollback and clone snapshots in the webapp
+
 -   find older file versions in your zfs-snapshots for a given file
 
 -   view the file content from a given snapshot
@@ -24,8 +26,6 @@ With `zfs-snap-diff` you can
 -   browse the directory content from a snapshot
 
 -   download a zip-archive from any folder in your snapshots
-
--   create and destroy snapshots in the webapp
 
 -   bookmark often used folders
 
@@ -109,7 +109,7 @@ file version in the selected snapshot, revert a single change or restore a whole
 
 ## Browse snapshots {#browse-snapshots}
 
-In this view you can view all snapshots.
+In this view you can view and manage all snapshots.
 
 {{< figure src="/images/browse-snapshots-snapshots.png" alt="Screenshot from 'Browse snapshots'" link="/images/browse-snapshots-snapshots.png" >}}
 
@@ -147,12 +147,39 @@ Format sequences are alike the `date` command
 The default snapshot name template is per [`snapshot-name-template`](/docs/configuration/#snapshot-name-template) configurable.
 
 
-## Destroy snapshot {#destroy-snapshot}
+## Snapshot management {#snapshot-management}
 
-You can destroy snapshots with the {{< fa trash >}} symbol in **"Browse snapshots"**
-where you see all snapshots for the selected dataset.
+{{< hint warning >}}
+If you use any snapshot management functions, remember to use the `-use-sudo` flag!
+{{< /hint >}}
 
-{{< figure src="/images/delete-snapshot.png" link="/images/delete-snapshot.png" >}}
+You can click the {{< fa ellipsis-v >}} symbol to show the snapshots actions.
+
+{{< figure src="/images/browse-snapshots-actions.png" link="/images/delete-snapshot.png" >}}
+
+
+### Rename snapshot {#rename-snapshot}
+
+{{< figure src="/images/browse-snapshots-rename.png" link="/images/delete-snapshot.png" >}}
+
+
+### Destroy snapshot {#destroy-snapshot}
+
+{{< figure src="/images/browse-snapshots-destroy.png" link="/images/delete-snapshot.png" >}}
+
+
+### Clone snapshot {#clone-snapshot}
+
+{{< figure src="/images/browse-snapshots-clone.png" >}}
+
+{{< hint warning >}}
+The new created dataset will only listed if the parent datasets mountpoint is ****not**** `none` or `legacy`.
+{{< /hint >}}
+
+
+### Rollback snapshot {#rollback-snapshot}
+
+{{< figure src="/images/browse-snapshots-rollback.png" >}}
 
 
 ## Download zip-archive {#download-zip-archive}

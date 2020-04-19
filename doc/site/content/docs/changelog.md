@@ -5,6 +5,23 @@ creator = "Emacs 26.3 (Org mode 9.1.9 + ox-hugo)"
 weight = 50
 +++
 
+## 1.1.0 {#1-dot-1-dot-0}
+
+-   add snapshot management functions ([see docs](/docs/zfs-snap-diff/#snapshot-management))
+    -   rename
+    -   destroy
+    -   clone
+    -   rollback
+
+-   handle keyboard events in input fields
+    -   'Enter' for 'Submit'
+    -   'Esc' for 'Cancel' / close modal
+
+-   update npm deps
+
+[all commits from v1.0.1...v1.1.0](https://github.com/j-keck/zfs-snap-diff/compare/v1.0.1...v1.1.0)
+
+
 ## 1.0.1 {#1-dot-0-dot-1}
 
 -   fix destroy snapshot

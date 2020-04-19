@@ -7,49 +7,38 @@ weight = 20
 
 ## Binary packages {#binary-packages}
 
-{{< hint warning >}}
-This is the first release after a complete rewrite. You find older versions on the [GitHub release page](https://github.com/j-keck/zfs-snap-diff/releases).
-
-If you have any questions, trouble or other input, feel free to open an
-issue, contact me per mail (see my github profile), or over [keybase.io](https://keybase.io/jkeck).
-{{< /hint >}}
-
-{{< hint info >}}
-The tar archive contains currently only the executables. In the following releases
-i will provide distribution specific packages.
-{{< /hint >}}
-
 You can download the latest binary package from here or from the [GitHub release page](https://github.com/j-keck/zfs-snap-diff/releases).
 
 {{<tabs "install">}}
 {{< tab "Linux" >}}
-  1.) ****Download**** the latest version for ****Linux amd64****: [zfs-snap-diff-linux-v1.0.1.tgz](https://github.com/j-keck/zfs-snap-diff/releases/download/v1.0.1/zfs-snap-diff-linux-v1.0.1.tgz)
+  1.) ****Download**** the latest version for ****Linux amd64****: [zfs-snap-diff-linux-v1.1.0.tgz](https://github.com/j-keck/zfs-snap-diff/releases/download/v1.1.0/zfs-snap-diff-linux-v1.1.0.tgz)
 
-2.) Unpack the archive: `tar xvf zfs-snap-diff-linux-v1.0.1.tgz`
+2.) Unpack the archive: `tar xvf zfs-snap-diff-linux-v1.1.0.tgz`
 
   3.) Run it:  `./zfs-snap-diff [OPTIONS] <ZFS_DATASET_NAME>`
 {{< /tab >}}
 
 {{< tab "FreeBSD" >}}
-  1.) ****Download**** the latest version for ****FreeBSD amd64****: [zfs-snap-diff-freebsd-v1.0.1.tgz](https://github.com/j-keck/zfs-snap-diff/releases/download/v1.0.1/zfs-snap-diff-freebsd-v1.0.1.tgz)
+  1.) ****Download**** the latest version for ****FreeBSD amd64****: [zfs-snap-diff-freebsd-v1.1.0.tgz](https://github.com/j-keck/zfs-snap-diff/releases/download/v1.1.0/zfs-snap-diff-freebsd-v1.1.0.tgz)
 
-2.) Unpack the archive: `tar xvf zfs-snap-diff-freebsd-v1.0.1.tgz`
+2.) Unpack the archive: `tar xvf zfs-snap-diff-freebsd-v1.1.0.tgz`
 
   3.) Run it:  `./zfs-snap-diff [OPTIONS] <ZFS_DATASET_NAME>`
 {{< /tab >}}
 
+{{< tab "FreeBSD (pkg)" >}} You can use `pkg install zfs-snap-diff` to install it from the package repository.{{< /tab >}}
 {{< tab "macOS" >}}
-  1.) ****Download**** the latest version for ****macOS amd64****: [zfs-snap-diff-darwin-v1.0.1.tgz](https://github.com/j-keck/zfs-snap-diff/releases/download/v1.0.1/zfs-snap-diff-darwin-v1.0.1.tgz)
+  1.) ****Download**** the latest version for ****macOS amd64****: [zfs-snap-diff-darwin-v1.1.0.tgz](https://github.com/j-keck/zfs-snap-diff/releases/download/v1.1.0/zfs-snap-diff-darwin-v1.1.0.tgz)
 
-2.) Unpack the archive: `tar xvf zfs-snap-diff-darwin-v1.0.1.tgz`
+2.) Unpack the archive: `tar xvf zfs-snap-diff-darwin-v1.1.0.tgz`
 
   3.) Run it:  `./zfs-snap-diff [OPTIONS] <ZFS_DATASET_NAME>`
 {{< /tab >}}
 
 {{< tab "Solaris" >}}
-  1.) ****Download**** the latest version for ****Solaris amd64****: [zfs-snap-diff-solaris-v1.0.1.tgz](https://github.com/j-keck/zfs-snap-diff/releases/download/v1.0.1/zfs-snap-diff-solaris-v1.0.1.tgz)
+  1.) ****Download**** the latest version for ****Solaris amd64****: [zfs-snap-diff-solaris-v1.1.0.tgz](https://github.com/j-keck/zfs-snap-diff/releases/download/v1.1.0/zfs-snap-diff-solaris-v1.1.0.tgz)
 
-2.) Unpack the archive: `tar xvf zfs-snap-diff-solaris-v1.0.1.tgz`
+2.) Unpack the archive: `tar xvf zfs-snap-diff-solaris-v1.1.0.tgz`
 
   3.) Run it:  `./zfs-snap-diff [OPTIONS] <ZFS_DATASET_NAME>`
 {{< /tab >}}
@@ -57,12 +46,12 @@ You can download the latest binary package from here or from the [GitHub release
 {{< /tabs >}}
 
 {{< hint warning >}}
-Try with the `-use-sudo` flag if it's not working - and please give feedback.
+If you use any snapshot management functions, remember to use the `-use-sudo` flag!
 {{< /hint >}}
 
 {{< hint info >}}
-If you need a 32bit version, or a binary for a different
-platform, feel free to contact me!
+The tar archive contains currently only the executables.
+If you need distribution specific packages, or binaries for any other platform, feel free to contact me.
 {{< /hint >}}
 
 

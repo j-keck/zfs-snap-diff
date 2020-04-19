@@ -10,14 +10,13 @@ See the [[https://j-keck.github.io/zfs-snap-diff/][website]] for more details.
 
 *** Prebuild
 
- You can download a prebuild version from: [[https://j-keck.github.io/zfs-snap-diff/docs/install][here]].
+ You can download a prebuild version from [[https://j-keck.github.io/zfs-snap-diff/docs/install][here]].
 
 *** Build from source
 
   You only need go to build this project.
 
-  Check: [[https://j-keck.github.io/zfs-snap-diff/docs/install/#build-from-source][the docs]] for more information.
-
+  Check [[https://j-keck.github.io/zfs-snap-diff/docs/install/#build-from-source][the docs]] for more information.
 
 ** Run it
 

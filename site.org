@@ -30,7 +30,7 @@
 
 ** Management
 
-You can create and destroy zfs snapshots, use the integrated directory browser to
+You can create, destroy, rename, rollback and clone zfs snapshots, use the integrated directory browser to
 navigate in your snapshots (directory history) and download a directory as a zip-archive.
 
 
@@ -46,6 +46,11 @@ navigate in your snapshots (directory history) and download a directory as a zip
   [[/images/zfs-snap-diff.gif][file:/images/zfs-snap-diff.gif]]
 
 
+{{< hint warning >}}
+If you have any questions, trouble or other input, feel free to open an issue,
+contact me per mail (see my github profile), or check [[https://keybase.io/jkeck][keybase.io]] for other channels.
+{{< /hint >}}
+
 
 * Installation
   :PROPERTIES:
@@ -55,19 +60,6 @@ navigate in your snapshots (directory history) and download a directory as a zip
   :END:
 
 ** Binary packages
-
-{{< hint warning >}}
-This is the first release after a complete rewrite. You find older versions on the [[https://github.com/j-keck/zfs-snap-diff/releases][GitHub release page]].
-
-If you have any questions, trouble or other input, feel free to open an
-issue, contact me per mail (see my github profile), or over [[https://keybase.io/jkeck][keybase.io]].
-{{< /hint >}}
-
-{{< hint info >}}
-The tar archive contains currently only the executables. In the following releases
-i will provide distribution specific packages.
-{{< /hint >}}
-
 
 You can download the latest binary package from here or from the [[https://github.com/j-keck/zfs-snap-diff/releases][GitHub release page]].
 
@@ -93,6 +85,7 @@ You can download the latest binary package from here or from the [[https://githu
        (princ "\n\n{{<tabs \"install\">}}\n")
        (princ (section-for "Linux" (archive-name-string "linux" v) v))
        (princ (section-for "FreeBSD" (archive-name-string "freebsd" v) v))
+       (princ "{{< tab \"FreeBSD (pkg)\" >}} You can use ~pkg install zfs-snap-diff~ to install it from the package repository.{{< /tab >}}\n")
        (princ (section-for "macOS" (archive-name-string "darwin" v) v))
        (princ (section-for "Solaris" (archive-name-string "solaris" v) v))
        (princ "{{< /tabs >}}\n\n"))
@@ -100,15 +93,13 @@ You can download the latest binary package from here or from the [[https://githu
 
 
 {{< hint warning >}}
-Try with the ~-use-sudo~ flag if it's not working - and please give feedback.
+If you use any snapshot management functions, remember to use the ~-use-sudo~ flag!
 {{< /hint >}}
 
 {{< hint info >}}
-If you need a 32bit version, or a binary for a different
-platform, feel free to contact me!
+The tar archive contains currently only the executables.
+If you need distribution specific packages, or binaries for any other platform, feel free to contact me.
 {{< /hint >}}
-
-
 
 ** Build from source
 
@@ -158,6 +149,8 @@ To crosscompile the binary use:
 
 With ~zfs-snap-diff~ you can
 
+  - create, destroy, rename, rollback and clone snapshots in the webapp
+
   - find older file versions in your zfs-snapshots for a given file
 
   - view the file content from a given snapshot
@@ -173,8 +166,6 @@ With ~zfs-snap-diff~ you can
   - browse the directory content from a snapshot
 
   - download a zip-archive from any folder in your snapshots
-
-  - create and destroy snapshots in the webapp
 
   - bookmark often used folders
 
@@ -255,7 +246,7 @@ file version in the selected snapshot, revert a single change or restore a whole
 
 ** Browse snapshots
 
-In this view you can view all snapshots.
+In this view you can view and manage all snapshots.
 
   #+attr_html: :alt Screenshot from 'Browse snapshots'
   [[/images/browse-snapshots-snapshots.png][file:/images/browse-snapshots-snapshots.png]]
@@ -293,12 +284,34 @@ The template supports the following format sequences:
 
 The default snapshot name template is per [[/docs/configuration/#snapshot-name-template][~snapshot-name-template~]] configurable.
 
-** Destroy snapshot
+** Snapshot management
 
-You can destroy snapshots with the {{< fa trash >}} symbol in *"Browse snapshots"*
-where you see all snapshots for the selected dataset.
+{{< hint warning >}}
+If you use any snapshot management functions, remember to use the ~-use-sudo~ flag!
+{{< /hint >}}
 
-[[/images/delete-snapshot.png][file:/images/delete-snapshot.png]]
+You can click the {{< fa ellipsis-v >}} symbol to show the snapshots actions.
+
+ [[/images/delete-snapshot.png][file:/images/browse-snapshots-actions.png]]
+
+*** Rename snapshot
+
+ [[/images/delete-snapshot.png][file:/images/browse-snapshots-rename.png]]
+
+*** Destroy snapshot
+
+ [[/images/delete-snapshot.png][file:/images/browse-snapshots-destroy.png]]
+
+*** Clone snapshot
+
+  file:/images/browse-snapshots-clone.png
+
+{{< hint warning >}}
+The new created dataset will only listed if the parent datasets mountpoint is **not** ~none~ or ~legacy~.
+{{< /hint >}}
+*** Rollback snapshot
+
+  file:/images/browse-snapshots-rollback.png
 
 ** Download zip-archive
 
@@ -577,12 +590,29 @@ Diff context size in the webui.
 :export_hugo_section: docs
 :END:
 
+** 1.1.0
+
+  - add snapshot management functions ([[/docs/zfs-snap-diff/#snapshot-management][see docs]])
+    - rename
+    - destroy
+    - clone
+    - rollback
+
+  - handle keyboard events in input fields
+    - 'Enter' for 'Submit'
+    - 'Esc' for 'Cancel' / close modal
+
+  - update npm deps
+
+[[https://github.com/j-keck/zfs-snap-diff/compare/v1.0.1...v1.1.0][all commits from v1.0.1...v1.1.0]]
+
 
 ** 1.0.1
 
   - fix destroy snapshot
 
 [[https://github.com/j-keck/zfs-snap-diff/compare/v1.0.0...v1.0.1][all commits from v1.0.0...v1.0.1]]
+
 
 ** 1.0.0
 
