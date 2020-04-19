@@ -91,7 +91,7 @@ func (self *Dataset) CloneSnapshot(snapName, fsName string, flags []string) erro
 		snapName = self.Name + "@" + snapName
 	}
 
-	log.Debugf("clone snapshot: %s to %s", snapName)
+	log.Debugf("clone snapshot: %s to %s", snapName, fsName)
 	args := append(flags, snapName, fsName)
 	stdout, stderr, err := self.cmd.Exec("clone", args...)
 	log.Tracef("clone snapshot stdout: %s", stdout)

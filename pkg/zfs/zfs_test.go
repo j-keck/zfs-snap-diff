@@ -10,7 +10,7 @@ tank/sub	1	2	3	testdata/tank/subpool
 `
 	zfs := new(ZFS)
 	zfs.cmd = NewZFSCmdMock(out, "", nil)
-	ds, err := zfs.scanDatasets("tank")
+	ds, _, err := zfs.scanDatasets("tank")
 	if err != nil {
 		t.Error(err)
 	}
