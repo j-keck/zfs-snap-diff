@@ -1,12 +1,17 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>zfs-snap-diff on ZFS Snap Diff</title><link>https://j-keck.github.io/zfs-snap-diff/</link><description>Recent content in zfs-snap-diff on ZFS Snap Diff</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://j-keck.github.io/zfs-snap-diff/index.xml" rel="self" type="application/rss+xml"/><item><title>Installation</title><link>https://j-keck.github.io/zfs-snap-diff/docs/install/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://j-keck.github.io/zfs-snap-diff/docs/install/</guid><description>Binary packages This is the first release after a complete rewrite. You find older versions on the GitHub release page.
-If you have any questions, trouble or other input, feel free to open an issue, contact me per mail (see my github profile), or over keybase.io.
-The tar archive contains currently only the executables. In the following releases i will provide distribution specific packages. You can download the latest binary package from here or from the GitHub release page.</description></item><item><title>zfs-snap-diff</title><link>https://j-keck.github.io/zfs-snap-diff/docs/zfs-snap-diff/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://j-keck.github.io/zfs-snap-diff/docs/zfs-snap-diff/</guid><description>zfs-snap-diff - web application to find older file versions in zfs snapshots and zfs snapshot management tool.
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>zfs-snap-diff on ZFS Snap Diff</title><link>https://j-keck.github.io/zfs-snap-diff/</link><description>Recent content in zfs-snap-diff on ZFS Snap Diff</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://j-keck.github.io/zfs-snap-diff/index.xml" rel="self" type="application/rss+xml"/><item><title>Installation</title><link>https://j-keck.github.io/zfs-snap-diff/docs/install/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://j-keck.github.io/zfs-snap-diff/docs/install/</guid><description>Binary packages You can download the latest binary package from here or from the GitHub release page.
+Linux 1.) Download the latest version for Linux amd64: zfs-snap-diff-linux-v1.1.0.tgz
+2.) Unpack the archive: tar xvf zfs-snap-diff-linux-v1.1.0.tgz
+3.) Run it: ./zfs-snap-diff [OPTIONS] &amp;lt;ZFS_DATASET_NAME&amp;gt;
+FreeBSD 1.) Download the latest version for FreeBSD amd64: zfs-snap-diff-freebsd-v1.1.0.tgz
+2.) Unpack the archive: tar xvf zfs-snap-diff-freebsd-v1.1.0.tgz
+3.) Run it: ./zfs-snap-diff [OPTIONS] &amp;lt;ZFS_DATASET_NAME&amp;gt;
+FreeBSD (pkg) You can use pkg install zfs-snap-diff to install it from the package repository.</description></item><item><title>zfs-snap-diff</title><link>https://j-keck.github.io/zfs-snap-diff/docs/zfs-snap-diff/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://j-keck.github.io/zfs-snap-diff/docs/zfs-snap-diff/</guid><description>zfs-snap-diff - web application to find older file versions in zfs snapshots and zfs snapshot management tool.
 With zfs-snap-diff you can
+create, destroy, rename, rollback and clone snapshots in the webapp
 find older file versions in your zfs-snapshots for a given file
 view the file content from a given snapshot
 inspect a diff from the older version to the actual version
-revert a single change
-restore a version from a zfs snapshot</description></item><item><title>zsd</title><link>https://j-keck.github.io/zfs-snap-diff/docs/zsd/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://j-keck.github.io/zfs-snap-diff/docs/zsd/</guid><description>zsd - cli tool to find older versions of a given file in your zfs snapshots.
+revert a single change</description></item><item><title>zsd</title><link>https://j-keck.github.io/zfs-snap-diff/docs/zsd/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://j-keck.github.io/zfs-snap-diff/docs/zsd/</guid><description>zsd - cli tool to find older versions of a given file in your zfs snapshots.
 With zsd you can
 find older file versions in your zfs snapshots for a given file
 view the file content from a given snapshot
@@ -14,9 +19,10 @@ inspect a diff from the older version to the actual version
 restore a version from a zfs snapshot
 It uses the same code as zfs-snap-diff to find different file versions in your zfs snapshots.</description></item><item><title>Configuration</title><link>https://j-keck.github.io/zfs-snap-diff/docs/configuration/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://j-keck.github.io/zfs-snap-diff/docs/configuration/</guid><description>zfs-snap-diff loads it's configuration from:
 Linux, FreeBSD, Solaris $XDG_CONFIG_HOME/.config/zfs-snap-diff/zfs-snap-diff.toml $HOME/.config/zfs-snap-diff/zfs-snap-diff.toml macOS $HOME/Library/Application Support/zfs-snap-diff/zfs-snap-diff.toml if it does not find a configuration, it will create the following default configuration:
-use-cache-dir-for-backups = true days-to-scan = 2 max-archive-unpacked-size-mb = 200 snapshot-name-template = &amp;#34;zfs-snap-diff-%FT%H:%M&amp;#34; compare-method = &amp;#34;auto&amp;#34; diff-context-size = 5 [webserver] listen-ip = &amp;#34;127.0.0.1&amp;#34; listen-port = 12345 use-tls = false cert-file = &amp;#34;&amp;#34; key-file = &amp;#34;&amp;#34; [zfs] use-sudo = false mount-snapshots = false use-cache-dir-for-backups If it's set to true, the file backups will be stored in the users cache-directory.</description></item><item><title>Changelog</title><link>https://j-keck.github.io/zfs-snap-diff/docs/changelog/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://j-keck.github.io/zfs-snap-diff/docs/changelog/</guid><description>1.0.1 fix destroy snapshot all commits from v1.0.0&amp;hellip;v1.0.1
+use-cache-dir-for-backups = true days-to-scan = 2 max-archive-unpacked-size-mb = 200 snapshot-name-template = &amp;#34;zfs-snap-diff-%FT%H:%M&amp;#34; compare-method = &amp;#34;auto&amp;#34; diff-context-size = 5 [webserver] listen-ip = &amp;#34;127.0.0.1&amp;#34; listen-port = 12345 use-tls = false cert-file = &amp;#34;&amp;#34; key-file = &amp;#34;&amp;#34; [zfs] use-sudo = false mount-snapshots = false use-cache-dir-for-backups If it's set to true, the file backups will be stored in the users cache-directory.</description></item><item><title>Changelog</title><link>https://j-keck.github.io/zfs-snap-diff/docs/changelog/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://j-keck.github.io/zfs-snap-diff/docs/changelog/</guid><description>1.1.0 add snapshot management functions (see docs)
+rename destroy clone rollback handle keyboard events in input fields
+&amp;lsquo;Enter&amp;rsquo; for &amp;lsquo;Submit&amp;rsquo; &amp;lsquo;Esc&amp;rsquo; for &amp;lsquo;Cancel&amp;rsquo; / close modal update npm deps
+all commits from v1.0.1&amp;hellip;v1.1.0
+1.0.1 fix destroy snapshot all commits from v1.0.0&amp;hellip;v1.0.1
 1.0.0 This version is a complete rewrite.
-The backend is implemented in Go (as before) and the frontend in PureScript.
-If you have any questions, trouble or other input, feel free to open an issue, contact me per mail (see my github profile), or over keybase.io.
-create and destroy snapshots from the webapp
-download a complete directory as a zip-archive</description></item></channel></rss>
+The backend is implemented in Go (as before) and the frontend in PureScript.</description></item></channel></rss>
