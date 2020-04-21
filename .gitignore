@@ -13,3 +13,6 @@ webapp/dist
 doc/site/public
 *~
 /gh-pages/
+__pycache__
+.mypy_cache
+geckodriver.log

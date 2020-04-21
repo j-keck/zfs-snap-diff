@@ -3,18 +3,26 @@ import unittest
 from typing import Any
 from selenium import webdriver # type: ignore
 import sys
+import subprocess
 
-import fs
-import zfs
-from page import Page
+from browser_tests import zfs
+from browser_tests import fs
+from browser_tests.page import Page
 
 class Tests(unittest.TestCase):
+    pool: str
+    dataset = "zsd-browser-test"
     mountpoint: str
-    pool = "zguest"
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls.mountpoint = zfs.createDataset(cls.pool, "zsd-browser-test")
+        # use the first found zfs pool (dirty, unsafe code!)
+        cls.pool = subprocess.run(["sudo", "zpool", "list", "-Ho", "name"]
+                                  , text=True
+                                  , capture_output=True).stdout.strip()
+
+        # create test dataset
+        cls.mountpoint = zfs.createDataset(cls.pool, cls.dataset)
 
 
     def setUp(self) -> None:
@@ -28,7 +36,7 @@ class Tests(unittest.TestCase):
         )
 
         self.page.selectView("Browse filesystem")
-        self.page.selectDataset("zsd-browser-test")
+        self.page.selectDataset(self.dataset)
         self.page.findByXPath("//td[contains(.,'file.txt')]").click()
         self.assertIn("Current content of file.txt", self.page.findById("file-actions-header").text)
         self.assertIn("firstline\nsecondline\nthirdline", self.page.findById("file-actions-body").text)
@@ -36,21 +44,22 @@ class Tests(unittest.TestCase):
 
     def testCreateSnapshotInBrowseFilesystem(self) -> None:
         self.page.selectView("Browse filesystem")
-        self.page.selectDataset("zsd-browser-test")
+        self.page.selectDataset(self.dataset)
         self.page.createSnapshot("create-snapshot-in-browse-filesystem")
         self.assertIn("@create-snapshot-in-browse-filesystem' created", self.page.alertText())
 
 
     def testCreateSnapshotInBrowseSnapshots(self) -> None:
         self.page.selectView("Browse snapshots")
-        self.page.selectDataset("zsd-browser-test")
+        self.page.selectDataset(self.dataset)
         self.page.createSnapshot("create-snapshot-in-browse-snapshots")
         self.assertIn("@create-snapshot-in-browse-snapshots' created", self.page.alertText())
 
 
     def testDestroySnapshot(self) -> None:
         self.page.selectView("Browse snapshots")
-        self.page.selectDataset("zsd-browser-test")
+        self.page.selectDataset(self.dataset)
+
 
         # create snapshot
         self.page.createSnapshot("destroy-snapshot")
@@ -64,7 +73,7 @@ class Tests(unittest.TestCase):
 
     def testRenameSnapshot(self) -> None:
         self.page.selectView("Browse snapshots")
-        self.page.selectDataset("zsd-browser-test")
+        self.page.selectDataset(self.dataset)
 
         # create snapshot
         self.page.createSnapshot("rename-snapshot")
@@ -78,7 +87,7 @@ class Tests(unittest.TestCase):
 
     def testCloneSnapshot(self) -> None:
         self.page.selectView("Browse snapshots")
-        self.page.selectDataset("zsd-browser-test")
+        self.page.selectDataset(self.dataset)
 
         # create snapshot
         self.page.createSnapshot("clone-snapshot")
@@ -92,7 +101,7 @@ class Tests(unittest.TestCase):
 
     def testRollbackSnapshot(self) -> None:
         self.page.selectView("Browse snapshots")
-        self.page.selectDataset("zsd-browser-test")
+        self.page.selectDataset(self.dataset)
 
         # create snapshot
         self.page.createSnapshot("rollback-snapshot")
@@ -115,4 +124,4 @@ class Tests(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls) -> None:
-        zfs.destroyDataset(cls.pool, "zsd-browser-test")
+        zfs.destroyDataset(cls.pool, cls.dataset)
