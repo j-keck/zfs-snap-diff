@@ -67,13 +67,13 @@ let
         sha512 = "tbx5cHubwE6e2ZG7nqM3g/FZ5PQEDMWmMGNrCUBVRPHXTJaH7CBDdsLeu3eCh3B1tzAxTnAbtmrzvWEvT2NNEA==";
       };
     };
-    "browserslist-4.11.1" = {
+    "browserslist-4.12.0" = {
       name = "browserslist";
       packageName = "browserslist";
-      version = "4.11.1";
+      version = "4.12.0";
       src = fetchurl {
-        url = "https://registry.npmjs.org/browserslist/-/browserslist-4.11.1.tgz";
-        sha512 = "DCTr3kDrKEYNw6Jb9HFxVLQNaue8z+0ZfRBRjmCunKDEXEBajKDj2Y+Uelg+Pi29OnvaSGwjOsnRyNEkXzHg5g==";
+        url = "https://registry.npmjs.org/browserslist/-/browserslist-4.12.0.tgz";
+        sha512 = "UH2GkcEDSI0k/lRkuDSzFl9ZZ87skSy9w2XAn1MsZnL+4c4rqbBd3e82UWHbYDpztABrPBhZsTEeuxVfHppqDg==";
       };
     };
     "caller-callsite-2.0.0" = {
@@ -112,13 +112,13 @@ let
         sha512 = "bsTwuIg/BZZK/vreVTYYbSWoe2F+71P7K5QGEX+pT250DZbfU1MQ5prOKpPR+LL6uWKK3KMwMCAS74QB3Um1uw==";
       };
     };
-    "caniuse-lite-1.0.30001041" = {
+    "caniuse-lite-1.0.30001048" = {
       name = "caniuse-lite";
       packageName = "caniuse-lite";
-      version = "1.0.30001041";
+      version = "1.0.30001048";
       src = fetchurl {
-        url = "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001041.tgz";
-        sha512 = "fqDtRCApddNrQuBxBS7kEiSGdBsgO4wiVw4G/IClfqzfhW45MbTumfN4cuUJGTM0YGFNn97DCXPJ683PS6zwvA==";
+        url = "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001048.tgz";
+        sha512 = "g1iSHKVxornw0K8LG9LLdf+Fxnv7T1Z+mMsf0/YYLclQX4Cd522Ap0Lrw6NFqHgezit78dtyWxzlV2Xfc7vgRg==";
       };
     };
     "chalk-2.4.2" = {
@@ -373,13 +373,13 @@ let
         sha512 = "uEUyaDKoSQ1M4Oq8l45hSE26SnTxL6snNnqvK/VWx5wJhmff5z0FUVJDKDanor/6w3kzE3i7XZOk+7wC0EXr1A==";
       };
     };
-    "electron-to-chromium-1.3.403" = {
+    "electron-to-chromium-1.3.426" = {
       name = "electron-to-chromium";
       packageName = "electron-to-chromium";
-      version = "1.3.403";
+      version = "1.3.426";
       src = fetchurl {
-        url = "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.3.403.tgz";
-        sha512 = "JaoxV4RzdBAZOnsF4dAlZ2ijJW72MbqO5lNfOBHUWiBQl3Rwe+mk2RCUMrRI3rSClLJ8HSNQNqcry12H+0ZjFw==";
+        url = "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.3.426.tgz";
+        sha512 = "sdQ7CXQbFflKY5CU63ra+kIYq9F7d1OqI33856qJZxTrwo0sLASdmoRl9lWpGrQDS9Nk/RFliQWd3PPDrZ+Meg==";
       };
     };
     "entities-2.0.0" = {
@@ -650,15 +650,6 @@ let
       src = fetchurl {
         url = "https://registry.npmjs.org/is-symbol/-/is-symbol-1.0.3.tgz";
         sha512 = "OwijhaRSgqvhm/0ZdAcXNZt9lYdKFpcRDT5ULUuYXPoT794UNOdU+gpT6Rzo7b4V2HUl/op6GqY894AZwv9faQ==";
-      };
-    };
-    "jquery-3.5.0" = {
-      name = "jquery";
-      packageName = "jquery";
-      version = "3.5.0";
-      src = fetchurl {
-        url = "https://registry.npmjs.org/jquery/-/jquery-3.5.0.tgz";
-        sha512 = "Xb7SVYMvygPxbFMpTFQiHh1J7HClEaThguL15N/Gg37Lri/qKyhRGZYzHRyLH8Stq3Aow0LsHO2O2ci86fCrNQ==";
       };
     };
     "js-tokens-4.0.0" = {
@@ -1183,13 +1174,13 @@ let
         sha512 = "pISE66AbVkp4fDQ7VHBwRNXzAAKJjw4Vw7nWI/+Q3vuly7SNfgYXvm6i5IgFylHGK5sP/xHAbB7N49OS4gWNyQ==";
       };
     };
-    "postcss-value-parser-4.0.3" = {
+    "postcss-value-parser-4.1.0" = {
       name = "postcss-value-parser";
       packageName = "postcss-value-parser";
-      version = "4.0.3";
+      version = "4.1.0";
       src = fetchurl {
-        url = "https://registry.npmjs.org/postcss-value-parser/-/postcss-value-parser-4.0.3.tgz";
-        sha512 = "N7h4pG+Nnu5BEIzyeaaIYWs0LI5XC40OrRh5L60z0QjFsqGWcHcbkBvpe1WYpcIS9yQ8sOi/vIPt1ejQCrMVrg==";
+        url = "https://registry.npmjs.org/postcss-value-parser/-/postcss-value-parser-4.1.0.tgz";
+        sha512 = "97DXOFbQJhk71ne5/Mt6cOu6yxsSfM0QGQyl0L25Gca4yGWEGJaig7l7gbCX623VqTBNGLRLaVUCnNkcedlRSQ==";
       };
     };
     "prop-types-15.7.2" = {
@@ -1458,12 +1449,12 @@ let
       sources."argparse-1.0.10"
       sources."boolbase-1.0.0"
       sources."bootstrap-4.4.1"
-      sources."browserslist-4.11.1"
+      sources."browserslist-4.12.0"
       sources."caller-callsite-2.0.0"
       sources."caller-path-2.0.0"
       sources."callsites-2.0.0"
       sources."caniuse-api-3.0.0"
-      sources."caniuse-lite-1.0.30001041"
+      sources."caniuse-lite-1.0.30001048"
       sources."chalk-2.4.2"
       sources."coa-2.0.2"
       sources."color-3.1.2"
@@ -1499,7 +1490,7 @@ let
       sources."domelementtype-1.3.1"
       sources."domutils-1.7.0"
       sources."dot-prop-5.2.0"
-      sources."electron-to-chromium-1.3.403"
+      sources."electron-to-chromium-1.3.426"
       sources."entities-2.0.0"
       sources."error-ex-1.3.2"
       sources."es-abstract-1.17.5"
@@ -1529,7 +1520,6 @@ let
       sources."is-resolvable-1.1.0"
       sources."is-svg-3.0.0"
       sources."is-symbol-1.0.3"
-      sources."jquery-3.5.0"
       sources."js-tokens-4.0.0"
       sources."js-yaml-3.13.1"
       sources."json-parse-better-errors-1.0.2"
@@ -1665,7 +1655,7 @@ let
         ];
       })
       sources."postcss-unique-selectors-4.0.1"
-      sources."postcss-value-parser-4.0.3"
+      sources."postcss-value-parser-4.1.0"
       sources."prop-types-15.7.2"
       sources."q-1.5.1"
       sources."react-16.13.1"

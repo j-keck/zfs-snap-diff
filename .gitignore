@@ -16,3 +16,4 @@ doc/site/public
 __pycache__
 .mypy_cache
 geckodriver.log
+webapp/package-lock.json
