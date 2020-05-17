@@ -9,7 +9,7 @@ FreeBSD (pkg) You can use pkg install zfs-snap-diff to install it from the packa
 With zfs-snap-diff you can
 create, destroy, rename, rollback and clone snapshots in the webapp
 find older file versions in your zfs-snapshots for a given file
-view the file content from a given snapshot
+view the file content of a given snapshot
 inspect a diff from the older version to the actual version
 revert a single change</description></item><item><title>zsd</title><link>https://j-keck.github.io/zfs-snap-diff/docs/zsd/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://j-keck.github.io/zfs-snap-diff/docs/zsd/</guid><description>zsd - cli tool to find older versions of a given file in your zfs snapshots.
 With zsd you can
