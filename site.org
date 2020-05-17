@@ -21,7 +21,7 @@
 
  ~zfs-snap-diff~ searches different file versions in your zfs snapshots for you.
 
- If you have hundreds or thousands of zfs snapshots, ~zfs-snap-diff~ searched
+ If you have hundreds or thousands of zfs snapshots, ~zfs-snap-diff~ searches through
  the snapshots and shows you only the snapshots where a given file was modified.
 
  You can inspect a diff from the actual file version to the older file version in the
@@ -34,10 +34,10 @@ You can create, destroy, rename, rollback and clone zfs snapshots, use the integ
 navigate in your snapshots (directory history) and download a directory as a zip-archive.
 
 
-** Simply use
+** Simple use
 
  [[/docs/zfs-snap-diff][~zfs-snap-diff~]] has a web frontend, so it can run on your local work machine or on your
- remote file / backup server (no Xserver necesarry). To keep it portable it's made
+ remote file / backup server (no Xserver necessary). To keep it portable it's made
  as a single static compiled executable.
 
  For a quick file version lookup / restore in the terminal, it contains the independent [[/docs/zsd][~zsd~]] cli tool.
@@ -97,18 +97,18 @@ If you use any snapshot management functions, remember to use the ~-use-sudo~ fl
 {{< /hint >}}
 
 {{< hint info >}}
-The tar archive contains currently only the executables.
+Currently, the tar archive contains only the executables.
 If you need distribution specific packages, or binaries for any other platform, feel free to contact me.
 {{< /hint >}}
 
 ** Build from source
 
- The backend from ~zfs-snap-diff~ is implemented in [[https://golang.org][Go]], the frontend in [[http://purescript.org][PureScript]].
+ The backend of ~zfs-snap-diff~ is implemented in [[https://golang.org][Go]], the frontend in [[http://purescript.org][PureScript]].
 
 *** ~go~
 
  I use [[https://github.com/go-bindata/go-bindata][go-bindata]] to decode the frontend code and all dependencies to a
- go source file so you need only the go compiler to compile it yourself.
+ go source file so you only need the go compiler to compile it yourself.
 
 The minimum supported go version is =go1.12=.
 
@@ -122,7 +122,7 @@ The optional ~-ldflags="-X main.version=$(git describe)"~ flag updates the ~vers
 *** ~nix~
 
 I use [[https://nixos.org/nix/][nix]] to build my projects. The ~nix~ build also compiles the frontend
-to javascript and decode it in ~pkg/webapp/bindata.go~.
+to javascript and decodes it in ~pkg/webapp/bindata.go~.
 
   - clone this repo: ~git clone --depth 1 https://github.com/j-keck/zfs-snap-diff~
   - change to the checkout directory: ~cd zfs-snap-diff~
@@ -153,7 +153,7 @@ With ~zfs-snap-diff~ you can
 
   - find older file versions in your zfs-snapshots for a given file
 
-  - view the file content from a given snapshot
+  - view the file content of a given snapshot
 
   - inspect a diff from the older version to the actual version
 
@@ -163,7 +163,7 @@ With ~zfs-snap-diff~ you can
 
   - download a file version
 
-  - browse the directory content from a snapshot
+  - browse the directory content of a snapshot
 
   - download a zip-archive from any folder in your snapshots
 
@@ -226,7 +226,7 @@ Project home page: https://j-keck.github.io/zfs-snap-diff
  ./zfs-snap-diff [OPTIONS] <ZFS_DATASET_NAME>
  #+END_SRC
 
- This starts a embedded webserver and serves the included web-app at http://127.0.0.1:12345.
+ This starts an embedded webserver and serves the included web-app at http://127.0.0.1:12345.
 
    - open your webbrowser at
 
@@ -307,7 +307,7 @@ You can click the {{< fa ellipsis-v >}} symbol to show the snapshots actions.
   file:/images/browse-snapshots-clone.png
 
 {{< hint warning >}}
-The new created dataset will only listed if the parent datasets mountpoint is **not** ~none~ or ~legacy~.
+The newly created dataset will only listed if the parent datasets mountpoint is **not** ~none~ or ~legacy~.
 {{< /hint >}}
 *** Rollback snapshot
 
@@ -361,7 +361,7 @@ OPTIONS:
   -d int
         days to scan (default 2)
  -mount-snapshots
-        mount snapshot (only necessary if it's not mounted by zfs automatically
+        mount snapshot (only necessary if it's not mounted by zfs automatically)
  -use-sudo
         use sudo when executing 'zfs' commands
   -v	debug output
@@ -370,7 +370,7 @@ OPTIONS:
 
 ACTIONS:
   list                : list zfs snapshots where the given file was modified
-  cat     <#|SNAPSHOT>: show the file content from the given snapshot
+  cat     <#|SNAPSHOT>: show file content of the given snapshot
   diff    <#|SNAPSHOT>: show a diff from the selected snapshot to the actual version
   restore <#|SNAPSHOT>: restore the file from the given snapshot
 
@@ -458,7 +458,7 @@ or the snapshot name to select a snapshot.
  #+END_EXAMPLE
 
 {{< hint warning >}}
-A backup of the actual version will be created.
+A backup of the current version will be created.
 {{< /hint >}}
 
 

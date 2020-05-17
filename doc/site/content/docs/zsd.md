@@ -35,7 +35,7 @@ OPTIONS:
   -d int
         days to scan (default 2)
  -mount-snapshots
-        mount snapshot (only necessary if it's not mounted by zfs automatically
+        mount snapshot (only necessary if it's not mounted by zfs automatically)
  -use-sudo
         use sudo when executing 'zfs' commands
   -v	debug output
@@ -44,7 +44,7 @@ OPTIONS:
 
 ACTIONS:
   list                : list zfs snapshots where the given file was modified
-  cat     <#|SNAPSHOT>: show the file content from the given snapshot
+  cat     <#|SNAPSHOT>: show file content of the given snapshot
   diff    <#|SNAPSHOT>: show a diff from the selected snapshot to the actual version
   restore <#|SNAPSHOT>: restore the file from the given snapshot
 
@@ -136,5 +136,5 @@ version restored from snapshot: zfs-auto-snap_hourly-2020-02-12-12h00U
 ```
 
 {{< hint warning >}}
-A backup of the actual version will be created.
+A backup of the current version will be created.
 {{< /hint >}}

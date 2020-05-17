@@ -13,7 +13,7 @@ With `zfs-snap-diff` you can
 
 -   find older file versions in your zfs-snapshots for a given file
 
--   view the file content from a given snapshot
+-   view the file content of a given snapshot
 
 -   inspect a diff from the older version to the actual version
 
@@ -23,7 +23,7 @@ With `zfs-snap-diff` you can
 
 -   download a file version
 
--   browse the directory content from a snapshot
+-   browse the directory content of a snapshot
 
 -   download a zip-archive from any folder in your snapshots
 
@@ -88,7 +88,7 @@ Project home page: https://j-keck.github.io/zfs-snap-diff
 ./zfs-snap-diff [OPTIONS] <ZFS_DATASET_NAME>
 ```
 
-This starts a embedded webserver and serves the included web-app at <http://127.0.0.1:12345>.
+This starts an embedded webserver and serves the included web-app at <http://127.0.0.1:12345>.
 
 -   open your webbrowser at
 
@@ -173,7 +173,7 @@ You can click the {{< fa ellipsis-v >}} symbol to show the snapshots actions.
 {{< figure src="/images/browse-snapshots-clone.png" >}}
 
 {{< hint warning >}}
-The new created dataset will only listed if the parent datasets mountpoint is ****not**** `none` or `legacy`.
+The newly created dataset will only listed if the parent datasets mountpoint is ****not**** `none` or `legacy`.
 {{< /hint >}}
 
 

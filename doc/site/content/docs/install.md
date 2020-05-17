@@ -50,20 +50,20 @@ If you use any snapshot management functions, remember to use the `-use-sudo` fl
 {{< /hint >}}
 
 {{< hint info >}}
-The tar archive contains currently only the executables.
+Currently, the tar archive contains only the executables.
 If you need distribution specific packages, or binaries for any other platform, feel free to contact me.
 {{< /hint >}}
 
 
 ## Build from source {#build-from-source}
 
-The backend from `zfs-snap-diff` is implemented in [Go](https://golang.org), the frontend in [PureScript](http://purescript.org).
+The backend of `zfs-snap-diff` is implemented in [Go](https://golang.org), the frontend in [PureScript](http://purescript.org).
 
 
 ### `go` {#go}
 
 I use [go-bindata](https://github.com/go-bindata/go-bindata) to decode the frontend code and all dependencies to a
-go source file so you need only the go compiler to compile it yourself.
+go source file so you only need the go compiler to compile it yourself.
 
 The minimum supported go version is `go1.12`.
 
@@ -77,7 +77,7 @@ The optional `-ldflags="-X main.version=$(git describe)"` flag updates the `vers
 ### `nix` {#nix}
 
 I use [nix](https://nixos.org/nix/) to build my projects. The `nix` build also compiles the frontend
-to javascript and decode it in `pkg/webapp/bindata.go`.
+to javascript and decodes it in `pkg/webapp/bindata.go`.
 
 -   clone this repo: `git clone --depth 1 https://github.com/j-keck/zfs-snap-diff`
 -   change to the checkout directory: `cd zfs-snap-diff`
