@@ -159,6 +159,8 @@ if pkgs.lib.inNixShell then pkgs.mkShell {
   shellHooks = ''
     unset GOPATH
     alias serv="parcel serve --host 0.0.0.0 index.html"
+
+    alias site="hugo --port 54321 --source doc/site server"
   '';
 }
 else {
