@@ -25,4 +25,4 @@ rename destroy clone rollback handle keyboard events in input fields
 all commits from v1.0.1&amp;hellip;v1.1.0
 1.0.1 fix destroy snapshot all commits from v1.0.0&amp;hellip;v1.0.1
 1.0.0 This version is a complete rewrite.
-The backend is implemented in Go (as before) and the frontend in PureScript.</description></item></channel></rss>
+The backend is implemented in Go (as before) and the frontend in PureScript.</description></item><item><title>Contact / Support</title><link>https://j-keck.github.io/zfs-snap-diff/docs/contact-support/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://j-keck.github.io/zfs-snap-diff/docs/contact-support/</guid><description>Contact Check my GitHub Profile for my mail address. Send me an direct message on twitter. Use keybase to contact me. Support If you have any questions, trouble or other input, feel free to contact me directly (see Contact) or open a issue@github.</description></item></channel></rss>
