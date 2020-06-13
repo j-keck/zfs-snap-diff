@@ -3,3 +3,7 @@ languageCode = "en-us"
 title = "ZFS Snap Diff"
 theme = "book"
 canonifyURLs = true
+
+[markup.goldmark.renderer]
+unsafe = true
+
