@@ -120,7 +120,7 @@ and inspect the directory content where the snapshot was created
 
 ## Create snapshots {#create-snapshots}
 
-To create a snapshot of the actual dataset use the camera symbol {{< fa camera >}} in the dataset selector.
+To create a snapshot of the actual dataset use the camera symbol {{< fas camera >}} in the dataset selector.
 ![](/images/create-snapshot-symbol.png)
 
 You can enter a snapshot name in **"Snapshot name template"** and `zfs-snap-diff` will
@@ -153,7 +153,7 @@ The default snapshot name template is per [`snapshot-name-template`](/docs/confi
 If you use any snapshot management functions, remember to use the `-use-sudo` flag!
 {{< /hint >}}
 
-You can click the {{< fa ellipsis-v >}} symbol to show the snapshots actions.
+You can click the {{< fas ellipsis-v >}} symbol to show the snapshots actions.
 
 {{< figure src="/images/browse-snapshots-actions.png" link="/images/delete-snapshot.png" >}}
 
@@ -184,7 +184,7 @@ The newly created dataset will only listed if the parent datasets mountpoint is 
 
 ## Download zip-archive {#download-zip-archive}
 
-With the {{< fa file-archive >}} symbol in the file browser you can download
+With the {{< fas file-archive >}} symbol in the file browser you can download
 a whole directory as a zip-archive. You can download a archive from the
 actual filesystem or from a snapshot.
 

@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-ICONS="solid/camera"
+ICONS="solid/camera brands/twitter brands/keybase"
 
 for icon in $ICONS; do
   wget -O "$(basename $icon).svg" \

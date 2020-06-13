@@ -7,7 +7,7 @@ weight = 20
 
 ## Binary packages {#binary-packages}
 
-You can download the latest binary package from here or from the [GitHub release page](https://github.com/j-keck/zfs-snap-diff/releases).
+You can download the latest binary package from ****here**** or from the [GitHub release page](https://github.com/j-keck/zfs-snap-diff/releases).
 
 {{<tabs "install">}}
 {{< tab "Linux" >}}
@@ -26,7 +26,7 @@ You can download the latest binary package from here or from the [GitHub release
   3.) Run it:  `./zfs-snap-diff [OPTIONS] <ZFS_DATASET_NAME>`
 {{< /tab >}}
 
-{{< tab "FreeBSD (pkg)" >}} You can use `pkg install zfs-snap-diff` to install it from the package repository.{{< /tab >}}
+{{< tab "FreeBSD (pkg)" >}}You can use `pkg install zfs-snap-diff` to install it from the package repository.<br/>{{< hint info >}}The new 1.x.x series is currently only in the latest package set.{{< /hint >}}{{< /tab >}}
 {{< tab "macOS" >}}
   1.) ****Download**** the latest version for ****macOS amd64****: [zfs-snap-diff-darwin-v1.1.0.tgz](https://github.com/j-keck/zfs-snap-diff/releases/download/v1.1.0/zfs-snap-diff-darwin-v1.1.0.tgz)
 
@@ -51,7 +51,7 @@ If you use any snapshot management functions, remember to use the `-use-sudo` fl
 
 {{< hint info >}}
 Currently, the tar archive contains only the executables.
-If you need distribution specific packages, or binaries for any other platform, feel free to contact me.
+If you need distribution specific packages, or binaries for any other platform, feel free to [contact me](/docs/contact-support#contact).
 {{< /hint >}}
 
 

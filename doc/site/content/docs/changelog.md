@@ -37,9 +37,6 @@ This version is a complete rewrite.
 The backend is implemented in [Go](https://golang.org) (as before) and the frontend in [PureScript](http://purescript.org).
 {{< /hint >}}
 
-If you have any questions, trouble or other input, feel free to open an
-issue, contact me per mail (see my github profile), or over [keybase.io](https://keybase.io/jkeck).
-
 -   create and destroy snapshots from the webapp
 
 -   download a complete directory as a zip-archive

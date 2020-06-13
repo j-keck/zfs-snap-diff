@@ -1,4 +1,4 @@
-#
+ #
 # The gh-pages site at 'https://j-keck.github.io/zfs-snap-diff'
 # are generated from this file
 #
@@ -45,12 +45,9 @@ navigate in your snapshots (directory history) and download a directory as a zip
   #+attr_html: :alt Example session from zfs-snap-diff
   [[/images/zfs-snap-diff.gif][file:/images/zfs-snap-diff.gif]]
 
+** License
 
-{{< hint warning >}}
-If you have any questions, trouble or other input, feel free to open an issue,
-contact me per mail (see my github profile), or check [[https://keybase.io/jkeck][keybase.io]] for other channels.
-{{< /hint >}}
-
+~zfs-snap-diff~ is released under the **MIT** License. See the [[https://github.com/j-keck/zfs-snap-diff/blob/master/LICENSE][license file]] for more information.
 
 * Installation
   :PROPERTIES:
@@ -61,7 +58,7 @@ contact me per mail (see my github profile), or check [[https://keybase.io/jkeck
 
 ** Binary packages
 
-You can download the latest binary package from here or from the [[https://github.com/j-keck/zfs-snap-diff/releases][GitHub release page]].
+You can download the latest binary package from **here** or from the [[https://github.com/j-keck/zfs-snap-diff/releases][GitHub release page]].
 
  #+BEGIN_SRC elisp :results output raw :exports results
    (defun version-string ()
@@ -85,7 +82,10 @@ You can download the latest binary package from here or from the [[https://githu
        (princ "\n\n{{<tabs \"install\">}}\n")
        (princ (section-for "Linux" (archive-name-string "linux" v) v))
        (princ (section-for "FreeBSD" (archive-name-string "freebsd" v) v))
-       (princ "{{< tab \"FreeBSD (pkg)\" >}} You can use ~pkg install zfs-snap-diff~ to install it from the package repository.{{< /tab >}}\n")
+       (princ (concat "{{< tab \"FreeBSD (pkg)\" >}}"
+                      "You can use ~pkg install zfs-snap-diff~ to install it from the package repository.<br/>"
+                      "{{< hint info >}}The new 1.x.x series is currently only in the latest package set.{{< /hint >}}"
+                      "{{< /tab >}}\n"))
        (princ (section-for "macOS" (archive-name-string "darwin" v) v))
        (princ (section-for "Solaris" (archive-name-string "solaris" v) v))
        (princ "{{< /tabs >}}\n\n"))
@@ -98,7 +98,7 @@ If you use any snapshot management functions, remember to use the ~-use-sudo~ fl
 
 {{< hint info >}}
 Currently, the tar archive contains only the executables.
-If you need distribution specific packages, or binaries for any other platform, feel free to contact me.
+If you need distribution specific packages, or binaries for any other platform, feel free to [[/docs/contact-support#contact][contact me]].
 {{< /hint >}}
 
 ** Build from source
@@ -259,7 +259,7 @@ and inspect the directory content where the snapshot was created
 
 ** Create snapshots
 
-To create a snapshot of the actual dataset use the camera symbol {{< fa camera >}} in the dataset selector.
+To create a snapshot of the actual dataset use the camera symbol {{< fas camera >}} in the dataset selector.
 [[/images/create-snapshot-symbol.png]]
 
 You can enter a snapshot name in *"Snapshot name template"* and ~zfs-snap-diff~ will
@@ -290,7 +290,7 @@ The default snapshot name template is per [[/docs/configuration/#snapshot-name-t
 If you use any snapshot management functions, remember to use the ~-use-sudo~ flag!
 {{< /hint >}}
 
-You can click the {{< fa ellipsis-v >}} symbol to show the snapshots actions.
+You can click the {{< fas ellipsis-v >}} symbol to show the snapshots actions.
 
  [[/images/delete-snapshot.png][file:/images/browse-snapshots-actions.png]]
 
@@ -314,8 +314,7 @@ The newly created dataset will only listed if the parent datasets mountpoint is 
   file:/images/browse-snapshots-rollback.png
 
 ** Download zip-archive
-
-With the {{< fa file-archive >}} symbol in the file browser you can download
+With the {{< fas file-archive >}} symbol in the file browser you can download
 a whole directory as a zip-archive. You can download a archive from the
 actual filesystem or from a snapshot.
 
@@ -622,9 +621,6 @@ This version is a complete rewrite.
 The backend is implemented in [[https://golang.org][Go]] (as before) and the frontend in [[http://purescript.org][PureScript]].
 {{< /hint >}}
 
-If you have any questions, trouble or other input, feel free to open an
-issue, contact me per mail (see my github profile), or over [[https://keybase.io/jkeck][keybase.io]].
-
   - create and destroy snapshots from the webapp
 
   - download a complete directory as a zip-archive
@@ -739,3 +735,29 @@ issue, contact me per mail (see my github profile), or over [[https://keybase.io
   - prototype
 
 
+
+
+
+* Contact / Support
+  :PROPERTIES:
+  :export_file_name: contact-support
+  :export_hugo_weight: 60
+  :export_hugo_section: docs
+  :END:
+
+
+** Contact
+
+{{< columns >}}
+[[https://github.com/j-keck][{{< fas envelope >}} Check my GitHub Profile for my mail address.]]
+<--->
+[[https://twitter.com/jhyphenkeck][{{< fab twitter >}} Send me an direct message on twitter.]]
+<--->
+[[https://keybase.io/jkeck][{{< fab keybase >}} Use keybase to contact me.]]
+{{< /columns >}}
+
+
+** Support
+
+If you have any questions, trouble or other input, feel free to contact
+me directly (see [[/docs/contact-support#contact][Contact]]) or open a [[https://github.com/j-keck/zfs-snap-diff/issues/new][issue@github]].

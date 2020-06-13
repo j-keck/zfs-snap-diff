@@ -36,7 +36,7 @@ For a quick file version lookup / restore in the terminal, it contains the indep
 
 {{< figure src="/images/zfs-snap-diff.gif" alt="Example session from zfs-snap-diff" link="/images/zfs-snap-diff.gif" >}}
 
-{{< hint warning >}}
-If you have any questions, trouble or other input, feel free to open an issue,
-contact me per mail (see my github profile), or check [keybase.io](https://keybase.io/jkeck) for other channels.
-{{< /hint >}}
+
+## License {#license}
+
+`zfs-snap-diff` is released under the ****MIT**** License. See the [license file](https://github.com/j-keck/zfs-snap-diff/blob/master/LICENSE) for more information.
