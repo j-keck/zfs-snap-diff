@@ -7,3 +7,5 @@ canonifyURLs = true
 [markup.goldmark.renderer]
 unsafe = true
 
+[params]
+  BookSearch = false
