@@ -21,9 +21,10 @@ import (
 var version string = "SNAPSHOT"
 
 type CliConfig struct {
-	logLevel        plog.LogLevel
-	printVersion    bool
-	scriptingOutput bool
+	logLevel                  plog.LogLevel
+	printVersion              bool
+	scriptingOutput           bool
+	snapshotTimemachineOutput bool
 }
 
 func main() {
@@ -77,7 +78,7 @@ func main() {
 	action := flag.Arg(1)
 	switch action {
 	case "list":
-		if !cliCfg.scriptingOutput {
+		if !(cliCfg.scriptingOutput || cliCfg.snapshotTimemachineOutput) {
 			fmt.Printf("scan the last %d days for other file versions\n", config.Get.DaysToScan)
 		}
 
@@ -91,7 +92,12 @@ func main() {
 
 		cacheFileVersions(scanResult.FileVersions)
 
-		if !cliCfg.scriptingOutput {
+		if cliCfg.snapshotTimemachineOutput {
+			for idx, v := range scanResult.FileVersions {
+				fmt.Printf("%d\t%s\t%s\t%s\n",
+					idx, v.Snapshot.Name, v.Backup.Path, v.Snapshot.Created.Format("Jan 2 15:04"))
+			}
+		} else if !cliCfg.scriptingOutput {
 
 			// find the longest snapshot name to format the output table
 			width := 0
@@ -262,6 +268,8 @@ func parseFlags() CliConfig {
 	flag.IntVar(&config.Get.DaysToScan, "d", config.Get.DaysToScan, "days to scan")
 	flag.BoolVar(&cliCfg.scriptingOutput, "H", false,
 		"Scripting mode. Do not print headers, print absolute dates and separate fields by a single tab")
+	flag.BoolVar(&cliCfg.snapshotTimemachineOutput, "snapshot-timemachine", false,
+		"Special output for Snapshot-timemachine (https://github.com/mrBliss/snapshot-timemachine)")
 
 	// logging
 	cliCfg.logLevel = plog.Note
@@ -272,7 +280,7 @@ func parseFlags() CliConfig {
 	zfsCfg := &config.Get.ZFS
 	flag.BoolVar(&zfsCfg.UseSudo, "use-sudo", zfsCfg.UseSudo, "use sudo when executing 'zfs' commands")
 	flag.BoolVar(&zfsCfg.MountSnapshots, "mount-snapshots", zfsCfg.MountSnapshots,
-		"mount snapshot (only necessary if it's not mounted by zfs automatically")
+		"mount snapshot (only necessary if it's not mounted by zfs automatically)")
 
 	flag.Parse()
 	return *cliCfg
