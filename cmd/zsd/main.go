@@ -21,8 +21,9 @@ import (
 var version string = "SNAPSHOT"
 
 type CliConfig struct {
-	logLevel     plog.LogLevel
-	printVersion bool
+	logLevel        plog.LogLevel
+	printVersion    bool
+	scriptingOutput bool
 }
 
 func main() {
@@ -76,7 +77,10 @@ func main() {
 	action := flag.Arg(1)
 	switch action {
 	case "list":
-		fmt.Printf("scan the last %d days for other file versions\n", config.Get.DaysToScan)
+		if !cliCfg.scriptingOutput {
+			fmt.Printf("scan the last %d days for other file versions\n", config.Get.DaysToScan)
+		}
+
 		dr := scanner.NDaysBack(config.Get.DaysToScan, time.Now())
 		sc := scanner.NewScanner(dr, "auto", ds, zfs)
 		scanResult, err := sc.FindFileVersions(filePath)
@@ -87,19 +91,25 @@ func main() {
 
 		cacheFileVersions(scanResult.FileVersions)
 
-		// find the longest snapshot name to format the output table
-		width := 0
-		for _, v := range scanResult.FileVersions {
-			width = int(math.Max(float64(width), float64(len(v.Snapshot.Name))))
+		if !cliCfg.scriptingOutput {
 
-		}
+			// find the longest snapshot name to format the output table
+			width := 0
+			for _, v := range scanResult.FileVersions {
+				width = int(math.Max(float64(width), float64(len(v.Snapshot.Name))))
+			}
 
-		// show snapshots where the file was modified
-		header := fmt.Sprintf("%3s | %-[2]*s | %s", "#", width, "Snapshot", "Snapshot age")
-		fmt.Printf("%s\n%s\n", header, strings.Repeat("-", len(header)))
-		for idx, v := range scanResult.FileVersions {
-			age := humanDuration(time.Since(v.Snapshot.Created))
-			fmt.Printf("%3d | %-[2]*s | %s\n", idx, width, v.Snapshot.Name, age)
+			// show snapshots where the file was modified
+			header := fmt.Sprintf("%3s | %-[2]*s | %s", "#", width, "Snapshot", "Snapshot age")
+			fmt.Printf("%s\n%s\n", header, strings.Repeat("-", len(header)))
+			for idx, v := range scanResult.FileVersions {
+				age := humanDuration(time.Since(v.Snapshot.Created))
+				fmt.Printf("%3d | %-[2]*s | %s\n", idx, width, v.Snapshot.Name, age)
+			}
+		} else {
+			for idx, v := range scanResult.FileVersions {
+				fmt.Printf("%d\t%s\t%s\n", idx, v.Snapshot.Name, v.Snapshot.Created)
+			}
 		}
 
 	case "cat":
@@ -148,7 +158,9 @@ func main() {
 			return
 		}
 
-		fmt.Printf("Diff from the actual version to the version from: %s\n", version.Backup.MTime)
+		if !cliCfg.scriptingOutput {
+			fmt.Printf("Diff from the actual version to the version from: %s\n", version.Backup.MTime)
+		}
 		fmt.Printf("%s", diffs.PrettyTextDiff)
 
 	case "restore":
@@ -169,11 +181,16 @@ func main() {
 			log.Errorf("unable to backup the current version - %v", err)
 			return
 		}
-		fmt.Printf("backup from the actual version created at: %s\n", backupPath)
+		if !cliCfg.scriptingOutput {
+			fmt.Printf("backup from the actual version created at: %s\n", backupPath)
+		}
 
 		// restore the backup version
 		version.Backup.Copy(version.Current.Path)
-		fmt.Printf("version restored from snapshot: %s\n", version.Snapshot.Name)
+
+		if !cliCfg.scriptingOutput {
+			fmt.Printf("version restored from snapshot: %s\n", version.Snapshot.Name)
+		}
 
 	default:
 		fmt.Fprintf(os.Stderr, "invalid action: %s (see `%s -h` for help)\n", action, zsdBin)
@@ -243,6 +260,8 @@ func parseFlags() CliConfig {
 	// cli
 	flag.BoolVar(&cliCfg.printVersion, "V", false, "print version and exit")
 	flag.IntVar(&config.Get.DaysToScan, "d", config.Get.DaysToScan, "days to scan")
+	flag.BoolVar(&cliCfg.scriptingOutput, "H", false,
+		"Scripting mode. Do not print headers, print absolute dates and separate fields by a single tab")
 
 	// logging
 	cliCfg.logLevel = plog.Note
