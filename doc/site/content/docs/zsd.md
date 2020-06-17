@@ -31,11 +31,14 @@ USAGE:
  ./zsd [OPTIONS] <FILE> <ACTION>
 
 OPTIONS:
+  -H	Scripting mode. Do not print headers, print absolute dates and separate fields by a single tab
   -V	print version and exit
   -d int
         days to scan (default 2)
  -mount-snapshots
         mount snapshot (only necessary if it's not mounted by zfs automatically)
+ -snapshot-timemachine
+        Special output for Snapshot-timemachine (https://github.com/mrBliss/snapshot-timemachine)
  -use-sudo
         use sudo when executing 'zfs' commands
   -v	debug output

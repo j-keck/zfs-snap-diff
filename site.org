@@ -592,6 +592,19 @@ Diff context size in the webui.
 :export_hugo_section: docs
 :END:
 
+** 1.1.1
+
+This release contains only changes for [[/docs/zsd][~zsd~]].
+
+  - zsd: new flag ~-H~ for scripting mode output.
+
+  - zsd: new flag ~-snapshot-timemachine~ to support [[https://github.com/mrBliss/snapshot-timemachine][mrBliss/snapshot-timemachine]]
+
+/The release / packaging process for the two programms is
+currently not separated, so i make a "bugfix" release for this changes./
+
+[[https://github.com/j-keck/zfs-snap-diff/compare/v1.1.0...v1.1.1][all commits from v1.1.0 to v1.1.1]]
+
 ** 1.1.0
 
   - add snapshot management functions ([[/docs/zfs-snap-diff/#snapshot-management][see docs]])

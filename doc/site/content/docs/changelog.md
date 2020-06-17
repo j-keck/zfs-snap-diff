@@ -5,6 +5,20 @@ creator = "Emacs 26.3 (Org mode 9.1.9 + ox-hugo)"
 weight = 50
 +++
 
+## 1.1.1 {#1-dot-1-dot-1}
+
+This release contains only changes for [`zsd`](/docs/zsd).
+
+-   zsd: new flag `-H` for scripting mode output.
+
+-   zsd: new flag `-snapshot-timemachine` to support [mrBliss/snapshot-timemachine](https://github.com/mrBliss/snapshot-timemachine)
+
+_The release / packaging process for the two programms is
+currently not separated, so i make a "bugfix" release for this changes._
+
+[all commits from v1.1.0 to v1.1.1](https://github.com/j-keck/zfs-snap-diff/compare/v1.1.0...v1.1.1)
+
+
 ## 1.1.0 {#1-dot-1-dot-0}
 
 -   add snapshot management functions ([see docs](/docs/zfs-snap-diff/#snapshot-management))
