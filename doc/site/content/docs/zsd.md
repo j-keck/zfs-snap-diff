@@ -5,6 +5,12 @@ creator = "Emacs 26.3 (Org mode 9.1.9 + ox-hugo)"
 weight = 35
 +++
 
+{{< hint warning >}}
+`zsd` is now a independent project. You find it here: <https://j-keck.github.io/zsd>.
+
+The next version of `zfs-snap-diff` comes without `zsd`.
+{{< /hint >}}
+
 `zsd` - cli tool to find older versions of a given file in your zfs snapshots.
 
 With `zsd` you can

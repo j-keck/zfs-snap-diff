@@ -2,6 +2,8 @@
 
 helps you with your zfs snapshots.
 
+/For a terminal based tool see [[https://j-keck.github.io/zsd][zsd]]./
+
 ** Documentation
 
 See the [[https://j-keck.github.io/zfs-snap-diff/][website]] for more details.

@@ -32,7 +32,7 @@ navigate in your snapshots (directory history) and download a directory as a zip
 remote file / backup server (no Xserver necessary). To keep it portable it's made
 as a single static compiled executable.
 
-For a quick file version lookup / restore in the terminal, it contains the independent [`zsd`](/docs/zsd) cli tool.
+_For a terminal based tool see [zsd](https://j-keck.github.io/zsd)._
 
 {{< figure src="/images/zfs-snap-diff.gif" alt="Example session from zfs-snap-diff" link="/images/zfs-snap-diff.gif" >}}
 

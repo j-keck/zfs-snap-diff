@@ -8,11 +8,11 @@ weight = 60
 ## Contact {#contact}
 
 {{< columns >}}
-[{{< fas envelope >}} Check my GitHub Profile for my mail address.](https://github.com/j-keck)
+[{{< fas envelope lg >}} Check my GitHub Profile for my mail address.](https://github.com/j-keck)
 <--->
-[{{< fab twitter >}} Send me an direct message on twitter.](https://twitter.com/jhyphenkeck)
+[{{< fab twitter lg >}} Send me an direct message on twitter.](https://twitter.com/jhyphenkeck)
 <--->
-[{{< fab keybase >}} Use keybase to contact me.](https://keybase.io/jkeck)
+[{{< fab keybase lg >}} Use keybase to contact me.](https://keybase.io/jkeck)
 {{< /columns >}}
 
 

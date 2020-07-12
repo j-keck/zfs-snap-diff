@@ -1,4 +1,4 @@
- #
+#
 # The gh-pages site at 'https://j-keck.github.io/zfs-snap-diff'
 # are generated from this file
 #
@@ -40,7 +40,7 @@ navigate in your snapshots (directory history) and download a directory as a zip
  remote file / backup server (no Xserver necessary). To keep it portable it's made
  as a single static compiled executable.
 
- For a quick file version lookup / restore in the terminal, it contains the independent [[/docs/zsd][~zsd~]] cli tool.
+ /For a terminal based tool see [[https://j-keck.github.io/zsd][zsd]]./
 
   #+attr_html: :alt Example session from zfs-snap-diff
   [[/images/zfs-snap-diff.gif][file:/images/zfs-snap-diff.gif]]
@@ -330,6 +330,14 @@ The archive size is restricted by default. You can configure per
   :export_hugo_weight: 35
   :export_hugo_section: docs
   :END:
+
+
+{{< hint warning >}}
+~zsd~ is now a independent project. You find it here: [[https://j-keck.github.io/zsd]].
+
+The next version of ~zfs-snap-diff~ comes without ~zsd~.
+{{< /hint >}}
+
 
 ~zsd~ - cli tool to find older versions of a given file in your zfs snapshots.
 
@@ -765,11 +773,11 @@ The backend is implemented in [[https://golang.org][Go]] (as before) and the fro
 ** Contact
 
 {{< columns >}}
-[[https://github.com/j-keck][{{< fas envelope >}} Check my GitHub Profile for my mail address.]]
+[[https://github.com/j-keck][{{< fas envelope lg >}} Check my GitHub Profile for my mail address.]]
 <--->
-[[https://twitter.com/jhyphenkeck][{{< fab twitter >}} Send me an direct message on twitter.]]
+[[https://twitter.com/jhyphenkeck][{{< fab twitter lg >}} Send me an direct message on twitter.]]
 <--->
-[[https://keybase.io/jkeck][{{< fab keybase >}} Use keybase to contact me.]]
+[[https://keybase.io/jkeck][{{< fab keybase lg >}} Use keybase to contact me.]]
 {{< /columns >}}
 
 
