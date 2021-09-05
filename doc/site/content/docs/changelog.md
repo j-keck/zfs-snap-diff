@@ -5,6 +5,14 @@ creator = "Emacs 27.2 (Org mode 9.4.4 + ox-hugo)"
 weight = 50
 +++
 
+## 1.1.3 {#1-dot-1-dot-3}
+
+-   no changes in the application, only in the build-pipeline
+    (note to myself: always separate the app from the pipelines)
+
+[all commits from v1.1.2 to v1.1.3](https://github.com/j-keck/zfs-snap-diff/compare/v1.1.2...v1.1.3)
+
+
 ## 1.1.2 {#1-dot-1-dot-2}
 
 -   bump deps
