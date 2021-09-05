@@ -1,9 +1,16 @@
 +++
 title = "Changelog"
 draft = false
-creator = "Emacs 26.3 (Org mode 9.1.9 + ox-hugo)"
+creator = "Emacs 27.2 (Org mode 9.4.4 + ox-hugo)"
 weight = 50
 +++
+
+## 1.1.2 {#1-dot-1-dot-2}
+
+-   bump deps
+
+[all commits from v1.1.1 to v1.1.2](https://github.com/j-keck/zfs-snap-diff/compare/v1.1.1...v1.1.2)
+
 
 ## 1.1.1 {#1-dot-1-dot-1}
 

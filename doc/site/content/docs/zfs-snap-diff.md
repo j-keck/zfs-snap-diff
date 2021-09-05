@@ -1,7 +1,7 @@
 +++
 title = "zfs-snap-diff"
 draft = false
-creator = "Emacs 26.3 (Org mode 9.1.9 + ox-hugo)"
+creator = "Emacs 27.2 (Org mode 9.4.4 + ox-hugo)"
 weight = 30
 +++
 

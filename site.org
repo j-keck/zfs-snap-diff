@@ -600,6 +600,12 @@ Diff context size in the webui.
 :export_hugo_section: docs
 :END:
 
+** 1.1.2
+
+ - bump deps
+
+[[https://github.com/j-keck/zfs-snap-diff/compare/v1.1.1...v1.1.2][all commits from v1.1.1 to v1.1.2]]
+
 ** 1.1.1
 
 This release contains only changes for [[/docs/zsd][~zsd~]].

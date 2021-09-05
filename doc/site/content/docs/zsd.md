@@ -1,7 +1,7 @@
 +++
 title = "zsd"
 draft = false
-creator = "Emacs 26.3 (Org mode 9.1.9 + ox-hugo)"
+creator = "Emacs 27.2 (Org mode 9.4.4 + ox-hugo)"
 weight = 35
 +++
 
@@ -93,9 +93,9 @@ main⟩ zsd go.mod cat 0
 module github.com/j-keck/zfs-snap-diff
 
 require (
-	github.com/j-keck/go-diff v1.0.0
-	github.com/j-keck/plog v0.5.0
-	github.com/stretchr/testify v1.4.0 // indirect
+  github.com/j-keck/go-diff v1.0.0
+  github.com/j-keck/plog v0.5.0
+  github.com/stretchr/testify v1.4.0 // indirect
 )
 
 go 1.12
