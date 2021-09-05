@@ -4,7 +4,8 @@ module ZSD.Components.ActionButton where
 import Prelude
 import Effect (Effect)
 import Effect.Timer (setTimeout)
-import React.Basic (Component, JSX, Self, createComponent, make)
+import React.Basic (JSX)
+import React.Basic.Classic (Component, createComponent, make, Self)
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture_)
 import Data.Monoid (guard)

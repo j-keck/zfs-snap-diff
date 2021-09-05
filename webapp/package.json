@@ -6,7 +6,7 @@
     "@fortawesome/fontawesome-free": "^5.13.0",
     "bootstrap": "^4.4.1",
     "cssnano": "^4.1.10",
-    "highlight.js": "^9.18.1",
+    "highlight.js": "^11.2.0",
     "jquery": "^3.5.0",
     "popper.js": "^1.16.1",
     "react": "^16.13.1",

@@ -1,22 +1,19 @@
 { goos ? "linux", with-dev-tools ? false }:
 let
 
-  fetchNixpkgs = {rev, sha256}: builtins.fetchTarball {
-    url = "https://github.com/NixOS/nixpkgs-channels/archive/${rev}.tar.gz";
-    inherit sha256;
-  };
-
-  pkgs = import (fetchNixpkgs {
-    rev = "8a9807f1941d046f120552b879cf54a94fca4b38";
-    sha256 = "0s8gj8b7y1w53ak138f3hw1fvmk40hkpzgww96qrsgf490msk236";
+  pkgs = import (builtins.fetchGit {
+    name = "nixos-21.05";
+    url = "https://github.com/nixos/nixpkgs/";
+    ref = "refs/heads/nixos-21.05";
+    rev = "a1007637cea374bd1bafd754cfd5388894c49129";
   }) {};
 
   # nix-prefetch-git https://github.com/justinwoo/easy-purescript-nix
   easy-ps = import (pkgs.fetchFromGitHub {
     owner = "justinwoo";
     repo = "easy-purescript-nix";
-    rev = "a09d4ff6a8e4a8a24b26f111c2a39d9ef7fed720";
-    sha256 = "1iaid67vf8frsqfnw1vm313d50mdws9qg4bavrhfhmgjhcyqmb52";
+    rev = "5e66c8fe92e80c054cd6ef7e9ac0e91de81175ca";
+    sha256 = "1wr5gynay76623mnf0jz8adwvldk4qyqc96r3yp9qkql83gn3zpx";
   }) { inherit pkgs; };
 
 
@@ -81,6 +78,7 @@ let
           rev = version;
           sha256 = "11j2cph5w042qx1d91gbwkcq884dlz0lc7ngq1xvyg5hhpd3j8qv";
         };
+        vendorSha256 = "0sjjj9z1dhilhpc8pq4154czrb79z9cm044jvn75kxcjv6v5l2m5";
         modSha256 = "00zr3kpaywqi5kgjzvmf284njxl1fs1k9xaz1b8azwxnjpy77i0c";
       };
     in pkgs.runCommand "bindata.go" {} ''
@@ -89,10 +87,11 @@ let
       ${go-bindata}/bin/go-bindata -pkg webapp -o $out/bindata.go .
     '';
 
-  zfs-snap-diff = pkgs.buildGo112Module rec {
+  zfs-snap-diff = pkgs.buildGo115Module rec {
     pname = "zfs-snap-diff";
     inherit version;
     src = pkgs.nix-gitignore.gitignoreSource [ ".gitignore" "/webapp/" ] ./.;
+    vendorSha256 = "1pr4xnm412ihmvxm3zygqsb34wabyxvs7dlnhbks3sxr0zsfp6fi";
     modSha256 = "0k1sz9mnz09pgn4w3k2dx0grcb66xd3h0f6ccc2r76vz6mz1hpgf";
 
     preBuild = ''

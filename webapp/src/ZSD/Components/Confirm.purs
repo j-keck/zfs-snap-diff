@@ -4,7 +4,8 @@ import Prelude
 
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
-import React.Basic (Component, JSX, createComponent, fragment, makeStateless)
+import React.Basic (JSX)
+import React.Basic.Classic (Component, createComponent, fragment, makeStateless)
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture_, key)
 import React.Basic.Events (handler)

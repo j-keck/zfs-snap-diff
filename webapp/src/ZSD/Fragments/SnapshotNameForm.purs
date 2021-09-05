@@ -16,7 +16,8 @@ import Data.String as S
 import Data.Traversable (traverse)
 import Effect (Effect)
 import Effect.Now (nowDateTime)
-import React.Basic (Component, JSX, Self, createComponent, make)
+import React.Basic (JSX)
+import React.Basic.Classic (Component, Self, createComponent, make)
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture, capture_, key, targetValue)
 import React.Basic.Events (handler)

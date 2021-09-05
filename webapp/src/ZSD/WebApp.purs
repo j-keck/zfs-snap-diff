@@ -7,7 +7,8 @@ module ZSD.WebApp where
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Prelude (($))
-import React.Basic (Component, JSX, createComponent, empty, fragment, make)
+import React.Basic (JSX)
+import React.Basic.Classic (Component, createComponent, empty, fragment, make)
 import ZSD.Components.Navbar (navbar)
 import ZSD.Components.Spinner as Spinner
 import ZSD.Model.Config (Config)

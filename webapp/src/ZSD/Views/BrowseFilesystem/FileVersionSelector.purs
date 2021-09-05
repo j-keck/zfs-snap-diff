@@ -12,8 +12,9 @@ import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
-import React.Basic (Component, JSX, createComponent, fragment, make, readState)
-import React.Basic as React
+import React.Basic (JSX)
+import React.Basic.Classic (Component, createComponent, fragment, make, readState)
+import React.Basic.Classic as React
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture_)
 import ZSD.Components.DropDownButton (dropDownButton)

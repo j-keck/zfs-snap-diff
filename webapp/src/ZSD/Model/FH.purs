@@ -5,7 +5,7 @@ import Affjax.ResponseFormat as ARF
 import Data.Either (Either)
 import Data.Foldable (foldMap)
 import Data.Generic.Rep (class Generic)
-import Data.Generic.Rep.Show (genericShow)
+import Data.Show.Generic (genericShow)
 import Data.Maybe (Maybe, maybe)
 import Data.Newtype (class Newtype, over, unwrap)
 import Data.String as S

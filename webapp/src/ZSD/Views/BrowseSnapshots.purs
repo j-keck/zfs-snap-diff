@@ -9,8 +9,9 @@ import Data.Tuple.Nested (tuple2, tuple3, uncurry2, uncurry3)
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
-import React.Basic (Component, JSX, createComponent, make)
-import React.Basic as React
+import React.Basic (JSX)
+import React.Basic.Classic (Component, createComponent, make)
+import React.Basic.Classic as React
 import React.Basic.DOM as R
 import ZSD.Fragments.DatasetSelector (datasetSelector)
 import ZSD.Fragments.DirBrowser (dirBrowser)

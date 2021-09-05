@@ -18,7 +18,8 @@ import Effect.Now (nowDateTime)
 import Effect.Ref (Ref)
 import Effect.Ref as Ref
 import Effect.Unsafe (unsafePerformEffect)
-import React.Basic (JSX, createComponent, make, readState)
+import React.Basic (JSX)
+import React.Basic.Classic (createComponent, make, readState)
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture_)
 import ZSD.Components.Table (table)

@@ -13,8 +13,9 @@ import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import Foreign.Object as O
-import React.Basic (Component, JSX, createComponent, empty, fragment, make)
-import React.Basic as React
+import React.Basic (JSX)
+import React.Basic.Classic (Component, createComponent, empty, fragment, make)
+import React.Basic.Classic as React
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture_)
 import ZSD.BrowseSnapshots.CloneSnapshot as CloneSnapshot
@@ -120,7 +121,7 @@ snapshotSelector = make component { initialState, didMount, didUpdate, render }
 
   didMount self = update self FetchSnapshots
 
-  didUpdate self { prevProps, prevState } = guard (prevProps.dataset /= self.props.dataset) $ update self FetchSnapshots
+  didUpdate self { prevProps, prevState: _ } = guard (prevProps.dataset /= self.props.dataset) $ update self FetchSnapshots
 
   render self =
     fragment

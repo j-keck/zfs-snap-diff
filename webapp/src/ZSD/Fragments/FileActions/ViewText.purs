@@ -2,7 +2,8 @@ module ZSD.Fragments.FileActions.ViewText where
 
 import Effect (Effect)
 import Prelude (Unit, unit)
-import React.Basic (Component, JSX, createComponent, make)
+import React.Basic (JSX)
+import React.Basic.Classic (Component, createComponent, make)
 import React.Basic.DOM as R
 
 type Props

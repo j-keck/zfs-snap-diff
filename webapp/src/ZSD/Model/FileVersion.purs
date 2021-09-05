@@ -5,7 +5,7 @@ import Affjax.ResponseFormat as ARF
 import Control.Alt ((<|>))
 import Data.Either (Either(..))
 import Data.Generic.Rep (class Generic)
-import Data.Generic.Rep.Show (genericShow)
+import Data.Show.Generic (genericShow)
 import Data.Maybe (maybe)
 import Data.Newtype (class Newtype, unwrap)
 import Data.String as S

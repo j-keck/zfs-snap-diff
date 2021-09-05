@@ -4,7 +4,7 @@ import Prelude
 import Affjax.ResponseFormat as ARF
 import Data.Either (Either(..))
 import Data.Generic.Rep (class Generic)
-import Data.Generic.Rep.Show (genericShow)
+import Data.Show.Generic (genericShow)
 import Data.Newtype (unwrap)
 import Effect.Aff (Aff)
 import Foreign (ForeignError(..))

@@ -12,7 +12,8 @@ import Effect.Ref as Ref
 import Effect.Timer (setInterval)
 import Effect.Unsafe (unsafePerformEffect)
 import Foreign.Object as O
-import React.Basic (JSX, createComponent, fragment, make)
+import React.Basic (JSX)
+import React.Basic.Classic (createComponent, fragment, make)
 import React.Basic.DOM as R
 
 display :: Effect Unit

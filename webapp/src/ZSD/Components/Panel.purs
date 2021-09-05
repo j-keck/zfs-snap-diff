@@ -6,7 +6,8 @@ module ZSD.Components.Panel where
 import Prelude
 import Data.Monoid (guard)
 import Effect (Effect)
-import React.Basic (Component, JSX, createComponent, make)
+import React.Basic (JSX)
+import React.Basic.Classic (Component, createComponent, make)
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture_)
 

@@ -14,8 +14,9 @@ import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Unsafe (unsafePerformEffect)
-import React.Basic (Component, JSX, createComponent, make, fragment)
-import React.Basic as React
+import React.Basic (JSX)
+import React.Basic.Classic (Component, createComponent, make, fragment)
+import React.Basic.Classic as React
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture_)
 import Unsafe.Coerce (unsafeCoerce)
@@ -74,7 +75,6 @@ update self = case _ of
     let
       fh = FH.fromMountPoint mp
     update self $ ReadDir fh
-    bms <- BM.get self.props.ds
     self.setState _ { breadcrumb = [ fh ], selectedFile = Nothing }
   PickFromBreadcrumb fh ->
     update self (ReadDir fh)
@@ -130,7 +130,7 @@ update self = case _ of
                         self.setState _ { dirListing = ls, currentDir = fh }
                           *> rebuildBreadcrumb self fh
                           *> Spinner.remove
-                      Left err ->
+                      Left _ ->
                         ( Messages.error
                             $ "Directory "
                             <> (unwrap >>> _.name) fh

@@ -4,13 +4,13 @@ module ZSD.Utils.Formatter where
 import Data.Array as A
 import Data.Date (Date)
 import Data.DateTime as DT
-import Data.Either (fromRight)
-import Data.Formatter.DateTime (format, parseFormatString)
+import Data.Either (either)
+import Data.Formatter.DateTime (formatDateTime)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (unwrap)
 import Data.Number.Format (fixed, toStringWith)
-import Partial.Unsafe (unsafePartial)
-import Prelude (bottom, otherwise, ($), (/), (<), (<<<), (<>), (>))
+import Partial.Unsafe (unsafeCrashWith)
+import Prelude (bottom, identity, otherwise, ($), (/), (<), (<<<), (<>), (>))
 import ZSD.Model.DateTime (DateTime)
 
 -- | formats the given `Number` as a filesize with a unit prefix
@@ -27,14 +27,14 @@ filesize = go [ "B", "K", "M", "G", "T", "P" ]
 
 -- | formats the given `ZSD.Model.DateTime` as "dd MMM DD HH:mm YYYY"
 dateTime :: DateTime -> String
-dateTime = format fmt <<< unwrap
+dateTime = fmt <<< unwrap
   where
-  fmt = unsafePartial $ fromRight <<< parseFormatString $ "ddd MMM DD HH:mm YYYY"
+  fmt dt = either (\msg -> unsafeCrashWith "Invalid dateTime: " <> msg) identity $ formatDateTime "ddd MMM DD HH:mm YYYY" dt
 
 date :: Date -> String
-date d = format fmt $ DT.DateTime d bottom
+date d = fmt $ DT.DateTime d bottom
   where
-  fmt = unsafePartial $ fromRight <<< parseFormatString $ "DD MMM YYYY"
+  fmt dt = either (\msg -> unsafeCrashWith "Invalid date: " <> msg) identity $ formatDateTime "DD MMM YYYY" dt
 
 -- | formats a duration in nanos
 duration :: Number -> String

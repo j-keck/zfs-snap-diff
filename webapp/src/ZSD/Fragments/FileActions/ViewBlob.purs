@@ -2,7 +2,8 @@ module ZSD.Fragments.FileActions.ViewBlob where
 
 import Prelude
 import Effect.Unsafe (unsafePerformEffect)
-import React.Basic (Component, JSX, createComponent, makeStateless)
+import React.Basic (JSX)
+import React.Basic.Classic (Component, createComponent, makeStateless)
 import React.Basic.DOM as R
 import Web.File.Blob (Blob)
 import Web.File.Url as Url

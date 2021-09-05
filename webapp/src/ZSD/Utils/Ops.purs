@@ -2,8 +2,8 @@
 module ZSD.Utils.Ops where
 
 import Prelude
+
 import Data.Array as A
-import Data.Either (Either, fromRight)
 import Data.Foldable (class Foldable)
 import Data.Foldable as F
 import Data.Maybe (Maybe(..), fromJust, fromMaybe, maybe)
@@ -35,9 +35,6 @@ foldrSemigroup = F.foldr (\a b -> maybe (Just a) (\b' -> Just $ a <> b') b) Noth
 
 unsafeFromJust :: forall a. Maybe a -> a
 unsafeFromJust a = unsafePartial $ fromJust a
-
-unsafeFromRight :: forall a b. Either a b -> b
-unsafeFromRight e = unsafePartial $ fromRight e
 
 checkAll :: forall a f. F.Foldable f => f (a -> Boolean) -> a -> Boolean
 checkAll fs a = F.foldl (\b f -> f a && b) true fs

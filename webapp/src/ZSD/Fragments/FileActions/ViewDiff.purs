@@ -9,8 +9,9 @@ import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
-import React.Basic (Component, JSX, createComponent, fragment, make)
-import React.Basic as React
+import React.Basic (JSX)
+import React.Basic.Classic (Component, createComponent, fragment, make)
+import React.Basic.Classic as React
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture_)
 import ZSD.Components.ActionButton (actionButton)
@@ -76,7 +77,7 @@ viewDiff = make component { initialState, render, didMount, didUpdate }
 
   didMount self = update self Diff
 
-  didUpdate self { prevState, prevProps } = guard (self.props.version /= prevProps.version) $ update self Diff
+  didUpdate self { prevState: _, prevProps } = guard (self.props.version /= prevProps.version) $ update self Diff
 
   render self = case self.props.version of
     CurrentVersion _ ->

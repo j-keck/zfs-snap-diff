@@ -3,7 +3,8 @@ module ZSD.Views.BrowseFilesystem.Stats where
 import Prelude
 import Data.Array as A
 import Data.Traversable (foldMap)
-import React.Basic (JSX, createComponent, makeStateless)
+import React.Basic (JSX)
+import React.Basic.Classic (createComponent, makeStateless)
 import React.Basic.DOM as R
 import React.Basic.DOM.Textf as TF
 import ZSD.Model.DateRange (DateRange(..))

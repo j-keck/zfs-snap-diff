@@ -2,17 +2,19 @@ module ZSD.BrowseSnapshots.CloneSnapshot where
 
 import Prelude
 
-import Data.Array (foldMap, (..))
+import Data.Array ((..))
 import Data.Array as A
 import Data.Either (Either(..), either)
 import Data.Enum (toEnumWithDefaults)
+import Data.Foldable (foldMap)
 import Data.Maybe (Maybe(..), fromMaybe, isJust)
 import Data.Monoid (guard)
 import Data.String as S
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
-import React.Basic (Component, JSX, Self, createComponent, make)
+import React.Basic (JSX)
+import React.Basic.Classic (Component, Self, createComponent, make)
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture, capture_, key, targetValue)
 import React.Basic.Events (handler)
@@ -51,8 +53,7 @@ update self = case _ of
     either (\error -> self.setState _ { error = Just error, fsName = Nothing })
       (\fsName -> self.setState _ { fsName = Just fsName, error = Nothing })
       $ validateName name
-  CloneSnapshot ->
-    flip foldMap self.state.fsName \name ->
+  CloneSnapshot -> flip foldMap self.state.fsName \name ->
        Spinner.display *> launchAff_ do
           let fsName = self.state.base <> "/" <> name
           res <- Dataset.cloneSnapshot self.props.dataset self.props.snap self.state.flags fsName

@@ -5,7 +5,8 @@ import Data.Monoid (guard)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Foreign.Object as O
-import React.Basic (Component, JSX, createComponent, makeStateless)
+import React.Basic (JSX)
+import React.Basic.Classic (Component, createComponent, makeStateless)
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture_)
 
